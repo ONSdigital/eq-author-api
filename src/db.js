@@ -25,7 +25,7 @@ var Message = conn.define('message', {
   }
 });
 
-conn.sync({force: true}).then(()=>{
+conn.sync().then(()=>{
   Message.create({
     text: 'World'
   })

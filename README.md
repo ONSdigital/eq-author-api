@@ -34,28 +34,23 @@ In most cases sensible defaults have been selected.
 | DB_HOST              | Hostname of database server. |
 | DB_DIALECT           | Database dialect (e.g. `postgres`, `mysql`, `sqlite`) |
 
-### Run using Yarn
-
-To install the dependencies, simply run:
-```
-yarn
-```
-
-To start the author API backend, run:
-```
-yarn start
-```
-
 ### Run using Docker
 
 To build and run the Author GraphQL API inside a docker container, ensure that
 Docker is installed for your platform, navigate to the project directory, then run:
 
+Build the docker image (1st time run):
 ```
-docker-compose up -d
+docker-compose build
+```
+
+```
+docker-compose up
 ```
 
 Once the containers are running you should be able to navigate to http://localhost:4000/graphiql and begin exploring the eQ Author GraphQL API.
+
+Changes to the application should hot reload via `nodemon`.
 
 ## Usage
 

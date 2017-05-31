@@ -1,7 +1,8 @@
 version: '3'
 services:
   web:
-    build: .
+    build:
+      context: .
     depends_on:
       - db
     links:
@@ -10,11 +11,17 @@ services:
       - .:/app
     ports:
       - 4000:4000
+    environment:
+      - DATABASE=postgres
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=mysecretpassword
+      - DB_HOST=db
+      - DB_DIALECT=postgres
   db:
     image: postgres
     environment:
-      - POSTGRES_USER:"postgres"
-      - POSTGRES_PASSWORD:"mysecretpassword"
-      - POSTGRES_DB:"postgres"
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=postgres
     ports:
       - 5432:5432

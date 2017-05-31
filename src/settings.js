@@ -2,7 +2,7 @@ require('dotenv').config()
 
 var express = {
   port: process.env.PORT || 4000,
-  url: process.env.SCHEME || 'http://' + process.env.HOST || 'localhost' + ':' + process.env.PORT || 4000
+  url: (process.env.SCHEME || 'http://') + (process.env.HOST || 'localhost') + ':' + (process.env.PORT || 4000)
 };
 
 var graphiql = {
@@ -12,11 +12,11 @@ var graphiql = {
 };
 
 var db = {
-  DATABASE: process.env.DATABASE || 'postgres',
-  USERNAME: process.env.DATABASE_USERNAME || 'postgres',
-  PASSWORD: process.env.DATABASE_PASSWORD || 'mysecretpassword',
-  HOST: process.env.DB_HOST = 'db',
-  DIALECT: process.env.DB_DIALECT = 'postgres'
+  DATABASE: process.env.DATABASE,
+  USERNAME: process.env.DATABASE_USERNAME,
+  PASSWORD: process.env.DATABASE_PASSWORD,
+  HOST: process.env.DB_HOST,
+  DIALECT: process.env.DB_DIALECT
 };
 
 module.exports = {
