@@ -2,7 +2,7 @@ require('dotenv').config()
 
 var express = {
   port: process.env.PORT || 4000,
-  url: process.env.SCHEME || 'http://' + process.env.HOST || 'localhost' + ':' + process.env.PORT || 4000
+  url: (process.env.SCHEME || 'http://') + (process.env.HOST || 'localhost') + ':' + (process.env.PORT || 4000)
 };
 
 var graphiql = {
