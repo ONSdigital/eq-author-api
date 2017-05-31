@@ -15,7 +15,7 @@ var db = {
   DATABASE: process.env.DATABASE || 'postgres',
   USERNAME: process.env.DATABASE_USERNAME || 'postgres',
   PASSWORD: process.env.DATABASE_PASSWORD || 'mysecretpassword',
-  HOST: process.env.DB_HOST = 'localhost',
+  HOST: process.env.DB_HOST = 'db',
   DIALECT: process.env.DB_DIALECT = 'postgres'
 };
 
