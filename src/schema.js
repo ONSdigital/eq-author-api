@@ -1,4 +1,4 @@
-var {
+const {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
@@ -8,13 +8,15 @@ var {
 } = require("graphql");
 
 // Import the Database connection.
+
 var Db = require("./db");
 
 // Define the GraphQL types for the schema.
 // Eventually these might include things like Pages, Questions, Answers etc.
-var Message = new GraphQLObjectType({
+var message = new GraphQLObjectType({
   name: "Message",
   description: "This represents a message",
+
   fields: () => {
     return {
       id: {
@@ -35,13 +37,15 @@ var Message = new GraphQLObjectType({
 
 // Define a root query.
 // Think of this as public API for querying
-var Query = new GraphQLObjectType({
-  name: "App",
-  description: "This is the root query",
+
+const query = new GraphQLObjectType({
+  name: 'Query',
+  description: 'This is the root query',
+
   fields: () => {
     return {
       hello: {
-        type: new GraphQLList(Message),
+        type: new GraphQLList(message),
         resolve(root, args) {
           return Db.models.message.findAll({ where: args });
         }
@@ -52,15 +56,15 @@ var Query = new GraphQLObjectType({
 
 // Define a root mutation.
 // Think of this as public API for mutation
-var Mutation = new GraphQLObjectType({
-  name: "Mutation",
-  description: "Functions to mutate stuff",
+const mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  description: 'Functions to mutate stuff',
   fields() {
     return {
       // In this case I'm definining a single mutation object that adds a new
       // message.
       addMessage: {
-        type: Message,
+        type: message,
         args: {
           text: {
             type: new GraphQLNonNull(GraphQLString)
@@ -81,9 +85,9 @@ var Mutation = new GraphQLObjectType({
 * This is where all the GraphQL schema types will be defined.
 * The finished schema is likely to include things like Pages, Questions, Answers etc.
 */
-var schema = new GraphQLSchema({
-  query: Query,
-  mutation: Mutation
+const schema = new GraphQLSchema({
+  query,
+  mutation
 });
 
 // Export the schema
