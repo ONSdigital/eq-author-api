@@ -12,7 +12,7 @@ var Db = require('./db')
 
 // Define the GraphQL types for the schema.
 // Eventually these might include things like Pages, Questions, Answers etc.
-var Message = new GraphQLObjectType({
+var message = new GraphQLObjectType({
   name: 'Message',
   description: 'This represents a message',
   fields: () => {
@@ -35,7 +35,7 @@ var Message = new GraphQLObjectType({
 
 // Define a root query.
 // Think of this as public API for querying
-var Query = new GraphQLObjectType({
+var query = new GraphQLObjectType({
   name: 'Query',
   description: 'This is the root query',
   fields: () => {
@@ -52,7 +52,7 @@ var Query = new GraphQLObjectType({
 
 // Define a root mutation.
 // Think of this as public API for mutation
-var Mutation = new GraphQLObjectType({
+var mutation = new GraphQLObjectType({
   name: 'Mutation',
   description: 'Functions to mutate stuff',
   fields() {
@@ -82,8 +82,8 @@ var Mutation = new GraphQLObjectType({
 * The finished schema is likely to include things like Pages, Questions, Answers etc.
 */
 var schema = new GraphQLSchema({
-  query: Query,
-  mutation: Mutation
+  query,
+  mutation
 });
 
 // Export the schema
