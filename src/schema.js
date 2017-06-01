@@ -72,6 +72,41 @@ const mutation = new GraphQLObjectType({
             text: args.text
           });
         }
+      },
+      updateMessage: {
+        type: message,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          text: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve(_, { text, id }) {
+          return Db.models.message
+            .update(
+              { text },
+              {
+                where : { id }
+              }
+            )
+            .then(() => Db.models.message.findById(id))
+            .catch(err => console.log(err))
+        }
+      },
+      deleteMessage: {
+        type: message,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
+        },
+        resolve(_, {id}) {
+          return Db.models.message.destroy({where: {id}})
+            .then(result => result)
+            .catch(err => console.log(err));
+        }
       }
     }
   }
