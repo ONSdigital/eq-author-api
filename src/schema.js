@@ -5,16 +5,18 @@ const {
   GraphQLSchema,
   GraphQLList,
   GraphQLNonNull
-} = require('graphql');
+} = require("graphql");
 
 // Import the Database connection.
-const Db = require('./db')
+
+var Db = require("./db");
 
 // Define the GraphQL types for the schema.
 // Eventually these might include things like Pages, Questions, Answers etc.
-const message = new GraphQLObjectType({
-  name: 'Message',
-  description: 'This represents a message',
+var message = new GraphQLObjectType({
+  name: "Message",
+  description: "This represents a message",
+
   fields: () => {
     return {
       id: {
@@ -29,24 +31,26 @@ const message = new GraphQLObjectType({
           return message.text;
         }
       }
-    }
+    };
   }
 });
 
 // Define a root query.
 // Think of this as public API for querying
+
 const query = new GraphQLObjectType({
   name: 'Query',
   description: 'This is the root query',
+
   fields: () => {
     return {
       hello: {
         type: new GraphQLList(message),
         resolve(root, args) {
-          return Db.models.message.findAll({where: args});
+          return Db.models.message.findAll({ where: args });
         }
       }
-    }
+    };
   }
 });
 
@@ -108,7 +112,7 @@ const mutation = new GraphQLObjectType({
             .catch(err => console.log(err));
         }
       }
-    }
+    };
   }
 });
 
@@ -122,4 +126,4 @@ const schema = new GraphQLSchema({
 });
 
 // Export the schema
-module.exports = schema
+module.exports = schema;

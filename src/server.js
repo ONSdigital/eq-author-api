@@ -1,8 +1,8 @@
-
-var express = require('express');
-var graphqlHTTP = require('express-graphql');
-var schema = require('./schema');
-var colors = require('colors');
+var express = require("express");
+var graphqlHTTP = require("express-graphql");
+var schema = require("./schema");
+var colors = require("colors");
+const cors = require("cors");
 var { EXPRESS_URL, EXPRESS_PORT } = require('./settings').express
 var {
    GRAPHIQL_ENABLED,
@@ -10,8 +10,18 @@ var {
    GRAPHIQL_PRETTY
  } = require('./settings').graphiql
 
+
+<<<<<<< HEAD
+var express = require('express');
+var graphqlHTTP = require('express-graphql');
+var schema = require('./schema');
+var colors = require('colors');
+
+
 var app = express();
-app.use(GRAPHIQL_ENDPOINT, graphqlHTTP({
+app.use(GRAPHIQL_ENDPOINT,
+  cors(),
+  graphqlHTTP({
   schema: schema,
   pretty: GRAPHIQL_PRETTY,
   graphiql: GRAPHIQL_ENABLED,
