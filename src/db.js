@@ -1,20 +1,20 @@
 var Sequelize = require('sequelize');
 var {
-  DATABASE,
-  USERNAME,
-  PASSWORD,
-  HOST,
-  DIALECT
+  DB_DATABASE,
+  DB_USER,
+  DB_PASSWORD,
+  DB_HOSTNAME,
+  DB_DIALECT
 } = require('./settings').db
 
 // Define the connection to the database.
 var conn = new Sequelize(
-  DATABASE,
-  USERNAME,
-  PASSWORD,
+  DB_DATABASE,
+  DB_USER,
+  DB_PASSWORD,
   {
-    host: HOST,
-    dialect: DIALECT
+    host: DB_HOSTNAME,
+    dialect: DB_DIALECT
   }
 );
 

@@ -1,22 +1,22 @@
 require('dotenv').config()
 
-var express = {
-  port: process.env.PORT || 4000,
-  url: (process.env.SCHEME || 'http://') + (process.env.HOST || 'localhost') + ':' + (process.env.PORT || 4000)
+const express = {
+  EXPRESS_PORT: process.env.PORT || 4000,
+  EXPRESS_URL: (process.env.SCHEME || 'http://') + (process.env.HOST || 'localhost') + ':' + (process.env.PORT || 4000)
 };
 
-var graphiql = {
-  enabled: process.env.GRAPHIQL_ENABLED || true,
-  endpoint: process.env.GRAPHIQL_ENDPOINT || '/graphiql',
-  pretty: process.env.PRETTY_PRINT_GRAPHQL || true
+const graphiql = {
+  GRAPHIQL_ENABLED: process.env.GRAPHIQL_ENABLED,
+  GRAPHIQL_ENDPOINT: process.env.GRAPHIQL_ENDPOINT || '/graphiql',
+  GRAPHIQL_PRETTY: process.env.GRAPHIQL_PRETTY
 };
 
-var db = {
-  DATABASE: process.env.DATABASE,
-  USERNAME: process.env.DATABASE_USERNAME,
-  PASSWORD: process.env.DATABASE_PASSWORD,
-  HOST: process.env.DB_HOST,
-  DIALECT: process.env.DB_DIALECT
+const db = {
+  DB_DATABASE: process.env.DB_DATABASE,
+  DB_USER: process.env.DB_USER,
+  DB_PASSWORD: process.env.DB_PASSWORD,
+  DB_HOSTNAME: process.env.DB_HOSTNAME,
+  DB_DIALECT: process.env.DB_DIALECT
 };
 
 module.exports = {
