@@ -10,8 +10,6 @@ var {
    GRAPHIQL_PRETTY
  } = require('./settings').graphiql
 
-
-<<<<<<< HEAD
 var express = require('express');
 var graphqlHTTP = require('express-graphql');
 var schema = require('./schema');
