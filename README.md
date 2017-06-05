@@ -65,3 +65,28 @@ Changes to the application should hot reload via `nodemon`.
 ### Browsing the API documentation
 
 ![browsing the API documentation](./doc/images/docs.gif)
+
+### Debugging
+
+Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1fd28091b23de0e147/developer-tools/nodejs-debugging/VSCode-README.md) to enable debugging through VS Code. Use this config for VS Code, rather than what is detailed in the guide:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+        "name": "Attach",
+        "type": "node",
+        "request": "attach",
+        "port": 5858,
+        "address": "localhost",
+        "restart": true,
+        "sourceMaps": false,
+        "outDir": null,
+        "localRoot": "${workspaceRoot}",
+        "remoteRoot": "/app"
+    }
+  ]
+}
+```
+

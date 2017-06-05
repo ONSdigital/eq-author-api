@@ -11,6 +11,7 @@ services:
       - .:/app
     ports:
       - 4000:4000
+      - 5858:5858 # open port for debugging
     environment:
       - EXPRESS_PORT=4000
       - GRAPHIQL_ENABLED=true

@@ -1,10 +1,10 @@
 {
   "name": "eq-author-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/server.js"
+    "start": "nodemon --debug"
   },
   "devDependencies": {
     "colors": "^1.1.2",

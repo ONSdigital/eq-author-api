@@ -89,12 +89,7 @@ const mutation = new GraphQLObjectType({
         },
         resolve(_, { text, id }) {
           return Db.models.message
-            .update(
-              { text },
-              {
-                where : { id }
-              }
-            )
+            .update({ text }, { where : { id } })
             .then(() => Db.models.message.findById(id))
             .catch(err => console.log(err))
         }
@@ -107,8 +102,8 @@ const mutation = new GraphQLObjectType({
           }
         },
         resolve(_, {id}) {
-          return Db.models.message.destroy({where: {id}})
-            .then(result => result)
+          return Db.models.message
+            .destroy({ where: { id } })
             .catch(err => console.log(err));
         }
       }
