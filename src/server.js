@@ -1,25 +1,26 @@
-
-var express = require('express');
-var graphqlHTTP = require('express-graphql');
-var schema = require('./schema');
-var colors = require('colors');
-var { scheme, host, port, graphiql_enabled, graphiql_endpoint } = require('./settings')
-
-/*
-* The root object defines all the data lookup functions.
-*/
-var root = { hello: () => 'Hello world!' };
+var express = require("express");
+var graphqlHTTP = require("express-graphql");
+var schema = require("./schema");
+var colors = require("colors");
+const cors = require("cors");
+var { EXPRESS_URL, EXPRESS_PORT } = require('./settings').express
+var {
+  GRAPHIQL_ENABLED,
+  GRAPHIQL_ENDPOINT,
+  GRAPHIQL_PRETTY } = require('./settings').graphiql
 
 var app = express();
-app.use(graphiql_endpoint, graphqlHTTP({
+app.use(GRAPHIQL_ENDPOINT,
+  cors(),
+  graphqlHTTP({
   schema: schema,
-  rootValue: root,
-  graphiql: graphiql_enabled,
+  pretty: GRAPHIQL_PRETTY,
+  graphiql: GRAPHIQL_ENABLED,
 }));
 
 console.log('Starting server...')
-app.listen(port, () => {
+app.listen(EXPRESS_PORT, () => {
   console.log(colors.green('eq-author-api'),
     'is running at',
-    colors.yellow(scheme + host + ':' + port + graphiql_endpoint))
+    colors.yellow(EXPRESS_URL + GRAPHIQL_ENDPOINT))
 });
