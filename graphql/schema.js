@@ -1,5 +1,6 @@
-const { get } = require("lodash/fp");
 const models = require("../models");
+const { attributeFields, resolver } = require("graphql-sequelize");
+
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -14,40 +15,7 @@ const {
 const Questionnaire = new GraphQLObjectType({
   name : "Questionnaire",
   description : "A Questionnaire",
-
-  fields: {
-
-    id : {
-      type: GraphQLID,
-      resolve: get("id")
-    },
-
-    title : {
-      type: GraphQLString,
-      resole: get("title")
-    },
-
-    description : {
-      type: GraphQLString,
-      resolve: get("description")
-    },
-
-    theme : {
-      type: GraphQLString,
-      resolve: get("theme")
-    },
-
-    legalBasis : {
-      type: GraphQLString,
-      resolve: get("legalBasis")
-    },
-
-    navigation : {
-      type: GraphQLBoolean,
-      resolve: get("navigation")
-    }
-
-  }
+  fields: attributeFields(models.Questionnaire)
 });
 
 // Define a root query.
@@ -60,16 +28,12 @@ const query = new GraphQLObjectType({
   fields: {
     questionnaires : {
       type : new GraphQLList(Questionnaire),
-      resolve(root, args) {
-        return models.Questionnaire.all();
-      }
+      resolve: resolver(models.Questionnaire)
     },
 
     questionnaire : {
       type: Questionnaire,
-      reslolve(root, { id }) {
-        return models.Questionnaire.findById(id);
-      }
+      reslolve : resolver(models.Questionnaire)
     }
   }
 });
