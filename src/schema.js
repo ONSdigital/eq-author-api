@@ -1,3 +1,4 @@
+const models = require("../models");
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -6,10 +7,6 @@ const {
   GraphQLList,
   GraphQLNonNull
 } = require("graphql");
-
-// Import the Database connection.
-
-var Db = require("./db");
 
 // Define the GraphQL types for the schema.
 // Eventually these might include things like Pages, Questions, Answers etc.
@@ -47,7 +44,7 @@ const query = new GraphQLObjectType({
       hello: {
         type: new GraphQLList(message),
         resolve(root, args) {
-          return Db.models.message.findAll({ where: args });
+          return models.message.findAll({ where: args });
         }
       }
     };
@@ -72,7 +69,7 @@ const mutation = new GraphQLObjectType({
         },
         resolve(_, args) {
           // Call the create method provided by sequelize
-          return Db.models.message.create({
+          return models.message.create({
             text: args.text
           });
         }
@@ -88,9 +85,9 @@ const mutation = new GraphQLObjectType({
           }
         },
         resolve(_, { text, id }) {
-          return Db.models.message
+          return models.message
             .update({ text }, { where : { id } })
-            .then(() => Db.models.message.findById(id))
+            .then(() => models.message.findById(id))
             .catch(err => console.log(err))
         }
       },
@@ -102,7 +99,7 @@ const mutation = new GraphQLObjectType({
           }
         },
         resolve(_, {id}) {
-          return Db.models.message
+          return models.message
             .destroy({ where: { id } })
             .catch(err => console.log(err));
         }
