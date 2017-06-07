@@ -1,10 +1,10 @@
 const express = require("express");
 const graphqlHTTP = require("express-graphql");
-const schema = require("./schema");
+const schema = require("./graphql/schema");
 const colors = require("colors");
 const cors = require("cors");
-const models = require("../models");
-const settings = require('./settings');
+const models = require("./models");
+const settings = require('./config/settings');
 
 const {
   express : {
