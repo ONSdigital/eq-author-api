@@ -23,10 +23,11 @@ var app = express();
 app.use(GRAPHIQL_ENDPOINT,
   cors(),
   graphqlHTTP({
-  schema: schema,
-  pretty: GRAPHIQL_PRETTY,
-  graphiql: GRAPHIQL_ENABLED,
-}));
+    schema: schema,
+    pretty: GRAPHIQL_PRETTY,
+    graphiql: GRAPHIQL_ENABLED,
+  })
+);
 
 
 console.log('Starting server...');

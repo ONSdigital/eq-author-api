@@ -1,3 +1,4 @@
+const { get } = require("lodash/fp");
 const models = require("../models");
 const {
   GraphQLObjectType,
@@ -5,30 +6,47 @@ const {
   GraphQLInt,
   GraphQLSchema,
   GraphQLList,
-  GraphQLNonNull
+  GraphQLNonNull,
+  GraphQLID,
+  GraphQLBoolean
 } = require("graphql");
 
-// Define the GraphQL types for the schema.
-// Eventually these might include things like Pages, Questions, Answers etc.
-var message = new GraphQLObjectType({
-  name: "Message",
-  description: "This represents a message",
+const Questionnaire = new GraphQLObjectType({
+  name : "Questionnaire",
+  description : "A Questionnaire",
 
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLInt,
-        resolve(message) {
-          return message.id;
-        }
-      },
-      text: {
-        type: GraphQLString,
-        resolve(message) {
-          return message.text;
-        }
-      }
-    };
+  fields: {
+
+    id : {
+      type: GraphQLID,
+      resolve: get("id")
+    },
+
+    title : {
+      type: GraphQLString,
+      resole: get("title")
+    },
+
+    description : {
+      type: GraphQLString,
+      resolve: get("description")
+    },
+
+    theme : {
+      type: GraphQLString,
+      resolve: get("theme")
+    },
+
+    legalBasis : {
+      type: GraphQLString,
+      resolve: get("legalBasis")
+    },
+
+    navigation : {
+      type: GraphQLBoolean,
+      resolve: get("navigation")
+    }
+
   }
 });
 
@@ -39,15 +57,20 @@ const query = new GraphQLObjectType({
   name: 'Query',
   description: 'This is the root query',
 
-  fields: () => {
-    return {
-      hello: {
-        type: new GraphQLList(message),
-        resolve(root, args) {
-          return models.message.findAll({ where: args });
-        }
+  fields: {
+    questionnaires : {
+      type : new GraphQLList(Questionnaire),
+      resolve(root, args) {
+        return models.Questionnaire.all();
       }
-    };
+    },
+
+    questionnaire : {
+      type: Questionnaire,
+      reslolve(root, { id }) {
+        return models.Questionnaire.findById(id);
+      }
+    }
   }
 });
 
@@ -56,55 +79,40 @@ const query = new GraphQLObjectType({
 const mutation = new GraphQLObjectType({
   name: 'Mutation',
   description: 'Functions to mutate stuff',
-  fields() {
-    return {
-      // In this case I'm definining a single mutation object that adds a new
-      // message.
-      addMessage: {
-        type: message,
-        args: {
-          text: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
+  fields: {
+    createQuestionnaire: {
+      type: Questionnaire,
+
+      args : {
+        title : {
+          type : new GraphQLNonNull(GraphQLString)
         },
-        resolve(_, args) {
-          // Call the create method provided by sequelize
-          return models.message.create({
-            text: args.text
-          });
+        description : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        theme : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        legalBasis : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        navigation : {
+          type : GraphQLBoolean
         }
       },
-      updateMessage: {
-        type: message,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          },
-          text: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
-        },
-        resolve(_, { text, id }) {
-          return models.message
-            .update({ text }, { where : { id } })
-            .then(() => models.message.findById(id))
-            .catch(err => console.log(err))
-        }
-      },
-      deleteMessage: {
-        type: message,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve(_, {id}) {
-          return models.message
-            .destroy({ where: { id } })
-            .catch(err => console.log(err));
-        }
+
+      resolve(source, args) {
+        const { title, description, theme, legalBasis, navigation } = args;
+
+        return models.Questionnaire.create({
+          title,
+          description,
+          theme,
+          legalBasis,
+          navigation
+        });
       }
-    };
+    }
   }
 });
 
