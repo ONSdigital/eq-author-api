@@ -19,7 +19,7 @@ module.exports = function createAnswerModel(sequelize, DataTypes) {
       type : DataTypes.STRING
     },
 
-    guidance : {
+    label : {
       type: DataTypes.STRING
     },
 
@@ -49,7 +49,7 @@ module.exports = function createAnswerModel(sequelize, DataTypes) {
 
     classMethods : {
       associate(models) {
-        Answer.belongsTo(models.Question);
+        Answer.Question = Answer.belongsTo(models.Question);
       }
     }
 

@@ -12,10 +12,21 @@ const {
   GraphQLBoolean
 } = require("graphql");
 
+const Answer = new GraphQLObjectType({
+  name : "Answer",
+  description : "An answer",
+  fields : attributeFields(models.Answer)
+});
+
 const Question = new GraphQLObjectType({
   name : "Question",
   description: "A question",
-  fields: attributeFields(models.Question)
+  fields: Object.assign(attributeFields(models.Question), {
+    answers : {
+      type: new GraphQLList(Answer),
+      resolve: resolver(models.Question.Answers)
+    }
+  })
 });
 
 const Page = new GraphQLObjectType({
@@ -81,7 +92,17 @@ const query = new GraphQLObjectType({
         }
       },
       resolve : resolver(models.Question)
-    }
+    },
+
+    answer : {
+      type: Answer,
+      args : {
+        id : {
+          type : new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve : resolver(models.Answer)
+    },
   }
 });
 
@@ -179,6 +200,57 @@ const mutation = new GraphQLObjectType({
           type,
           mandatory,
           PageId : pageId
+        });
+      }
+    },
+
+    createAnswer: {
+      type: Answer,
+
+      args : {
+        title : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+
+        description : {
+          type : GraphQLString
+        },
+
+        guidance : {
+          type : GraphQLString
+        },
+
+        label : {
+          type : GraphQLString
+        },
+
+        qCode : {
+          type : GraphQLString
+        },
+
+        type : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+
+        mandatory : {
+          type : GraphQLBoolean
+        },
+
+        questionId: {
+          type : GraphQLID
+        }
+      },
+
+      resolve(source, { title, description, guidance, label, qCode, type, mandatory, questionId }) {
+        return models.Answer.create({
+          title,
+          description,
+          guidance,
+          label,
+          qCode,
+          type,
+          mandatory,
+          QuestionId : questionId
         });
       }
     }
