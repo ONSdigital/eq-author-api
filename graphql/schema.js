@@ -12,10 +12,23 @@ const {
   GraphQLBoolean
 } = require("graphql");
 
+const Page = new GraphQLObjectType({
+  name : "Page",
+  description : "A page",
+  fields : attributeFields(models.Page)
+});
+
 const Questionnaire = new GraphQLObjectType({
   name : "Questionnaire",
   description : "A Questionnaire",
-  fields: attributeFields(models.Questionnaire)
+  fields: Object.assign(attributeFields(models.Questionnaire), {
+    pages : {
+      type : new GraphQLList(Page),
+      resolve: resolver(models.Questionnaire.Pages, {
+        separate: false
+      })
+    }
+  })
 });
 
 // Define a root query.
@@ -33,7 +46,22 @@ const query = new GraphQLObjectType({
 
     questionnaire : {
       type: Questionnaire,
-      reslolve : resolver(models.Questionnaire)
+      args : {
+        id : {
+          type : new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: resolver(models.Questionnaire)
+    },
+
+    page : {
+      type: Page,
+      args : {
+        id : {
+          type : new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve : resolver(models.Page)
     }
   }
 });
@@ -65,15 +93,37 @@ const mutation = new GraphQLObjectType({
         }
       },
 
-      resolve(source, args) {
-        const { title, description, theme, legalBasis, navigation } = args;
-
+      resolve(source, { title, description, theme, legalBasis, navigation }) {
         return models.Questionnaire.create({
           title,
           description,
           theme,
           legalBasis,
           navigation
+        });
+      }
+    },
+
+    createPage: {
+      type: Page,
+
+      args : {
+        title : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        description : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        questionnaireId : {
+          type : GraphQLID
+        }
+      },
+
+      resolve(source, { title, description, questionnaireId }) {
+        return models.Page.create({
+          title,
+          description,
+          QuestionnaireId : questionnaireId
         });
       }
     }

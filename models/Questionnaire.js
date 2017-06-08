@@ -31,7 +31,7 @@ module.exports = function createQuestionnaireModel(sequelize, DataTypes) {
 
     classMethods : {
       associate(models) {
-        Questionnare.hasMany(models.Page);
+        Questionnare.Pages = Questionnare.hasMany(models.Page);
       }
     }
 
