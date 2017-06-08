@@ -33,8 +33,8 @@ module.exports = function createQuestionModel(sequelize, DataTypes) {
 
     classMethods : {
       associate(models) {
-        Question.belongsTo(models.Page);
-        Question.hasMany(models.Answer);
+        Question.Page = Question.belongsTo(models.Page);
+        Question.Answers = Question.hasMany(models.Answer);
       }
     }
 

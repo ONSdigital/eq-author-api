@@ -12,10 +12,21 @@ const {
   GraphQLBoolean
 } = require("graphql");
 
+const Question = new GraphQLObjectType({
+  name : "Question",
+  description: "A question",
+  fields: attributeFields(models.Question)
+});
+
 const Page = new GraphQLObjectType({
   name : "Page",
   description : "A page",
-  fields : attributeFields(models.Page)
+  fields : Object.assign(attributeFields(models.Page), {
+    questions : {
+      type: new GraphQLList(Question),
+      resolve: resolver(models.Page.Questions)
+    }
+  })
 });
 
 const Questionnaire = new GraphQLObjectType({
@@ -24,9 +35,7 @@ const Questionnaire = new GraphQLObjectType({
   fields: Object.assign(attributeFields(models.Questionnaire), {
     pages : {
       type : new GraphQLList(Page),
-      resolve: resolver(models.Questionnaire.Pages, {
-        separate: false
-      })
+      resolve: resolver(models.Questionnaire.Pages)
     }
   })
 });
@@ -62,6 +71,16 @@ const query = new GraphQLObjectType({
         }
       },
       resolve : resolver(models.Page)
+    },
+
+    question : {
+      type: Question,
+      args : {
+        id : {
+          type : new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve : resolver(models.Question)
     }
   }
 });
@@ -124,6 +143,42 @@ const mutation = new GraphQLObjectType({
           title,
           description,
           QuestionnaireId : questionnaireId
+        });
+      }
+    },
+
+    createQuestion: {
+      type: Question,
+
+      args : {
+        title : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        description : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        guidance : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        type : {
+          type : GraphQLString
+        },
+        mandatory : {
+          type : GraphQLBoolean
+        },
+        pageId : {
+          type : GraphQLID
+        }
+      },
+
+      resolve(source, { title, description, guidance, type, mandatory, pageId }) {
+        return models.Question.create({
+          title,
+          description,
+          guidance,
+          type,
+          mandatory,
+          PageId : pageId
         });
       }
     }

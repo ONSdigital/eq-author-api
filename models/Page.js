@@ -15,8 +15,8 @@ module.exports = function createPageModel(sequelize, DataTypes) {
 
     classMethods : {
       associate(models) {
-        Page.belongsTo(models.Questionnaire);
-        Page.hasMany(models.Question);
+        Page.Questionnaire = Page.belongsTo(models.Questionnaire);
+        Page.Questions = Page.hasMany(models.Question);
       }
     }
 
