@@ -2,11 +2,6 @@ module.exports = function createAnswerModel(sequelize, DataTypes) {
 
   const Answer = sequelize.define("Answer", {
 
-    title : {
-      type : DataTypes.STRING,
-      allowNull: false
-    },
-
     description : {
       type : DataTypes.STRING
     },
