@@ -183,6 +183,22 @@ const mutation = new GraphQLObjectType({
       }
     },
 
+    deleteQuestionnaire : {
+      type : Questionnaire,
+
+      args : {
+        id : {
+          type : GraphQLID
+        },
+      },
+
+      resolve(_, { id }) {
+        return models.Questionnaire
+          .findById(id)
+          .then(questionnaire => questionnaire.destroy().then(() => questionnaire));
+      }
+    },
+
     createPage: {
       type: Page,
 
@@ -226,6 +242,22 @@ const mutation = new GraphQLObjectType({
         return models.Page
           .findById(id)
           .then(page => page.update({ title, description }));
+      }
+    },
+
+    deletePage : {
+      type : Page,
+
+      args : {
+        id : {
+          type : GraphQLID
+        }
+      },
+
+      resolve(_, { id }) {
+        return models.Page
+          .findById(id)
+          .then(page => page.destroy().then(() => page));
       }
     },
 
@@ -302,6 +334,21 @@ const mutation = new GraphQLObjectType({
       }
     },
 
+    deleteQuestion : {
+      type : Question,
+
+      args : {
+        id : {
+          type : GraphQLID
+        }
+      },
+
+      resolve(_, { id }) {
+        return models.Question
+          .findById(id)
+          .then(question => question.destroy().then(() => question));
+      }
+    },
 
     createAnswer: {
       type: Answer,
@@ -384,6 +431,21 @@ const mutation = new GraphQLObjectType({
       }
     },
 
+    deleteAnswer : {
+      type : Answer,
+
+      args : {
+        id : {
+          type : GraphQLID
+        }
+      },
+
+      resolve(_, { id }) {
+        return models.Answer
+          .findById(id)
+          .then(answer => answer.destroy().then(() => answer));
+      }
+    },
   }
 });
 
