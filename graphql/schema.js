@@ -112,6 +112,7 @@ const mutation = new GraphQLObjectType({
   name: 'Mutation',
   description: 'Functions to mutate stuff',
   fields: {
+
     createQuestionnaire: {
       type: Questionnaire,
 
@@ -144,6 +145,44 @@ const mutation = new GraphQLObjectType({
       }
     },
 
+
+    updateQuestionnaire: {
+      type: Questionnaire,
+
+      args : {
+        id : {
+          type : GraphQLID
+        },
+        title : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        description : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        theme : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        legalBasis : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        navigation : {
+          type : GraphQLBoolean
+        }
+      },
+
+      resolve(source, { id, title, description, theme, legalBasis, navigation }) {
+        return models.Questionnaire
+          .findById(id)
+          .then(questionnaire => questionnaire.update({
+            title,
+            description,
+            theme,
+            legalBasis,
+            navigation
+          }));
+      }
+    },
+
     createPage: {
       type: Page,
 
@@ -165,6 +204,28 @@ const mutation = new GraphQLObjectType({
           description,
           QuestionnaireId : questionnaireId
         });
+      }
+    },
+
+    updatePage: {
+      type: Page,
+
+      args : {
+        id : {
+          type : GraphQLID
+        },
+        title : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        description : {
+          type : new GraphQLNonNull(GraphQLString)
+        }
+      },
+
+      resolve(source, { id, title, description }) {
+        return models.Page
+          .findById(id)
+          .then(page => page.update({ title, description }));
       }
     },
 
@@ -204,46 +265,73 @@ const mutation = new GraphQLObjectType({
       }
     },
 
+    updateQuestion: {
+      type: Question,
+
+      args : {
+        id : {
+          type : GraphQLID
+        },
+        title : {
+          type : GraphQLString
+        },
+        description : {
+          type : GraphQLString
+        },
+        guidance : {
+          type : GraphQLString
+        },
+        type : {
+          type : GraphQLString
+        },
+        mandatory : {
+          type : GraphQLBoolean
+        }
+      },
+
+      resolve(source, { id, title, description, guidance, type, mandatory }) {
+        return models.Question
+          .findById(id)
+          .then(question => question.update({
+            title,
+            description,
+            guidance,
+            type,
+            mandatory
+          }));
+      }
+    },
+
+
     createAnswer: {
       type: Answer,
 
       args : {
-        title : {
-          type : new GraphQLNonNull(GraphQLString)
-        },
-
         description : {
           type : GraphQLString
         },
-
         guidance : {
           type : GraphQLString
         },
-
         label : {
           type : GraphQLString
         },
-
         qCode : {
           type : GraphQLString
         },
-
         type : {
           type : new GraphQLNonNull(GraphQLString)
         },
-
         mandatory : {
           type : GraphQLBoolean
         },
-
         questionId: {
           type : GraphQLID
         }
       },
 
-      resolve(source, { title, description, guidance, label, qCode, type, mandatory, questionId }) {
+      resolve(source, { description, guidance, label, qCode, type, mandatory, questionId }) {
         return models.Answer.create({
-          title,
           description,
           guidance,
           label,
@@ -253,7 +341,49 @@ const mutation = new GraphQLObjectType({
           QuestionId : questionId
         });
       }
-    }
+    },
+
+    updateAnswer: {
+      type: Answer,
+
+      args : {
+        id : {
+          type : GraphQLID
+        },
+        description : {
+          type : GraphQLString
+        },
+        guidance : {
+          type : GraphQLString
+        },
+        label : {
+          type : GraphQLString
+        },
+        qCode : {
+          type : GraphQLString
+        },
+        type : {
+          type : new GraphQLNonNull(GraphQLString)
+        },
+        mandatory : {
+          type : GraphQLBoolean
+        }
+      },
+
+      resolve(source, { id, description, guidance, label, qCode, type, mandatory }) {
+        return models.Answer
+          .findById(id)
+          .then(answer => answer.update({
+            description,
+            guidance,
+            label,
+            qCode,
+            type,
+            mandatory
+          }));
+      }
+    },
+
   }
 });
 
