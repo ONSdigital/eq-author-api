@@ -27,10 +27,10 @@ module.exports = {
       type : new GraphQLNonNull(GraphQLString)
     },
     mandatory : {
-      type : GraphQLBoolean
+      type : new GraphQLNonNull(GraphQLBoolean)
     },
     questionId: {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     }
   },
 

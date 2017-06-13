@@ -12,14 +12,16 @@ module.exports = function createQuestionnaireModel(sequelize, DataTypes) {
     },
 
     theme : {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
 
     legalBasis : {
       type: DataTypes.ENUM(
         "Voluntary",
         "StatisticsOfTradeAct"
-      )
+      ),
+      allowNull: false
     },
 
     navigation : {

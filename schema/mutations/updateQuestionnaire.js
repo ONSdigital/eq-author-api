@@ -13,19 +13,19 @@ module.exports = {
 
   args : {
     id : {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     },
     title : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     description : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     theme : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     legalBasis : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     navigation : {
       type : GraphQLBoolean

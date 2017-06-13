@@ -14,7 +14,7 @@ module.exports = {
       type : new GraphQLNonNull(GraphQLString)
     },
     description : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     theme : {
       type : new GraphQLNonNull(GraphQLString)

@@ -11,13 +11,13 @@ module.exports = {
 
   args : {
     id : {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     },
     title : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     description : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     }
   },
 

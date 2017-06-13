@@ -21,7 +21,8 @@ module.exports = function createQuestionModel(sequelize, DataTypes) {
         "DateRange",
         "RepeatingAnswer",
         "Relationship"
-      )
+      ),
+      allowNull : false
     },
 
     mandatory : {

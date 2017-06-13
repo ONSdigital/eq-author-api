@@ -37,7 +37,8 @@ module.exports = function createAnswerModel(sequelize, DataTypes) {
 
     mandatory : {
       type : DataTypes.BOOLEAN,
-      defaultValue : false
+      defaultValue : false,
+      allowNull: false
     }
 
   }, {

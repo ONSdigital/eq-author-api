@@ -7,14 +7,12 @@ const {
   GraphQLID
 } = require("graphql");
 
-
-
 module.exports = {
   type: Answer,
 
   args : {
     id : {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     },
     description : {
       type : GraphQLString
@@ -29,7 +27,7 @@ module.exports = {
       type : GraphQLString
     },
     type : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     mandatory : {
       type : GraphQLBoolean

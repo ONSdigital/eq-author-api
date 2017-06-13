@@ -1,13 +1,13 @@
 const models = require("../../models");
 const { Page } = require("../types");
-const { GraphQLID } = require("graphql");
+const { GraphQLID, GraphQLNonNull } = require("graphql");
 
 module.exports = {
   type : Page,
 
   args : {
     id : {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     }
   },
 

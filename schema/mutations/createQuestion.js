@@ -16,19 +16,19 @@ module.exports = {
       type : new GraphQLNonNull(GraphQLString)
     },
     description : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     guidance : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     type : {
-      type : GraphQLString
+      type : new GraphQLNonNull(GraphQLString)
     },
     mandatory : {
       type : GraphQLBoolean
     },
     pageId : {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     }
   },
 

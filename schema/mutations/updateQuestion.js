@@ -3,7 +3,8 @@ const { Question } = require("../types");
 const {
   GraphQLString,
   GraphQLBoolean,
-  GraphQLID
+  GraphQLID,
+  GraphQLNonNull
 } = require("graphql");
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
 
   args : {
     id : {
-      type : GraphQLID
+      type : new GraphQLNonNull(GraphQLID)
     },
     title : {
       type : GraphQLString
