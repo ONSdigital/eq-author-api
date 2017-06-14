@@ -3,7 +3,8 @@
     "use_env_variable" : "DB_CONNECTION_URI"
   },
   "test": {
-    "use_env_variable" : "DB_CONNECTION_URI"
+    "dialect": "sqlite",
+    "logging": false
   },
   "production": {
     "use_env_variable" : "DB_CONNECTION_URI"
