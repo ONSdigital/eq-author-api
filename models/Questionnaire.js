@@ -27,6 +27,11 @@ module.exports = function createQuestionnaireModel(sequelize, DataTypes) {
     navigation : {
       type : DataTypes.BOOLEAN,
       defaultValue : false
+    },
+
+    surveyId : {
+      type : DataTypes.STRING,
+      allowNull: false
     }
 
   }, {

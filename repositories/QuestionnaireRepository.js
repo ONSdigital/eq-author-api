@@ -8,13 +8,14 @@ module.exports.all = function all() {
   return Questionnaire.all();
 };
 
-module.exports.insert = function insert({ title, description, theme, legalBasis, navigation }) {
+module.exports.insert = function insert({ title, description, theme, legalBasis, navigation, surveyId }) {
   return Questionnaire.create({
     title,
     description,
     theme,
     legalBasis,
-    navigation
+    navigation,
+    surveyId
   });
 };
 
@@ -24,7 +25,7 @@ module.exports.remove = function remove(id) {
     .then(questionnaire => questionnaire.destroy().then(() => questionnaire));
 };
 
-module.exports.update = function update({ id, title, description, theme, legalBasis, navigation }) {
+module.exports.update = function update({ id, title, description, theme, legalBasis, navigation, surveyId }) {
   return Questionnaire
     .findById(id)
     .then(questionnaire => questionnaire.update({
@@ -32,6 +33,7 @@ module.exports.update = function update({ id, title, description, theme, legalBa
       description,
       theme,
       legalBasis,
-      navigation
+      navigation,
+      surveyId
     }));
 }

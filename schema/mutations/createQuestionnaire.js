@@ -4,7 +4,6 @@ const {
   GraphQLBoolean
 } = require("graphql");
 const { Questionnaire } = require("../types");
-const QuestionnaireRepository = require("../../repositories/QuestionnaireRepository");
 
 module.exports = {
   type: Questionnaire,

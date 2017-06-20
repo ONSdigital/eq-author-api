@@ -9,14 +9,16 @@ describe("createQuestionnaire" , () => {
       $description: String!,
       $theme: String!,
       $legalBasis: String!,
-      $navigation: Boolean
+      $navigation: Boolean,
+      $surveyId : String!
     ) {
       createQuestionnaire(
         title: $title,
         description: $description,
         theme: $theme,
         legalBasis: $legalBasis,
-        navigation: $navigation
+        navigation: $navigation,
+        surveyId : $surveyId
       ) {
         id,
         title,
@@ -34,7 +36,8 @@ describe("createQuestionnaire" , () => {
       "description": "This is a test questionnaire",
       "theme": "test theme",
       "legalBasis": "Voluntary",
-      "navigation": true
+      "navigation": true,
+      "surveyId": "abc"
     };
 
     const result = await executeQuery(createQuestionnaire, fixture);
