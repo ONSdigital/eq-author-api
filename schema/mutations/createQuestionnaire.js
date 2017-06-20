@@ -1,10 +1,10 @@
-const models = require("../../models");
-const { Questionnaire } = require("../types");
 const {
   GraphQLString,
   GraphQLNonNull,
   GraphQLBoolean
 } = require("graphql");
+const { Questionnaire } = require("../types");
+const QuestionnaireRepository = require("../../repositories/QuestionnaireRepository");
 
 module.exports = {
   type: Questionnaire,
@@ -27,13 +27,7 @@ module.exports = {
     }
   },
 
-  resolve(source, { title, description, theme, legalBasis, navigation }) {
-    return models.Questionnaire.create({
-      title,
-      description,
-      theme,
-      legalBasis,
-      navigation
-    });
+  resolve(source, args) {
+    return QuestionnaireRepository.insert(args);
   }
 };

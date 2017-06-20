@@ -4,7 +4,7 @@ const executeQuery = require("../../utils/executeQuery");
 describe("Question query" , () => {
 
   const question = `
-    query GetQuestion($id: ID!) {
+    query GetQuestion($id: Int!) {
       question(id: $id) {
         id,
         title,
@@ -18,7 +18,7 @@ describe("Question query" , () => {
   `;
 
   const questionWithAnswers = `
-    query GetQuestionWithAnswers($id: ID!) {
+    query GetQuestionWithAnswers($id: Int!) {
       question(id: $id) {
         id,
         answers {

@@ -5,7 +5,7 @@ describe("updateAnswer" , () => {
 
   const updateAnswer = `
     mutation UpdateAnswer(
-      $id:ID!,
+      $id:Int!,
       $description:String,
       $guidance:String,
       $qCode: String,

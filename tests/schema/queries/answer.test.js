@@ -4,7 +4,7 @@ const executeQuery = require("../../utils/executeQuery");
 describe("answer query" , () => {
 
   const answer = `
-    query GetAnswer($id: ID!) {
+    query GetAnswer($id: Int!) {
       answer(id: $id) {
         id,
         description,

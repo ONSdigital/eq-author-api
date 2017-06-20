@@ -1,10 +1,10 @@
-const models = require("../../models");
+const AnswerRepository = require("../../repositories/AnswerRepository");
 const { Answer } = require("../types");
 const {
   GraphQLString,
   GraphQLNonNull,
   GraphQLBoolean,
-  GraphQLID
+  GraphQLInt
 } = require("graphql");
 
 module.exports = {
@@ -30,19 +30,11 @@ module.exports = {
       type : new GraphQLNonNull(GraphQLBoolean)
     },
     questionId: {
-      type : new GraphQLNonNull(GraphQLID)
+      type : new GraphQLNonNull(GraphQLInt)
     }
   },
 
-  resolve(source, { description, guidance, label, qCode, type, mandatory, questionId }) {
-    return models.Answer.create({
-      description,
-      guidance,
-      label,
-      qCode,
-      type,
-      mandatory,
-      QuestionId : questionId
-    });
+  resolve(source, args) {
+    return AnswerRepository.insert(args);
   }
 };

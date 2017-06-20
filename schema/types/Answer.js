@@ -1,9 +1,40 @@
-const models = require("../../models");
-const { GraphQLObjectType } = require("graphql");
-const { attributeFields } = require("graphql-sequelize");
+const { GraphQLObjectType, GraphQLString, GraphQLBoolean, GraphQLInt } = require("graphql");
 
 module.exports = new GraphQLObjectType({
   name : "Answer",
   description : "An answer",
-  fields : attributeFields(models.Answer)
+
+  fields : {
+    id : {
+      type: GraphQLInt
+    },
+
+    description : {
+      type : GraphQLString
+    },
+
+    guidance : {
+      type : GraphQLString
+    },
+
+    qCode : {
+      type : GraphQLString
+    },
+
+    label : {
+      type: GraphQLString
+    },
+
+    type : {
+      type : GraphQLString
+    },
+
+    mandatory : {
+      type : GraphQLBoolean
+    },
+
+    QuestionId : {
+      type : GraphQLInt
+    }
+  }
 });

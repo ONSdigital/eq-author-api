@@ -4,7 +4,7 @@ const executeQuery = require("../../utils/executeQuery");
 describe("questionnaire query" , () => {
 
   const questionnaire = `
-    query GetQuestionnaire($id : ID!) {
+    query GetQuestionnaire($id : Int!) {
       questionnaire(id: $id) {
         id,
         title,
@@ -17,7 +17,7 @@ describe("questionnaire query" , () => {
   `;
 
   const questionnaireWithPages = `
-    query GetQuestionnaireWithPages($id : ID!) {
+    query GetQuestionnaireWithPages($id : Int!) {
       questionnaire(id: $id) {
         id,
         pages {

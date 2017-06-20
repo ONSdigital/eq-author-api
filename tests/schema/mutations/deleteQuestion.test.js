@@ -4,7 +4,7 @@ const executeQuery = require("../../utils/executeQuery");
 describe("deleteQuestion" , () => {
 
   const deleteQuestion = `
-    mutation DeleteQuestion($id:ID!) {
+    mutation DeleteQuestion($id:Int!) {
       deleteQuestion(id:$id){
         id
       }

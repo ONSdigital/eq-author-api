@@ -1,10 +1,10 @@
-const models = require("../../models");
+const AnswerRepository = require("../../repositories/AnswerRepository");
 const { Answer } = require("../types");
 const {
   GraphQLString,
   GraphQLNonNull,
   GraphQLBoolean,
-  GraphQLID
+  GraphQLInt
 } = require("graphql");
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
 
   args : {
     id : {
-      type : new GraphQLNonNull(GraphQLID)
+      type : new GraphQLNonNull(GraphQLInt)
     },
     description : {
       type : GraphQLString
@@ -34,16 +34,7 @@ module.exports = {
     }
   },
 
-  resolve(source, { id, description, guidance, label, qCode, type, mandatory }) {
-    return models.Answer
-      .findById(id)
-      .then(answer => answer.update({
-        description,
-        guidance,
-        label,
-        qCode,
-        type,
-        mandatory
-      }));
+  resolve(source, args) {
+    return AnswerRepository.update(args);
   }
 };

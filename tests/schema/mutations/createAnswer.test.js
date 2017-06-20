@@ -11,7 +11,7 @@ describe("createAnswer" , () => {
       $label:String,
       $type:String!,
       $mandatory:Boolean!,
-      $questionId:ID!
+      $questionId:Int!
     ) {
       createAnswer(
         description: $description,

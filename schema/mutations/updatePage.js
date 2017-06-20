@@ -1,17 +1,13 @@
-const models = require("../../models");
+const PagesRepository = require("../../repositories/PagesRepository");
 const { Page } = require("../types");
-const {
-  GraphQLString,
-  GraphQLNonNull,
-  GraphQLID
-} = require("graphql");
+const { GraphQLString, GraphQLNonNull, GraphQLInt } = require("graphql");
 
 module.exports = {
   type: Page,
 
   args : {
     id : {
-      type : new GraphQLNonNull(GraphQLID)
+      type : new GraphQLNonNull(GraphQLInt)
     },
     title : {
       type : GraphQLString
@@ -21,9 +17,7 @@ module.exports = {
     }
   },
 
-  resolve(source, { id, title, description }) {
-    return models.Page
-      .findById(id)
-      .then(page => page.update({ title, description }));
+  resolve(source, args) {
+    return PagesRepository.update(args);
   }
 };

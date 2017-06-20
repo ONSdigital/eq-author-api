@@ -6,8 +6,8 @@ describe("createPage" , () => {
   const createPage = `
     mutation CreatePage(
       $title: String!,
-      $description: String!,
-      $questionnaireId:ID!
+      $description: String,
+      $questionnaireId:Int!
     ) {
       createPage(
         title:$title,

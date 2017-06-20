@@ -1,16 +1,17 @@
-const models = require("../../models");
+const QuestionRepository = require("../../repositories/QuestionRepository");
 const { Question } = require("../types");
-const { resolver } = require("graphql-sequelize");
-const { GraphQLNonNull, GraphQLID } = require("graphql");
+const { GraphQLNonNull, GraphQLInt } = require("graphql");
 
 module.exports = {
   type: Question,
 
   args : {
     id : {
-      type : new GraphQLNonNull(GraphQLID)
+      type : new GraphQLNonNull(GraphQLInt)
     }
   },
 
-  resolve : resolver(models.Question)
+  resolve(_, { id }) {
+    return QuestionRepository.get(id);
+  }
 };

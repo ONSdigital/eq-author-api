@@ -1,17 +1,48 @@
-const models = require("../../models");
-const { GraphQLObjectType, GraphQLList } = require("graphql");
-const { attributeFields, resolver } = require("graphql-sequelize");
+const { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLString, GraphQLInt } = require("graphql");
+
 const Page = require("./Page");
+const QuestionnaireRepository = require("../../repositories/QuestionnaireRepository");
+const PagesRepository = require("../../repositories/PagesRepository")
 
 module.exports = new GraphQLObjectType({
   name : "Questionnaire",
   description : "A Questionnaire",
 
-  fields: Object.assign(attributeFields(models.Questionnaire), {
+  fields: {
+    id : {
+      type: GraphQLInt
+    },
+
+    title : {
+      type: GraphQLString
+    },
+
+    description : {
+      type: GraphQLString
+    },
+
+    theme : {
+      type: GraphQLString
+    },
+
+    legalBasis : {
+      type: GraphQLString
+    },
+
+    navigation : {
+      type: GraphQLBoolean
+    },
+
     pages : {
       type : new GraphQLList(Page),
-      resolve: resolver(models.Questionnaire.Pages)
+      resolve({ id }) {
+        return PagesRepository.findAll({ QuestionnaireId : id });
+      }
     }
-  })
+  },
+
+  resolve(root, { id }) {
+    return QuestionnaireRepository.get(id);
+  }
 
 });

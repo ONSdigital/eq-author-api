@@ -4,7 +4,7 @@ const executeQuery = require("../../utils/executeQuery");
 describe("Page query" , () => {
 
   const page = `
-    query GetPage($id: ID!) {
+    query GetPage($id: Int!) {
       page(id: $id) {
         id,
         title,
@@ -15,7 +15,7 @@ describe("Page query" , () => {
   `;
 
   const pageWithQuestions = `
-    query GetPageWithQuestions($id: ID!) {
+    query GetPageWithQuestions($id: Int!) {
       page(id: $id) {
         id,
         questions {

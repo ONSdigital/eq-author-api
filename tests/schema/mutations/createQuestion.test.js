@@ -10,7 +10,7 @@ describe("createQuestion" , () => {
       $guidance: String!,
       $type: String!,
       $mandatory: Boolean,
-      $pageId: ID!
+      $pageId: Int!
     ) {
       createQuestion(
         title:$title,

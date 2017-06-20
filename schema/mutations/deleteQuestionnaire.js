@@ -1,19 +1,17 @@
-const models = require("../../models");
+const QuestionnaireRepository = require("../../repositories/QuestionnaireRepository");
 const { Questionnaire } = require("../types");
-const { GraphQLID, GraphQLNonNull } = require("graphql");
+const { GraphQLInt, GraphQLNonNull } = require("graphql");
 
 module.exports = {
   type : Questionnaire,
 
   args : {
     id : {
-      type : new GraphQLNonNull(GraphQLID)
+      type : new GraphQLNonNull(GraphQLInt)
     }
   },
 
   resolve(_, { id }) {
-    return models.Questionnaire
-      .findById(id)
-      .then(questionnaire => questionnaire.destroy().then(() => questionnaire));
+    return QuestionnaireRepository.remove(id);
   }
 }
