@@ -1,4 +1,3 @@
-const AnswerRepository = require("../../repositories/AnswerRepository");
 const { Answer } = require("../types");
 const { GraphQLInt, GraphQLNonNull } = require("graphql");
 
@@ -11,7 +10,7 @@ module.exports = {
     }
   },
 
-  resolve(_, { id }) {
-    return AnswerRepository.remove(id);
+  resolve(_, { id }, ctx) {
+    return ctx.repositories.Answer.remove(id);
   }
 };

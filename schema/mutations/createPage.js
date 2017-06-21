@@ -1,4 +1,3 @@
-const PagesRepository = require("../../repositories/PagesRepository");
 const { Page } = require("../types");
 const { GraphQLString, GraphQLNonNull, GraphQLInt } = require("graphql");
 
@@ -17,7 +16,7 @@ module.exports = {
     }
   },
 
-  resolve(source, args) {
-    return PagesRepository.insert(args);
+  resolve(source, args, ctx) {
+    return ctx.repositories.Page.insert(args);
   }
 };

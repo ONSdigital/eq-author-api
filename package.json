@@ -18,6 +18,7 @@
     "eslint": "^4.0.0",
     "eslint-plugin-jest": "^20.0.3",
     "jest": "^20.0.4",
+    "jest-environment-node-debug": "^2.0.0",
     "nodemon": "^1.11.0",
     "sequelize-cli": "^2.7.0",
     "sequelize-fixtures": "^0.5.6",

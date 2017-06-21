@@ -1,5 +1,5 @@
-const { Page } = require("../../../models");
 const executeQuery = require("../../utils/executeQuery");
+const mockRepository = require("../../utils/mockRepository");
 
 describe("updatePage" , () => {
 
@@ -21,6 +21,14 @@ describe("updatePage" , () => {
     }
   `;
 
+  let repositories;
+
+  beforeEach(() => {
+    repositories = {
+      Page : mockRepository()
+    }
+  });
+
   it("should allow update of Page", async () => {
     const fixture = {
       id: 1,
@@ -28,9 +36,9 @@ describe("updatePage" , () => {
       description: "This is an updated page description"
     };
 
-    const result = await executeQuery(updatePage, fixture);
-    const expected = await Page.findById(result.updatePage.id);
+    const result = await executeQuery(updatePage, fixture, { repositories });
 
-    expect(expected.get({ plain : true })).toEqual(expect.objectContaining(result.updatePage));
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Page.update).toHaveBeenCalled();
   });
 });

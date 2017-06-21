@@ -1,5 +1,5 @@
-const { Page } = require("../../../models");
 const executeQuery = require("../../utils/executeQuery");
+const mockRepository = require("../../utils/mockRepository");
 
 describe("deletePage" , () => {
 
@@ -11,10 +11,18 @@ describe("deletePage" , () => {
     }
   `;
 
-  it("should allow deletion of Page", async () => {
-    const result = await executeQuery(deletePage, { id : 1 });
-    const expected = await Page.findById(result.deletePage.id);
+  let repositories;
 
-    expect(expected).toEqual(null);
+  beforeEach(() => {
+    repositories = {
+      Page : mockRepository()
+    }
+  });
+
+  it("should allow deletion of Page", async () => {
+    const result = await executeQuery(deletePage, { id : 1 }, { repositories });
+
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Page.remove).toHaveBeenCalled();
   });
 });

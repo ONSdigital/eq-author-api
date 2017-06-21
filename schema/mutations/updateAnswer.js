@@ -1,4 +1,3 @@
-const AnswerRepository = require("../../repositories/AnswerRepository");
 const { Answer } = require("../types");
 const {
   GraphQLString,
@@ -34,7 +33,7 @@ module.exports = {
     }
   },
 
-  resolve(source, args) {
-    return AnswerRepository.update(args);
+  resolve(source, args, ctx) {
+    return ctx.repositories.Answer.update(args);
   }
 };

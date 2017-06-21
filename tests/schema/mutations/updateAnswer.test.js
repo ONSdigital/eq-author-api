@@ -1,5 +1,5 @@
-const { Answer } = require("../../../models");
 const executeQuery = require("../../utils/executeQuery");
+const mockRepository = require("../../utils/mockRepository");
 
 describe("updateAnswer" , () => {
 
@@ -34,6 +34,14 @@ describe("updateAnswer" , () => {
     }
   `;
 
+  let repositories;
+
+  beforeEach(() => {
+    repositories = {
+      Answer : mockRepository()
+    }
+  });
+
   it("should allow update of Answer", async () => {
     const fixture = {
       id: 1,
@@ -45,9 +53,9 @@ describe("updateAnswer" , () => {
       mandatory: false
     };
 
-    const result = await executeQuery(updateAnswer, fixture);
-    const expected = await Answer.findById(result.updateAnswer.id);
+    const result = await executeQuery(updateAnswer, fixture, { repositories });
 
-    expect(expected.get({ plain : true })).toEqual(expect.objectContaining(result.updateAnswer));
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Answer.update).toHaveBeenCalled();
   });
 });

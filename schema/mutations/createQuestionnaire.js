@@ -23,10 +23,13 @@ module.exports = {
     },
     navigation : {
       type : GraphQLBoolean
+    },
+    surveyId : {
+      type : new GraphQLNonNull(GraphQLString)
     }
   },
 
-  resolve(source, args) {
-    return QuestionnaireRepository.insert(args);
+  resolve(root, args, ctx) {
+    return ctx.repositories.Questionnaire.insert(args);
   }
 };

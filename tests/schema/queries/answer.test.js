@@ -1,5 +1,5 @@
-const findFixture = require("../../utils/findFixture");
 const executeQuery = require("../../utils/executeQuery");
+const mockRepository = require("../../utils/mockRepository");
 
 describe("answer query" , () => {
 
@@ -17,17 +17,19 @@ describe("answer query" , () => {
     }
   `;
 
-  it("should fetch answer by id", async () => {
-    const result = await executeQuery(answer, { id : 1 });
-    const expected = expect.objectContaining(findFixture("Answer", 1));
+  let repositories;
+  const id = 1;
 
-    expect(result.answer).toEqual(expected);
+  beforeEach(() => {
+    repositories = {
+      Answer : mockRepository()
+    }
   });
 
-  it("should return null if no matching answer", async () => {
-    const result = await executeQuery(answer, { id :-10 });
-    const expected = null;
+  it("should fetch answer by id", async () => {
+    const result = await executeQuery(answer, { id }, { repositories });
 
-    expect(result.answer).toEqual(expected);
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Answer.get).toHaveBeenCalledWith(id);
   });
 });

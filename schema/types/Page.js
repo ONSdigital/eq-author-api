@@ -1,6 +1,4 @@
 const { GraphQLObjectType, GraphQLList, GraphQLString, GraphQLInt } = require("graphql");
-const QuestionRepository = require("../../repositories/QuestionRepository");
-const PagesRepository = require("../../repositories/PagesRepository")
 const Question = require("./Question");
 
 module.exports = new GraphQLObjectType({
@@ -22,8 +20,8 @@ module.exports = new GraphQLObjectType({
 
     questions : {
       type: new GraphQLList(Question),
-      resolve({ id }) {
-        return QuestionRepository.findAll({ PageId : id });
+      resolve({ id }, args, ctx) {
+        return ctx.repositories.Question.findAll({ PageId : id });
       }
     },
 
@@ -32,7 +30,7 @@ module.exports = new GraphQLObjectType({
     },
   },
 
-  resolve(root, { id }) {
-    return PagesRepository.get(id);
+  resolve(root, { id }, ctx) {
+    return ctx.repositories.Page.get(id);
   }
 });

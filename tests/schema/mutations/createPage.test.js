@@ -1,5 +1,5 @@
-const { Page } = require("../../../models");
 const executeQuery = require("../../utils/executeQuery");
+const mockRepository = require("../../utils/mockRepository");
 
 describe("createPage" , () => {
 
@@ -22,6 +22,14 @@ describe("createPage" , () => {
     }
   `;
 
+  let repositories;
+
+  beforeEach(() => {
+    repositories = {
+      Page : mockRepository()
+    };
+  });
+
   it("should allow creation of Page", async () => {
     const fixture = {
       "title": "Test page",
@@ -29,9 +37,9 @@ describe("createPage" , () => {
       "questionnaireId": 1
     };
 
-    const result = await executeQuery(createPage, fixture);
-    const expected = await Page.findById(result.createPage.id);
+    const result = await executeQuery(createPage, fixture, { repositories });
 
-    expect(expected.get({ plain : true })).toEqual(expect.objectContaining(result.createPage));
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Page.insert).toHaveBeenCalled();
   });
 });

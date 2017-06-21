@@ -1,4 +1,3 @@
-const QuestionRepository = require("../../repositories/QuestionRepository");
 const { Question } = require("../types");
 const {
   GraphQLString,
@@ -32,7 +31,7 @@ module.exports = {
     }
   },
 
-  resolve(source, args) {
-    return QuestionRepository.insert(args);
+  resolve(source, args, ctx) {
+    return ctx.repositories.Question.insert(args);
   }
 };

@@ -1,4 +1,3 @@
-const QuestionnaireRepository = require("../../repositories/QuestionnaireRepository");
 const { Questionnaire } = require("../types");
 const { GraphQLInt, GraphQLNonNull } = require("graphql");
 
@@ -11,7 +10,7 @@ module.exports = {
     }
   },
 
-  resolve(_, { id }) {
-    return QuestionnaireRepository.remove(id);
+  resolve(_, { id }, ctx) {
+    return ctx.repositories.Questionnaire.remove(id);
   }
 }

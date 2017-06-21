@@ -1,4 +1,3 @@
-const QuestionnaireRepository = require("../../Repositories/QuestionnaireRepository");
 const { Questionnaire } = require("../types");
 const {
   GraphQLString,
@@ -31,7 +30,7 @@ module.exports = {
     }
   },
 
-  resolve(_, args) {
-    return QuestionnaireRepository.update(args);
+  resolve(_, args, ctx) {
+    return ctx.repositories.Questionnaire.update(args);
   }
 };

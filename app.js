@@ -6,6 +6,7 @@ const cors = require("cors");
 const schema = require("./schema");
 const models = require("./models");
 const settings = require('./config/settings');
+const repositories = require("./repositories");
 
 const {
   express : {
@@ -27,6 +28,7 @@ app.use(GRAPHIQL_ENDPOINT,
     schema: schema,
     pretty: GRAPHIQL_PRETTY,
     graphiql: GRAPHIQL_ENABLED,
+    context: { repositories }
   })
 );
 

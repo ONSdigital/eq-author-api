@@ -1,5 +1,5 @@
-const findFixture = require("../../utils/findFixture");
 const executeQuery = require("../../utils/executeQuery");
+const mockRepository = require("../../utils/mockRepository");
 
 describe("questionnaire query" , () => {
 
@@ -27,27 +27,31 @@ describe("questionnaire query" , () => {
     }
   `;
 
-  it("should fetch questionnaire by id", async () => {
-    const result = await executeQuery(questionnaire, { id : 1 });
-    const expected = expect.objectContaining(findFixture("Questionnaire", 1));
+  const id = 1;
+  let repositories;
 
-    expect(result.questionnaire).toEqual(expected);
+  beforeEach(() => {
+    repositories = {
+      Questionnaire : mockRepository(),
+      Page : mockRepository(),
+    }
   });
 
-  it("should return null if no matching questionnaire", async () => {
-    const result = await executeQuery(questionnaire, { id : -10 });
-    const expected = null;
+  it("should fetch questionnaire by id", async () => {
+    const result = await executeQuery(questionnaire, { id }, { repositories });
 
-    expect(result.questionnaire).toEqual(expected);
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
+    expect(repositories.Page.findAll).not.toHaveBeenCalled();
   });
 
   it("should have an association with pages", async () => {
-    const result = await executeQuery(questionnaireWithPages, { id : 1 });
-    const expected = expect.objectContaining({
-      id : 1,
-      pages : [{ id : 1 }]
-    });
+    repositories.Questionnaire.get.mockImplementation(() => ({ id }));
 
-    expect(result.questionnaire).toEqual(expected);
+    const result = await executeQuery(questionnaireWithPages, { id }, { repositories });
+
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
+    expect(repositories.Page.findAll).toHaveBeenCalledWith({ QuestionnaireId : id });
   });
 });
