@@ -28,9 +28,5 @@ module.exports = new GraphQLObjectType({
     QuestionnaireId : {
       type : GraphQLInt
     },
-  },
-
-  resolve(root, { id }, ctx) {
-    return ctx.repositories.Page.get(id);
   }
 });

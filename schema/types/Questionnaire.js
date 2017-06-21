@@ -38,10 +38,5 @@ module.exports = new GraphQLObjectType({
         return ctx.repositories.Page.findAll({ QuestionnaireId : id });
       }
     }
-  },
-
-  resolve(root, { id }, ctx) {
-    return ctx.repositories.Questionnaire.get(id);
   }
-
 });

@@ -41,9 +41,5 @@ module.exports = new GraphQLObjectType({
     PageId : {
       type : GraphQLInt
     },
-  },
-
-  resolve(root, { id }, ctx) {
-    return ctx.repositories.Question.get(id);
   }
 });
