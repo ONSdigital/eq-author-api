@@ -9,7 +9,8 @@
     "test": "jest .",
     "start-app": "nodemon --inspect=0.0.0.0:5858",
     "start-db": "docker run -ti sta-p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres --name postgres-db --rm postgres",
-    "stop-db": "docker stop postgres-db"
+    "stop-db": "docker stop postgres-db",
+    "knex": "knex"
   },
   "dependencies": {
     "colors": "^1.1.2",
@@ -25,6 +26,7 @@
     "express-graphql": "^0.6.5",
     "graphql": "^0.9.6",
     "graphql-relay": "^0.5.2",
+    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "pg": "^6.2.3",
     "pg-hstore": "^2.3.2",
