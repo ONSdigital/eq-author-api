@@ -3,8 +3,6 @@
 A GraphQL based API for the [eq-author](https://github.com/ONSdigital/eq-author)
 application.
 
-
-
 ## Installation
 
 ### Configuration
@@ -66,9 +64,13 @@ Changes to the application should hot reload via `nodemon`.
 
 ![browsing the API documentation](./doc/images/docs.gif)
 
-### Debugging
+## Debugging (with VS Code)
 
-Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1fd28091b23de0e147/developer-tools/nodejs-debugging/VSCode-README.md) to enable debugging through VS Code. Use this config for VS Code, rather than what is detailed in the guide:
+### Debugging app
+
+Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1fd28091b23de0e147/developer-tools/nodejs-debugging/VSCode-README.md) to enable debugging through VS Code. 
+
+Use this config for VS Code, rather than what is detailed in the guide. This will attach *to the running docker container*:
 
 ```json
 {
@@ -90,3 +92,24 @@ Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1f
 }
 ```
 
+### Debugging tests
+
+Add the following to your `launch.json` configurations. This will *launch the tests and start debugging*:
+
+```json
+{
+  "name": "Debug Jest tests",
+  "type": "node",
+  "request": "launch",
+  "runtimeArgs": [
+    "--inspect-brk",
+    "./node_modules/.bin/jest",
+    "-i",
+    "--env",
+    "jest-environment-node-debug"
+  ],
+  "cwd": "${workspaceRoot}",
+  "protocol": "inspector",
+  "console": "integratedTerminal"
+}
+```
