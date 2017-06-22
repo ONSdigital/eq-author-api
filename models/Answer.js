@@ -1,56 +1,38 @@
-module.exports = function createAnswerModel(sequelize, DataTypes) {
+const db = require("../db");
 
-  const Answer = sequelize.define("Answer", {
+function Answer() {
+  return db("Answers");
+}
 
-    description : {
-      type : DataTypes.STRING
-    },
-
-    guidance : {
-      type : DataTypes.STRING
-    },
-
-    qCode : {
-      type : DataTypes.STRING
-    },
-
-    label : {
-      type: DataTypes.STRING
-    },
-
-    type : {
-      type : DataTypes.ENUM(
-        "Checkbox",
-        "Currency",
-        "Date",
-        "MonthYearDate",
-        "Integer",
-        "Percentage",
-        "PositiveInteger",
-        "Radio",
-        "TextArea",
-        "TextField",
-        "Relationship"
-      ),
-      allowNull : false
-    },
-
-    mandatory : {
-      type : DataTypes.BOOLEAN,
-      defaultValue : false,
-      allowNull: false
-    }
-
-  }, {
-
-    classMethods : {
-      associate(models) {
-        Answer.Question = Answer.belongsTo(models.Question);
-      }
-    }
-
-  });
-
-  return Answer;
+module.exports.findAll = function findAll({ where }) {
+  return Answer()
+    .where(where)
+    .select();
 };
 
+
+module.exports.findById = function findById(id) {
+  return Answer()
+    .where("id", parseInt(id, 10))
+    .first();
+};
+
+module.exports.update = function update(id, updates) {
+  return Answer()
+    .where("id", parseInt(id, 10))
+    .update(updates)
+    .returning("*");
+};
+
+module.exports.create = function create(answer) {
+  return Answer()
+    .insert(answer)
+    .returning("*");
+};
+
+module.exports.destroy = function destroy(id) {
+  return Answer()
+    .where("id", parseInt(id, 10))
+    .delete()
+    .returning("*");
+}

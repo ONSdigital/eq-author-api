@@ -1,26 +1,37 @@
-module.exports = function createPageModel(sequelize, DataTypes) {
+const db = require("../db");
 
-  const Page = sequelize.define("Page", {
+function Page() {
+  return db("Pages");
+}
 
-    title : {
-      type : DataTypes.STRING,
-      allowNull : false
-    },
-
-    description : {
-      type : DataTypes.STRING
-    }
-
-  }, {
-
-    classMethods : {
-      associate(models) {
-        Page.Questionnaire = Page.belongsTo(models.Questionnaire);
-        Page.Questions = Page.hasMany(models.Question);
-      }
-    }
-
-  });
-
-  return Page;
+module.exports.findAll = function findAll({ where }) {
+  return Page()
+    .where(where)
+    .select();
 };
+
+module.exports.findById = function findById(id) {
+  return Page()
+    .where("id", parseInt(id, 10))
+    .first();
+};
+
+module.exports.update = function update(id, updates) {
+  return Page()
+    .where({ "id" : parseInt(id, 10) })
+    .update(updates)
+    .returning("*");
+};
+
+module.exports.create = function create(obj) {
+  return Page()
+    .insert(obj)
+    .returning("*");
+};
+
+module.exports.destroy = function destroy(id) {
+  return Page()
+    .where({ "id" : parseInt(id, 10) })
+    .delete()
+    .returning("*");
+}

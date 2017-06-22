@@ -1,46 +1,38 @@
-module.exports = function createQuestionModel(sequelize, DataTypes) {
+const db = require("../db");
 
-  const Question = sequelize.define("Question", {
+function Question() {
+  return db("Questions");
+}
 
-    title : {
-      type : DataTypes.STRING,
-      allowNull: false
-    },
-
-    description : {
-      type : DataTypes.STRING
-    },
-
-    guidance : {
-      type: DataTypes.STRING
-    },
-
-    type : {
-      type : DataTypes.ENUM(
-        "General",
-        "DateRange",
-        "RepeatingAnswer",
-        "Relationship"
-      ),
-      allowNull : false
-    },
-
-    mandatory : {
-      type : DataTypes.BOOLEAN,
-      defaultValue : false
-    }
-
-  }, {
-
-    classMethods : {
-      associate(models) {
-        Question.Page = Question.belongsTo(models.Page);
-        Question.Answers = Question.hasMany(models.Answer);
-      }
-    }
-
-  });
-
-  return Question;
+module.exports.findAll = function findAll({ where }) {
+  return Question()
+    .where(where)
+    .select();
 };
 
+
+module.exports.findById = function findById(id) {
+  return Question()
+    .where("id", parseInt(id, 10))
+    .first();
+};
+
+module.exports.update = function update(id, updates) {
+  return Question()
+    .where("id", parseInt(id, 10))
+    .update(updates)
+    .returning("*");
+};
+
+module.exports.create = function create(obj) {
+  return Question()
+    .insert(obj)
+    .returning("*");
+};
+
+module.exports.destroy = function destroy(id) {
+  return Question()
+    .where("id", parseInt(id, 10))
+    .delete()
+    .returning("*");
+}

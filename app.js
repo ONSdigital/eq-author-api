@@ -4,7 +4,6 @@ const colors = require("colors");
 const cors = require("cors");
 
 const schema = require("./schema");
-const models = require("./models");
 const settings = require('./config/settings');
 const repositories = require("./repositories");
 
@@ -35,8 +34,10 @@ app.use(GRAPHIQL_ENDPOINT,
 
 console.log('Starting server...');
 
-models.sequelize.sync().then(() => {
-  app.listen(EXPRESS_PORT, () => {
-    console.log(colors.green('eq-author-api'), 'is running at', colors.yellow(EXPRESS_URL + GRAPHIQL_ENDPOINT))
-  });
+app.listen(EXPRESS_PORT, () => {
+  console.log(
+    colors.green('eq-author-api'),
+    'is running at',
+    colors.yellow(EXPRESS_URL + GRAPHIQL_ENDPOINT)
+  );
 });

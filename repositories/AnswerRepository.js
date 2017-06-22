@@ -1,4 +1,5 @@
-const { Answer } = require("../models");
+const { head } = require("lodash");
+const Answer = require("../models/Answer");
 
 module.exports.findAll = function findAll(where) {
   return Answer.findAll({ where });
@@ -9,32 +10,34 @@ module.exports.get = function get(id) {
 };
 
 module.exports.insert = function insert({ description, guidance, label, qCode, type, mandatory, questionId }) {
-  return Answer.create({
-    description,
-    guidance,
-    label,
-    qCode,
-    type,
-    mandatory,
-    QuestionId : questionId
-  });
+  return Answer
+    .create({
+      description,
+      guidance,
+      label,
+      qCode,
+      type,
+      mandatory,
+      QuestionId : questionId
+    })
+    .then(head);
 }
 
 module.exports.update = function update({ id, description, guidance, label, qCode, type, mandatory }) {
   return Answer
-    .findById(id)
-    .then(answer => answer.update({
+    .update(id, {
       description,
       guidance,
       label,
       qCode,
       type,
       mandatory
-    }));
+    })
+    .then(head);
 };
 
 module.exports.remove = function remove(id) {
   return Answer
-    .findById(id)
-    .then(answer => answer.destroy().then(() => answer));
+    .destroy(id)
+    .then(head);
 };

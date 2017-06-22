@@ -1,4 +1,5 @@
-const { Page } = require("../models");
+const { head } = require("lodash");
+const Page = require("../models/Page");
 
 module.exports.findAll = function findAll(where) {
   return Page.findAll({ where });
@@ -9,21 +10,23 @@ module.exports.get = function get(id) {
 };
 
 module.exports.insert = function insert({ title, description, questionnaireId }) { 
-  return Page.create({
-    title,
-    description,
-    QuestionnaireId : questionnaireId
-  });
+  return Page
+    .create({
+      title,
+      description,
+      QuestionnaireId : questionnaireId
+    })
+    .then(head);
 }
 
 module.exports.update = function update({ id, title, description }) {
   return Page
-    .findById(id)
-    .then(page => page.update({ title, description }));
+    .update(id, { title, description })
+    .then(head);
 };
 
 module.exports.remove = function remove(id) {
   return Page
-    .findById(id)
-    .then(page => page.destroy().then(() => page));
+    .destroy(id)
+    .then(head);
 };

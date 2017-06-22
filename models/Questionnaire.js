@@ -1,48 +1,38 @@
-module.exports = function createQuestionnaireModel(sequelize, DataTypes) {
+const db = require("../db");
 
-  const Questionnare = sequelize.define("Questionnaire", {
+function Questionnaire() {
+  return db("Questionnaires");
+}
 
-    title : {
-      type : DataTypes.STRING,
-      allowNull: false
-    },
-
-    description : {
-      type : DataTypes.STRING
-    },
-
-    theme : {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-
-    legalBasis : {
-      type: DataTypes.ENUM(
-        "Voluntary",
-        "StatisticsOfTradeAct"
-      ),
-      allowNull: false
-    },
-
-    navigation : {
-      type : DataTypes.BOOLEAN,
-      defaultValue : false
-    },
-
-    surveyId : {
-      type : DataTypes.STRING,
-      allowNull: false
-    }
-
-  }, {
-
-    classMethods : {
-      associate(models) {
-        Questionnare.Pages = Questionnare.hasMany(models.Page);
-      }
-    }
-
-  });
-
-  return Questionnare;
+module.exports.findAll = function findAll({ where }) {
+  return Questionnaire()
+    .where(where)
+    .select();
 };
+
+
+module.exports.findById = function findById(id) {
+  return Questionnaire()
+    .where("id", parseInt(id, 10))
+    .first();
+};
+
+module.exports.update = function update(id, updates) {
+  return Questionnaire()
+    .where("id", parseInt(id, 10))
+    .update(updates)
+    .returning("*");
+};
+
+module.exports.create = function create(obj) {
+  return Questionnaire()
+    .insert(obj)
+    .returning("*");
+};
+
+module.exports.destroy = function destroy(id) {
+  return Questionnaire()
+    .where("id", parseInt(id, 10))
+    .delete()
+    .returning("*");
+}
