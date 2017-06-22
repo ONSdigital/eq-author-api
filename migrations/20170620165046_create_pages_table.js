@@ -2,16 +2,17 @@
 exports.up = function(knex) {
   return knex.schema.createTable("Pages", function(table) {
     table.increments();
-    table.timestamps();
+    table.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
+    table.timestamp("updated_at").notNullable().defaultTo(knex.fn.now());
 
     table.string("title").notNullable();
     table.text("description");
 
-    table.integer('QuestionnaireId')
+    table.integer("QuestionnaireId")
       .unsigned()
       .index()
-      .references('id')
-      .inTable('Questionnaires')
+      .references("id")
+      .inTable("Questionnaires")
       .onDelete("CASCADE");
   });
 };

@@ -2,7 +2,8 @@
 exports.up = function(knex) {
   return knex.schema.createTable("Answers", function(table) {
     table.increments();
-    table.timestamps();
+    table.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
+    table.timestamp("updated_at").notNullable().defaultTo(knex.fn.now());
 
     table.text("description");
     table.text("guidance");
@@ -23,11 +24,11 @@ exports.up = function(knex) {
     ]).notNullable();
     table.boolean("mandatory").notNullable().defaultsTo(false);
 
-    table.integer('QuestionId')
+    table.integer("QuestionId")
       .unsigned()
       .index()
-      .references('id')
-      .inTable('Questions')
+      .references("id")
+      .inTable("Questions")
       .onDelete("CASCADE");
   });
 };
