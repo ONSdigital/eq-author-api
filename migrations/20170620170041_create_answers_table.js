@@ -21,7 +21,7 @@ exports.up = function(knex) {
       "TextField",
       "Relationship"
     ]).notNullable();
-    table.boolean("mandartory").notNullable().defaultsTo(false);
+    table.boolean("mandatory").notNullable().defaultsTo(false);
 
     table.integer('QuestionId')
       .unsigned()
