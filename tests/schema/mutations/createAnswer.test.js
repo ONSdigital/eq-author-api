@@ -11,7 +11,7 @@ describe("createAnswer" , () => {
       $label:String,
       $type:String!,
       $mandatory:Boolean!,
-      $questionId:Int!
+      $QuestionId:Int!
     ) {
       createAnswer(
         description: $description,
@@ -20,7 +20,7 @@ describe("createAnswer" , () => {
         label: $label,
         type: $type,
         mandatory: $mandatory,
-        questionId:$questionId
+        QuestionId:$QuestionId
       ) {
         id,
         description,
@@ -49,7 +49,7 @@ describe("createAnswer" , () => {
       guidance: "Test answer guidance",
       type: "TextField",
       mandatory: false,
-      questionId: 1
+      QuestionId: 1
     };
 
     const result = await executeQuery(createAnswer, fixture, { repositories });

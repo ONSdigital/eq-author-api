@@ -28,7 +28,7 @@ exports.up = function(knex) {
       .unsigned()
       .index()
       .references("id")
-      .inTable("Questions")
+      .inTable("Pages")
       .onDelete("CASCADE");
   });
 };

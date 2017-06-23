@@ -4,7 +4,7 @@ function Questionnaire() {
   return db("Questionnaires");
 }
 
-module.exports.findAll = function findAll(where) {
+module.exports.findAll = function findAll(where = {}) {
   return Questionnaire()
     .where(where)
     .select();

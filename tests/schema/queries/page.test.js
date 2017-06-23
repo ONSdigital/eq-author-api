@@ -9,17 +9,8 @@ describe("Page query" , () => {
         id,
         title,
         description,
-        QuestionnaireId
-      }
-    }
-  `;
-
-  const pageWithQuestions = `
-    query GetPageWithQuestions($id: Int!) {
-      page(id: $id) {
-        id,
-        questions {
-          id
+        ... on Question {
+          QuestionnaireId
         }
       }
     }
@@ -41,15 +32,5 @@ describe("Page query" , () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.Page.get).toHaveBeenCalledWith(id);
     expect(repositories.Question.findAll).not.toHaveBeenCalled();
-  });
-
-  it("should have an association with questions", async () => {
-    repositories.Page.get.mockImplementation(() => ({ id }));
-
-    const result = await executeQuery(pageWithQuestions, { id }, { repositories });
-
-    expect(result.errors).toBeUndefined();
-    expect(repositories.Page.get).toHaveBeenCalledWith(id);
-    expect(repositories.Question.findAll).toHaveBeenCalledWith({ PageId : id });
   });
 });

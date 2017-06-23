@@ -1,38 +1,42 @@
 const db = require("../db");
 
 function Question() {
-  return db("Questions");
+  return db("Pages");
 }
 
-module.exports.findAll = function findAll(where) {
+function restrictType(where) {
+  return Object.assign({}, where, { pageType : "Question" });
+}
+
+module.exports.findAll = function findAll(where = {}) {
   return Question()
-    .where(where)
+    .where(restrictType(where))
     .select();
 };
 
 
 module.exports.findById = function findById(id) {
   return Question()
-    .where("id", parseInt(id, 10))
+    .where(restrictType({ id: parseInt(id, 10) }))
     .first();
 };
 
 module.exports.update = function update(id, updates) {
   return Question()
-    .where("id", parseInt(id, 10))
+    .where(restrictType({ id: parseInt(id, 10) }))
     .update(updates)
     .returning("*");
 };
 
 module.exports.create = function create(obj) {
   return Question()
-    .insert(obj)
+    .insert(restrictType(obj))
     .returning("*");
 };
 
 module.exports.destroy = function destroy(id) {
   return Question()
-    .where("id", parseInt(id, 10))
+    .where(restrictType({ id: parseInt(id, 10) }))
     .delete()
     .returning("*");
 }

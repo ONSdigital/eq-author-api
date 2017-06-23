@@ -5,7 +5,7 @@ describe("deletePage" , () => {
 
   const deletePage = `
     mutation DeletePage($id:Int!) {
-      deletePage(id:$id){
+      deletePage(id:$id) {
         id
       }
     }

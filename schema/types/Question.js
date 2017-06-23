@@ -1,17 +1,20 @@
-const { GraphQLObjectType, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLInt } = require("graphql");
+const { GraphQLObjectType, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLNonNull } = require("graphql");
 const Answer = require("./Answer");
+const Page = require("./Page");
 
 module.exports = new GraphQLObjectType({
   name : "Question",
   description: "A question",
+
+  interfaces: [Page],
   
   fields : {
     id : {
-      type : GraphQLInt
+      type : new GraphQLNonNull(GraphQLInt)
     },
 
     title : {
-      type : GraphQLString
+      type : new GraphQLNonNull(GraphQLString)
     },
 
     description : {
@@ -20,6 +23,10 @@ module.exports = new GraphQLObjectType({
 
     guidance : {
       type: GraphQLString
+    },
+
+    pageType : {
+      type: new GraphQLNonNull(GraphQLString)
     },
 
     type : {
@@ -38,8 +45,8 @@ module.exports = new GraphQLObjectType({
       }
     },
 
-    PageId : {
-      type : GraphQLInt
-    },
+    QuestionnaireId: {
+      type: new GraphQLNonNull(GraphQLInt)
+    }
   }
 });

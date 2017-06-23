@@ -11,16 +11,6 @@
       "surveyId" : "1"
     }
   },
-  
-  {
-    "model": "Page",
-    "data" : {
-      "id": 1,
-      "title": "Dairy products",
-      "description": "Please tell me about your love for various dairy products",
-      "QuestionnaireId": 1
-    }
-  },
 
   {
     "model": "Question",
@@ -31,7 +21,7 @@
       "guidance": "this is some guidance",
       "type": "General",
       "mandatory": true,
-      "PageId": 1
+      "QuestionnaireId": 1
     }
   },
 

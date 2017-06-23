@@ -16,7 +16,11 @@ describe("updatePage" , () => {
       ) {
         id,
         title,
-        description
+        description,
+        QuestionnaireId
+        ... on Question {
+          guidance
+        }
       }
     }
   `;

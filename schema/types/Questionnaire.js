@@ -6,7 +6,7 @@ module.exports = new GraphQLObjectType({
   name : "Questionnaire",
   description : "A Questionnaire",
 
-  fields: {
+  fields: () => ({
     id : {
       type: GraphQLInt
     },
@@ -38,5 +38,5 @@ module.exports = new GraphQLObjectType({
         return ctx.repositories.Page.findAll({ QuestionnaireId : id });
       }
     }
-  }
+  })
 });

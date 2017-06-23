@@ -1,32 +1,33 @@
-const { GraphQLObjectType, GraphQLList, GraphQLString, GraphQLInt } = require("graphql");
-const Question = require("./Question");
+const { GraphQLInterfaceType, GraphQLString, GraphQLNonNull, GraphQLInt } = require("graphql");
 
-module.exports = new GraphQLObjectType({
+const resolveType = ({ pageType }) => {
+  switch(pageType) {
+    case "Question":
+      return require("./Question");
+    default:
+      throw new TypeError(`Unknown type of Page: ${pageType}`);
+  }
+};
+
+module.exports = new GraphQLInterfaceType({
   name : "Page",
   description : "A page",
-  
-  fields : {
-    id : {
-      type : GraphQLInt
+
+  fields: {
+    id: {
+      type: new GraphQLNonNull(GraphQLInt)
+    },
+    title: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    description: {
+      type: GraphQLString
     },
 
-    title : {
-      type : GraphQLString
-    },
+    QuestionnaireId: {
+      type: new GraphQLNonNull(GraphQLInt)
+    }
+  },
 
-    description : {
-      type : GraphQLString
-    },
-
-    questions : {
-      type: new GraphQLList(Question),
-      resolve({ id }, args, ctx) {
-        return ctx.repositories.Question.findAll({ PageId : id });
-      }
-    },
-
-    QuestionnaireId : {
-      type : GraphQLInt
-    },
-  }
+  resolveType: resolveType
 });

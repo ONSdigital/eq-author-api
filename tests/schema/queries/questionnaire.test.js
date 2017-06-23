@@ -21,7 +21,9 @@ describe("questionnaire query" , () => {
       questionnaire(id: $id) {
         id,
         pages {
-          id
+          ... on Question {
+            id
+          }
         }
       }
     }

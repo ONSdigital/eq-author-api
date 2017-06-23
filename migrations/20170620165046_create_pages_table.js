@@ -8,6 +8,21 @@ exports.up = function(knex) {
     table.string("title").notNullable();
     table.text("description");
 
+    table.enum("pageType", [
+      "Question",
+      "Interstitial"
+    ]).notNullable();
+
+    // temporarily subsume the Questions table 
+    table.text("guidance");
+    table.enum("type", [
+      "General",
+      "DateRange",
+      "RepeatingAnswer",
+      "Relationship"
+    ]).notNullable();
+    table.boolean("mandatory").notNullable().defaultsTo(false);
+
     table.integer("QuestionnaireId")
       .unsigned()
       .index()
