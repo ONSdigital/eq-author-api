@@ -64,6 +64,20 @@ Changes to the application should hot reload via `nodemon`.
 
 ![browsing the API documentation](./doc/images/docs.gif)
 
+### DB migrations
+
+Start app using docker, then run following command:
+
+```
+DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:latest
+```
+
+To rollback:
+
+```
+DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:rollback
+```
+
 ## Debugging (with VS Code)
 
 ### Debugging app
