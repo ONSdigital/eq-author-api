@@ -5,7 +5,7 @@ module.exports = {
   type : new GraphQLList(Questionnaire),
 
   resolve(root, args, ctx) {
-    return ctx.repositories.Questionnaire.all();
+    return ctx.repositories.Questionnaire.findAll();
   }
 
 };

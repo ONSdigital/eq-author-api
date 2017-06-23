@@ -2,7 +2,7 @@ const { head } = require("lodash");
 const Question = require("../models/Question");
 
 module.exports.findAll = function findAll(where) {
-  return Question.findAll({ where });
+  return Question.findAll(where);
 };
 
 module.exports.get = function get(id) {

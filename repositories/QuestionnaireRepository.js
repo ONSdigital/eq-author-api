@@ -6,7 +6,7 @@ module.exports.get = function(id) {
   return Questionnaire.findById(id);
 };
 
-module.exports.all = function() {
+module.exports.findAll = function() {
   return Questionnaire.findAll();
 };
 

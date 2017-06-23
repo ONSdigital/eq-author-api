@@ -4,7 +4,7 @@ function Page() {
   return db("Pages");
 }
 
-module.exports.findAll = function findAll({ where }) {
+module.exports.findAll = function findAll(where) {
   return Page()
     .where(where)
     .select();
