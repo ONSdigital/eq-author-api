@@ -23,4 +23,4 @@ module.exports = {
   express,
   graphiql,
   db
-}
+};
