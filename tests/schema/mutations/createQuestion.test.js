@@ -10,7 +10,7 @@ describe("createQuestion" , () => {
       $guidance: String!,
       $type: String!,
       $mandatory: Boolean,
-      $QuestionnaireId: Int!
+      $GroupId: Int!
     ) {
       createQuestion(
         title:$title,
@@ -18,7 +18,7 @@ describe("createQuestion" , () => {
         guidance:$guidance,
         type: $type,
         mandatory: $mandatory,
-        QuestionnaireId: $QuestionnaireId
+        GroupId: $GroupId
       ) {
         id,
         title,
@@ -26,7 +26,7 @@ describe("createQuestion" , () => {
         guidance,
         type,
         mandatory,
-        QuestionnaireId
+        GroupId
       }
     }
   `;
@@ -47,7 +47,7 @@ describe("createQuestion" , () => {
       guidance: "Test question guidance",
       type: "General",
       mandatory: true,
-      QuestionnaireId: 1
+      GroupId: 1
     };
 
     const result = await executeQuery(createQuestion, fixture, { repositories });

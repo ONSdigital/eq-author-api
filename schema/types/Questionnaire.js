@@ -1,6 +1,6 @@
 const { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLString, GraphQLInt } = require("graphql");
 
-const Page = require("./Page");
+const Group = require("./Group");
 
 module.exports = new GraphQLObjectType({
   name : "Questionnaire",
@@ -31,11 +31,11 @@ module.exports = new GraphQLObjectType({
       type: GraphQLBoolean
     },
 
-    pages : {
-      type : new GraphQLList(Page),
+    groups : {
+      type : new GraphQLList(Group),
 
       resolve({ id }, args, ctx) {
-        return ctx.repositories.Page.findAll({ QuestionnaireId : id });
+        return ctx.repositories.Group.findAll({ QuestionnaireId : id });
       }
     }
   })

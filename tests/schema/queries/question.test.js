@@ -12,7 +12,7 @@ describe("Question query" , () => {
         guidance,
         type,
         mandatory,
-        QuestionnaireId
+        GroupId
       }
     }
   `;

@@ -4,7 +4,7 @@ module.exports = new GraphQLObjectType({
   name : "Answer",
   description : "An answer",
 
-  fields : {
+  fields : () => ({
     id : {
       type: GraphQLInt
     },
@@ -36,5 +36,5 @@ module.exports = new GraphQLObjectType({
     QuestionId : {
       type : GraphQLInt
     }
-  }
+  })
 });

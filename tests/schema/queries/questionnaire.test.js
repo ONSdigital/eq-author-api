@@ -20,10 +20,8 @@ describe("questionnaire query" , () => {
     query GetQuestionnaireWithPages($id : Int!) {
       questionnaire(id: $id) {
         id,
-        pages {
-          ... on Question {
-            id
-          }
+        groups {
+          id
         }
       }
     }
@@ -35,7 +33,7 @@ describe("questionnaire query" , () => {
   beforeEach(() => {
     repositories = {
       Questionnaire : mockRepository(),
-      Page : mockRepository(),
+      Group : mockRepository()
     }
   });
 
@@ -44,16 +42,16 @@ describe("questionnaire query" , () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
-    expect(repositories.Page.findAll).not.toHaveBeenCalled();
+    expect(repositories.Group.findAll).not.toHaveBeenCalled();
   });
 
-  it("should have an association with pages", async () => {
+  it("should have an association with Groups", async () => {
     repositories.Questionnaire.get.mockImplementation(() => ({ id }));
 
     const result = await executeQuery(questionnaireWithPages, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
-    expect(repositories.Page.findAll).toHaveBeenCalledWith({ QuestionnaireId : id });
+    expect(repositories.Group.findAll).toHaveBeenCalledWith({ QuestionnaireId : id });
   });
 });

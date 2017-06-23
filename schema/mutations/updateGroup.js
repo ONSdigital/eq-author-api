@@ -1,22 +1,22 @@
-const { Page } = require("../types");
+const { Group } = require("../types");
 const { GraphQLString, GraphQLNonNull, GraphQLInt } = require("graphql");
 
 module.exports = {
-  type: Page,
+  type: Group,
 
   args : {
+    id : {
+      type : new GraphQLNonNull(GraphQLInt)
+    },
     title : {
-      type : new GraphQLNonNull(GraphQLString)
+      type : GraphQLString
     },
     description : {
       type : GraphQLString
-    },
-    GroupId : {
-      type : new GraphQLNonNull(GraphQLInt)
     }
   },
 
   resolve(source, args, ctx) {
-    return ctx.repositories.Page.insert(args);
+    return ctx.repositories.Group.update(args);
   }
 };

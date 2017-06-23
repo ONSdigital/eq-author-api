@@ -23,11 +23,11 @@ exports.up = function(knex) {
     ]).notNullable();
     table.boolean("mandatory").notNullable().defaultsTo(false);
 
-    table.integer("QuestionnaireId")
+    table.integer("GroupId")
       .unsigned()
       .index()
       .references("id")
-      .inTable("Questionnaires")
+      .inTable("Groups")
       .onDelete("CASCADE");
   });
 };

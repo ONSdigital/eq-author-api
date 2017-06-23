@@ -1,8 +1,8 @@
-const { Page } = require("../types");
+const { Group } = require("../types");
 const { GraphQLString, GraphQLNonNull, GraphQLInt } = require("graphql");
 
 module.exports = {
-  type: Page,
+  type: Group,
 
   args : {
     title : {
@@ -11,12 +11,12 @@ module.exports = {
     description : {
       type : GraphQLString
     },
-    GroupId : {
+    QuestionnaireId : {
       type : new GraphQLNonNull(GraphQLInt)
     }
   },
 
   resolve(source, args, ctx) {
-    return ctx.repositories.Page.insert(args);
+    return ctx.repositories.Group.insert(args);
   }
 };

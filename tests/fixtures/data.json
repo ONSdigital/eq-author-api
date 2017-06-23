@@ -13,6 +13,16 @@
   },
 
   {
+    "model" : "Group",
+    "data" : {
+      "id" : 1,
+      "title" : "Cheese",
+      "description" : "Let's talk about cheese...",
+      "QuestionnaireId" : 1
+    }
+  },
+
+  {
     "model": "Question",
     "data" : {
       "id": 1,
@@ -21,7 +31,7 @@
       "guidance": "this is some guidance",
       "type": "General",
       "mandatory": true,
-      "QuestionnaireId": 1
+      "GroupId": 1
     }
   },
 

@@ -2,6 +2,9 @@ const { GraphQLObjectType } = require("graphql");
 const createQuestionnaire = require("./createQuestionnaire");
 const updateQuestionnaire = require("./updateQuestionnaire");
 const deleteQuestionnaire = require("./deleteQuestionnaire");
+const createGroup = require("./createGroup");
+const updateGroup = require("./updateGroup");
+const deleteGroup = require("./deleteGroup");
 const createPage = require("./createPage");
 const updatePage = require("./updatePage");
 const deletePage = require("./deletePage");
@@ -23,6 +26,10 @@ const mutations = new GraphQLObjectType({
     createQuestionnaire,
     updateQuestionnaire,
     deleteQuestionnaire,
+
+    createGroup,
+    updateGroup,
+    deleteGroup,
 
     createPage,
     updatePage,

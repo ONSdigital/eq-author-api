@@ -12,8 +12,9 @@ const resolveType = ({ pageType }) => {
 module.exports = new GraphQLInterfaceType({
   name : "Page",
   description : "A page",
+  resolveType,
 
-  fields: {
+  fields: () => ({
     id: {
       type: new GraphQLNonNull(GraphQLInt)
     },
@@ -24,10 +25,9 @@ module.exports = new GraphQLInterfaceType({
       type: GraphQLString
     },
 
-    QuestionnaireId: {
+    GroupId: {
       type: new GraphQLNonNull(GraphQLInt)
     }
-  },
+  }),
 
-  resolveType: resolveType
 });

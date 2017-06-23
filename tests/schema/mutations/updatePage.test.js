@@ -17,7 +17,7 @@ describe("updatePage" , () => {
         id,
         title,
         description,
-        QuestionnaireId
+        GroupId
         ... on Question {
           guidance
         }

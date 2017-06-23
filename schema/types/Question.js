@@ -6,9 +6,9 @@ module.exports = new GraphQLObjectType({
   name : "Question",
   description: "A question",
 
-  interfaces: [Page],
+  interfaces: () => [Page],
   
-  fields : {
+  fields : () => ({
     id : {
       type : new GraphQLNonNull(GraphQLInt)
     },
@@ -45,8 +45,8 @@ module.exports = new GraphQLObjectType({
       }
     },
 
-    QuestionnaireId: {
+    GroupId: {
       type: new GraphQLNonNull(GraphQLInt)
     }
-  }
+  })
 });

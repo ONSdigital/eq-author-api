@@ -9,7 +9,7 @@ module.exports.get = function get(id) {
   return Question.findById(id);
 };
 
-module.exports.insert = function insert({ title, description, guidance, type, mandatory, QuestionnaireId }) {
+module.exports.insert = function insert({ title, description, guidance, type, mandatory, GroupId }) {
   return Question
     .create({
       title,
@@ -17,7 +17,7 @@ module.exports.insert = function insert({ title, description, guidance, type, ma
       guidance,
       type,
       mandatory,
-      QuestionnaireId
+      GroupId
     })
     .then(head);
 }
