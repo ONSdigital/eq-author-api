@@ -5,17 +5,17 @@ describe("createQuestion" , () => {
 
   const createQuestion = `
     mutation CreateQuestion(
-      $title:String!,
+      $title: String!,
       $description: String!,
       $guidance: String!,
-      $type: String!,
+      $type: QuestionType!,
       $mandatory: Boolean,
       $GroupId: Int!
     ) {
       createQuestion(
-        title:$title,
+        title: $title,
         description: $description,
-        guidance:$guidance,
+        guidance: $guidance,
         type: $type,
         mandatory: $mandatory,
         GroupId: $GroupId

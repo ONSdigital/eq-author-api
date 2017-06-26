@@ -1,4 +1,4 @@
-const { Question } = require("../types");
+const { Question, QuestionTypeEnum } = require("../types");
 const {
   GraphQLString,
   GraphQLBoolean,
@@ -23,7 +23,7 @@ module.exports = {
       type : GraphQLString
     },
     type : {
-      type : GraphQLString
+      type : QuestionTypeEnum
     },
     mandatory : {
       type : GraphQLBoolean

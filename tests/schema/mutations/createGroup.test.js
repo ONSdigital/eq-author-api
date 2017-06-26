@@ -7,12 +7,12 @@ describe("createGroup" , () => {
     mutation CreateGroup(
       $title: String!,
       $description: String,
-      $QuestionnaireId:Int!
+      $QuestionnaireId: Int!
     ) {
       createGroup(
-        title:$title,
-        description:$description,
-        QuestionnaireId:$QuestionnaireId
+        title: $title,
+        description: $description,
+        QuestionnaireId: $QuestionnaireId
       ) {
         id,
         title

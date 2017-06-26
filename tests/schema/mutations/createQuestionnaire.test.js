@@ -8,7 +8,7 @@ describe("createQuestionnaire" , () => {
       $title: String!,
       $description: String!,
       $theme: String!,
-      $legalBasis: String!,
+      $legalBasis: LegalBasis!,
       $navigation: Boolean,
       $surveyId : String!
     ) {

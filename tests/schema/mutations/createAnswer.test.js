@@ -5,13 +5,13 @@ describe("createAnswer" , () => {
 
   const createAnswer = `
     mutation CreateAnswer(
-      $description:String,
-      $guidance:String,
+      $description: String,
+      $guidance: String,
       $qCode: String,
-      $label:String,
-      $type:String!,
-      $mandatory:Boolean!,
-      $QuestionId:Int!
+      $label: String,
+      $type: AnswerType!,
+      $mandatory: Boolean!,
+      $QuestionId: Int!
     ) {
       createAnswer(
         description: $description,
@@ -20,7 +20,7 @@ describe("createAnswer" , () => {
         label: $label,
         type: $type,
         mandatory: $mandatory,
-        QuestionId:$QuestionId
+        QuestionId: $QuestionId
       ) {
         id,
         description,

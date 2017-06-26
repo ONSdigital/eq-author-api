@@ -24,7 +24,6 @@ module.exports = new GraphQLInterfaceType({
     description: {
       type: GraphQLString
     },
-
     GroupId: {
       type: new GraphQLNonNull(GraphQLInt)
     }

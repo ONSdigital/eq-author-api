@@ -1,6 +1,6 @@
-const { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLString, GraphQLInt } = require("graphql");
-
+const { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLString, GraphQLInt, } = require("graphql");
 const Group = require("./Group");
+const LegalBasisEnum = require("./LegalBasisEnum")
 
 module.exports = new GraphQLObjectType({
   name : "Questionnaire",
@@ -24,7 +24,7 @@ module.exports = new GraphQLObjectType({
     },
 
     legalBasis : {
-      type: GraphQLString
+      type: LegalBasisEnum
     },
 
     navigation : {

@@ -1,4 +1,4 @@
-const { Questionnaire } = require("../types");
+const { Questionnaire, LegalBasisEnum } = require("../types");
 const {
   GraphQLString,
   GraphQLNonNull,
@@ -23,7 +23,7 @@ module.exports = {
       type : GraphQLString
     },
     legalBasis : {
-      type : GraphQLString
+      type : LegalBasisEnum
     },
     navigation : {
       type : GraphQLBoolean

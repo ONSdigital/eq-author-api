@@ -1,6 +1,9 @@
 const { GraphQLObjectType, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLNonNull } = require("graphql");
 const Answer = require("./Answer");
 const Page = require("./Page");
+const QuestionTypeEnum = require("./QuestionTypeEnum");
+const PageTypeEnum = require("./PageTypeEnum");
+
 
 module.exports = new GraphQLObjectType({
   name : "Question",
@@ -26,11 +29,11 @@ module.exports = new GraphQLObjectType({
     },
 
     pageType : {
-      type: new GraphQLNonNull(GraphQLString)
+      type: new GraphQLNonNull(PageTypeEnum)
     },
 
     type : {
-      type : GraphQLString
+      type : new GraphQLNonNull(QuestionTypeEnum),
     },
 
     mandatory : {

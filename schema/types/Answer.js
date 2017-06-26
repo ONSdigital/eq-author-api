@@ -1,4 +1,5 @@
 const { GraphQLObjectType, GraphQLString, GraphQLBoolean, GraphQLInt } = require("graphql");
+const AnswerTypeEnum = require("./AnswerTypeEnum");
 
 module.exports = new GraphQLObjectType({
   name : "Answer",
@@ -26,7 +27,7 @@ module.exports = new GraphQLObjectType({
     },
 
     type : {
-      type : GraphQLString
+      type : AnswerTypeEnum
     },
 
     mandatory : {

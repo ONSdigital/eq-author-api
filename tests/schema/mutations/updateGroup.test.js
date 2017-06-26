@@ -5,14 +5,14 @@ describe("updateGroup" , () => {
 
   const updateGroup = `
     mutation UpdateGroup(
-      $id:Int!,
+      $id: Int!,
       $title: String!,
       $description: String!
     ) {
       updateGroup(
-        id:$id,
-        title:$title,
-        description:$description,
+        id: $id,
+        title: $title,
+        description: $description,
       ) {
         id,
         title

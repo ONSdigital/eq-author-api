@@ -6,17 +6,17 @@ describe("updateQuestion" , () => {
   const updateQuestion = `
     mutation UpdateQuestion(
       $id: Int!,
-      $title:String!,
+      $title: String!,
       $description: String!,
       $guidance: String!,
-      $type: String!,
+      $type: QuestionType!,
       $mandatory: Boolean
     ) {
       updateQuestion(
-        id:$id,
-        title:$title,
+        id: $id,
+        title: $title,
         description: $description,
-        guidance:$guidance,
+        guidance: $guidance,
         type: $type,
         mandatory: $mandatory
       ) {

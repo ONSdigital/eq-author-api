@@ -5,14 +5,14 @@ describe("updatePage" , () => {
 
   const updatePage = `
     mutation UpdatePage(
-      $id:Int!,
+      $id: Int!,
       $title: String!,
       $description: String!
     ) {
       updatePage(
-        id:$id,
-        title:$title,
-        description:$description,
+        id: $id,
+        title: $title,
+        description: $description,
       ) {
         id,
         title,
