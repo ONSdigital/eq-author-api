@@ -6,8 +6,8 @@ module.exports.get = function(id) {
   return Questionnaire.findById(id);
 };
 
-module.exports.findAll = function() {
-  return Questionnaire.findAll();
+module.exports.findAll = function findAll(where, orderBy = "created_at", direction = "asc") {
+  return Questionnaire.findAll(where).orderBy(orderBy, direction);
 };
 
 module.exports.insert = function({ title, description, theme, legalBasis, navigation, surveyId }) {

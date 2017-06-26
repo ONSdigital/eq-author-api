@@ -11,8 +11,8 @@ function getRepositoryForType({ type }) {
   }
 }
 
-module.exports.findAll = function findAll(where) {
-  return Page.findAll(where);
+module.exports.findAll = function findAll(where, orderBy = "created_at", direction = "asc") {
+  return Page.findAll(where).orderBy(orderBy, direction);
 };
 
 module.exports.get = function get(id) {

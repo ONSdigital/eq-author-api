@@ -1,8 +1,8 @@
 const { head } = require("lodash");
 const Answer = require("../models/Answer");
 
-module.exports.findAll = function findAll(where) {
-  return Answer.findAll(where);
+module.exports.findAll = function findAll(where, orderBy = "created_at", direction = "asc") {
+  return Answer.findAll(where).orderBy(orderBy, direction);
 };
 
 module.exports.get = function get(id) {

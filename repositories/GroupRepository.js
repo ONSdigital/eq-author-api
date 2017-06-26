@@ -1,8 +1,8 @@
 const { head } = require("lodash");
 const Group = require("../models/Group");
 
-module.exports.findAll = function findAll(where) {
-  return Group.findAll(where);
+module.exports.findAll = function findAll(where, orderBy = "created_at", direction = "asc") {
+  return Group.findAll(where).orderBy(orderBy, direction);
 };
 
 module.exports.get = function get(id) {
