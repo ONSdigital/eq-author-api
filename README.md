@@ -64,6 +64,41 @@ Changes to the application should hot reload via `nodemon`.
 
 ![browsing the API documentation](./doc/images/docs.gif)
 
+### Querying pages
+
+There is no concrete `Page` type in the GraphQL schema. Instead we use a `Page` interface, which other types implement e.g. `Question` and `Interstitial`.
+
+To query all pages, and request different fields depending on the type, use [inline fragments](http://graphql.org/learn/queries/#inline-fragments):
+
+```gql
+query {
+  getQuestionnaire(id: 1) {
+    questionnaire {
+      groups {
+        pages {
+          id,
+
+          # inline fragment for `Question` type
+          ... on Question {
+            guidance,
+            answers {
+              id,
+              label
+            }
+          },
+
+          # For purposes of example only. `Interstitial` doesn't exist yet
+          ... on Interstitial { # doesn't exist yet
+            someField
+          }
+
+        }
+      }
+    }
+  }
+}
+```
+
 ### DB migrations
 
 First start app using Docker.
