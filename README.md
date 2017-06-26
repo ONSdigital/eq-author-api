@@ -66,13 +66,23 @@ Changes to the application should hot reload via `nodemon`.
 
 ### DB migrations
 
-Start app using docker, then run following command:
+First start app using Docker.
+
+#### Create migration
+
+```
+yarn knex -- migrate:make name_of_migration
+```
+
+Where `name_of_migration` is the name you wish to use. e.g. `create_questionnaires_table`
+
+#### Apply migrations
 
 ```
 DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:latest
 ```
 
-To rollback:
+#### Rollback migrations
 
 ```
 DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:rollback
