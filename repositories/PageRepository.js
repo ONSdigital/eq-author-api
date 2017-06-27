@@ -1,13 +1,12 @@
-const { head } = require("lodash");
 const Page = require("../models/Page");
 const QuestionRepository = require("./QuestionRepository");
 
-function getRepositoryForType({ type }) {
-  switch(type) {
+function getRepositoryForType({ pageType }) {
+  switch(pageType) {
     case "Question":
       return QuestionRepository;
     default:
-      throw new TypeError(`Unknown Page type: '${type}'`);
+      throw new TypeError(`Unknown pageType: '${pageType}'`);
   }
 }
 
@@ -22,23 +21,17 @@ module.exports.get = function get(id) {
 module.exports.insert = function insert(args) {
   const repository = getRepositoryForType(args);
   
-  return repository
-    .create(args)
-    .then(head);
+  return repository.insert(args);
 }
 
 module.exports.update = function update(args) {
   const repository = getRepositoryForType(args);
 
-  return repository
-    .update(args)
-    .then(head);
+  return repository.update(args);
 };
 
 module.exports.remove = function remove(args) {
   const repository = getRepositoryForType(args);
 
-  return repository
-    .destroy(args.id)
-    .then(head);
+  return repository.remove(args.id);
 };
