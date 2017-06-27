@@ -7,17 +7,17 @@ describe("createPage" , () => {
     mutation CreatePage(
       $title: String!,
       $description: String,
-      $GroupId: Int!
+      $groupId: Int!
     ) {
       createPage(
         title: $title,
         description: $description,
-        GroupId: $GroupId
+        groupId: $groupId
       ) {
         id,
         title,
         description,
-        GroupId
+        groupId
         ... on QuestionPage {
           guidance
         }
@@ -37,7 +37,7 @@ describe("createPage" , () => {
     const fixture = {
       "title": "Test page",
       "description": "Test page description",
-      "GroupId": 1
+      "groupId": 1
     };
 
     const result = await executeQuery(createPage, fixture, { repositories });

@@ -7,12 +7,12 @@ describe("createGroup" , () => {
     mutation CreateGroup(
       $title: String!,
       $description: String,
-      $QuestionnaireId: Int!
+      $questionnaireId: Int!
     ) {
       createGroup(
         title: $title,
         description: $description,
-        QuestionnaireId: $QuestionnaireId
+        questionnaireId: $questionnaireId
       ) {
         id,
         title
@@ -32,7 +32,7 @@ describe("createGroup" , () => {
     const fixture = {
       "title": "Test group",
       "description": "Test group description",
-      "QuestionnaireId": 1
+      "questionnaireId": 1
     };
 
     const result = await executeQuery(createGroup, fixture, { repositories });

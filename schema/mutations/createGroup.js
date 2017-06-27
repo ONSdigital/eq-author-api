@@ -11,7 +11,7 @@ module.exports = {
     description : {
       type : GraphQLString
     },
-    QuestionnaireId : {
+    questionnaireId : {
       type : new GraphQLNonNull(GraphQLInt)
     }
   },

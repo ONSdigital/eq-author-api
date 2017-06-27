@@ -12,7 +12,7 @@ describe("QuestionPage query" , () => {
         guidance,
         type,
         mandatory,
-        GroupId
+        groupId
       }
     }
   `;

@@ -48,7 +48,7 @@ module.exports = new GraphQLObjectType({
       }
     },
 
-    GroupId: {
+    groupId: {
       type: new GraphQLNonNull(GraphQLInt)
     }
   })

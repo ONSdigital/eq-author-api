@@ -28,7 +28,7 @@ module.exports = {
     mandatory : {
       type : new GraphQLNonNull(GraphQLBoolean)
     },
-    QuestionPageId: {
+    questionPageId: {
       type : new GraphQLNonNull(GraphQLInt)
     }
   },

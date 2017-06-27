@@ -11,7 +11,7 @@ describe("createAnswer" , () => {
       $label: String,
       $type: AnswerType!,
       $mandatory: Boolean!,
-      $QuestionPageId: Int!
+      $questionPageId: Int!
     ) {
       createAnswer(
         description: $description,
@@ -20,7 +20,7 @@ describe("createAnswer" , () => {
         label: $label,
         type: $type,
         mandatory: $mandatory,
-        QuestionPageId: $QuestionPageId
+        questionPageId: $questionPageId
       ) {
         id,
         description,
@@ -29,7 +29,7 @@ describe("createAnswer" , () => {
         label,
         type,
         mandatory,
-        QuestionPageId
+        questionPageId
       }
     }
   `;
@@ -49,7 +49,7 @@ describe("createAnswer" , () => {
       guidance: "Test answer guidance",
       type: "TextField",
       mandatory: false,
-      QuestionPageId: 1
+      questionPageId: 1
     };
 
     const result = await executeQuery(createAnswer, fixture, { repositories });

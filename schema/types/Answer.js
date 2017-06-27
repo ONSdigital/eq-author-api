@@ -34,7 +34,7 @@ module.exports = new GraphQLObjectType({
       type : GraphQLBoolean
     },
 
-    QuestionPageId : {
+    questionPageId : {
       type : GraphQLInt
     }
   })

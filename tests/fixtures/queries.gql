@@ -24,7 +24,7 @@ query GetQuestionnaire {
             label,
             mandatory,
             type
-            QuestionPageId
+            questionPageId
           }
         }
       }
@@ -82,12 +82,12 @@ mutation DeleteQuestionnaire($id:Int = 2) {
 mutation CreateGroup(
   $title: String!,
   $description: String!,
-  $QuestionnaireId:Int!
+  $questionnaireId:Int!
 ) {
   createGroup(
     title:$title,
     description:$description,
-    QuestionnaireId:$QuestionnaireId
+    questionnaireId:$questionnaireId
   ) {
     id
   }
@@ -122,12 +122,12 @@ query GetPage {
 mutation CreatePage(
   $title: String!,
   $description: String!,
-  $GroupId:Int!
+  $groupId:Int!
 ) {
   createPage(
     title:$title,
     description:$description,
-    GroupId:$GroupId
+    groupId:$groupId
   ) {
     id
   }
@@ -159,7 +159,7 @@ mutation CreateQuestionPage(
   $guidance: String,
   $type: QuestionType!,
   $mandatory: Boolean,
-  $GroupId: Int!
+  $groupId: Int!
 ) {
   createQuestionPage(
     title:$title,
@@ -167,7 +167,7 @@ mutation CreateQuestionPage(
     guidance:$guidance,
     type: $type,
     mandatory: $mandatory,
-    GroupId: $GroupId
+    groupId: $groupId
   ) {
     id
   }
@@ -206,7 +206,7 @@ mutation CreateAnswer(
   $label: String,
   $type: AnswerType!,
   $mandatory: Boolean!,
-  $QuestionPageId: Int!
+  $questionPageId: Int!
 ) {
   createAnswer(
     description: $description,
@@ -215,7 +215,7 @@ mutation CreateAnswer(
     label: $label,
     type: $type,
     mandatory: $mandatory,
-    QuestionPageId: $QuestionPageId
+    questionPageId: $questionPageId
   ) {
     id
   }

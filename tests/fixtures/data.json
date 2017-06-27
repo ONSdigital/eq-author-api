@@ -11,7 +11,7 @@
   "group" : {
     "title" : "Cheese",
     "description" : "Let's talk about cheese...",
-    "QuestionnaireId" : 1
+    "questionnaireId" : 1
   },
 
   "question" : {
@@ -20,7 +20,7 @@
     "guidance": "this is some guidance",
     "type": "General",
     "mandatory": true,
-    "GroupId": 1
+    "groupId": 1
   },
 
   "answer" : [
@@ -30,7 +30,7 @@
       "guidance": "1 being liking cheese, 5 being loving cheese. There is no option for not liking cheese",
       "type": "Integer",
       "mandatory": true,
-      "QuestionPageId": 1
+      "questionPageId": 1
     },
 
     {
@@ -39,7 +39,7 @@
       "guidance": "Think hard about this, it's a legally binding contract",
       "type": "Integer",
       "mandatory": true,
-      "QuestionPageId": 1
+      "questionPageId": 1
     }
   ]
 }

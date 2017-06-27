@@ -26,7 +26,7 @@ describe("updateQuestionPage" , () => {
         guidance,
         type,
         mandatory,
-        GroupId
+        groupId
       }
     }
   `;

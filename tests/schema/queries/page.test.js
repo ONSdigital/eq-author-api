@@ -9,9 +9,7 @@ describe("Page query" , () => {
         id,
         title,
         description,
-        ... on QuestionPage {
-          GroupId
-        }
+        groupId
       }
     }
   `;

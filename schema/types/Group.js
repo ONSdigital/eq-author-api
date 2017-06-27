@@ -25,7 +25,7 @@ module.exports = new GraphQLObjectType({
       }
     },
 
-    QuestionnaireId: {
+    questionnaireId: {
       type: new GraphQLNonNull(GraphQLInt)
     }
   })

@@ -29,7 +29,7 @@ describe("updateAnswer" , () => {
         label,
         type
         mandatory
-        QuestionPageId
+        questionPageId
       }
     }
   `;
