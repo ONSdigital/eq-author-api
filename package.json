@@ -10,7 +10,7 @@
     "start-app": "nodemon --inspect=0.0.0.0:5858",
     "start-db": "docker run -ti sta-p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres --name postgres-db --rm postgres",
     "stop-db": "docker stop postgres-db",
-    "knex": "knex"
+    "knex": "knex --knexfile config/knexfile.js --cwd ."
   },
   "dependencies": {
     "colors": "^1.1.2",

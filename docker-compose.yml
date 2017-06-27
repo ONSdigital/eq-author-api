@@ -14,7 +14,7 @@ services:
       - 5858:5858 # open port for debugging
     environment:
       - DB_CONNECTION_URI=postgres://postgres:mysecretpassword@db:5432/postgres
-      - EXPRESS_PORT=4000
+      - PORT=4000
       - GRAPHIQL_ENABLED=true
       - GRAPHIQL_ENDPOINT=/graphiql
       - GRAPHIQL_PRETTY=true

@@ -4,21 +4,14 @@ const colors = require("colors");
 const cors = require("cors");
 
 const schema = require("./schema");
-const settings = require('./config/settings');
 const repositories = require("./repositories");
-
 const {
-  express : {
-    EXPRESS_URL,
-    EXPRESS_PORT
-  },
-  graphiql : {
-    GRAPHIQL_ENABLED,
-    GRAPHIQL_ENDPOINT,
-    GRAPHIQL_PRETTY
-  }
-} = settings;
-
+  EXPRESS_URL,
+  EXPRESS_PORT,
+  GRAPHIQL_ENABLED,
+  GRAPHIQL_ENDPOINT,
+  GRAPHIQL_PRETTY
+} = require('./config/settings');
 
 var app = express();
 app.use(GRAPHIQL_ENDPOINT,
