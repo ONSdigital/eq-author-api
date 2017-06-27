@@ -1,4 +1,4 @@
-const Page = require("../models/Page");
+const Page = require("../db/Page");
 const QuestionRepository = require("./QuestionRepository");
 
 function getRepositoryForType({ pageType }) {

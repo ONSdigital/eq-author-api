@@ -1,5 +1,5 @@
 const { head } = require("lodash");
-const Questionnaire = require("../models/Questionnaire");
+const Questionnaire = require("../db/Questionnaire");
 
 
 module.exports.get = function(id) {

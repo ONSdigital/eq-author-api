@@ -1,5 +1,5 @@
 const { head } = require("lodash");
-const Answer = require("../models/Answer");
+const Answer = require("../db/Answer");
 
 module.exports.findAll = function findAll(where, orderBy = "created_at", direction = "asc") {
   return Answer.findAll(where).orderBy(orderBy, direction);
