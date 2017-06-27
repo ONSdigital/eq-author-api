@@ -8,7 +8,7 @@ exports.up = function(knex) {
     table.text("description");
     table.text("guidance");
     table.string("qCode");
-    table.string("label");
+    table.text("label");
     table.enum("type", [
       "Checkbox",
       "Currency",
