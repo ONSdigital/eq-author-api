@@ -23,6 +23,6 @@ describe("deleteGroup" , () => {
     const result = await executeQuery(deleteGroup, { id : 1 }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Group.remove).toHaveBeenCalled();
+    expect(repositories.Group.remove).toHaveBeenCalledWith(1);
   });
 });

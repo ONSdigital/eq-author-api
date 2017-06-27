@@ -23,6 +23,6 @@ describe("deletePage" , () => {
     const result = await executeQuery(deletePage, { id : 1 }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Page.remove).toHaveBeenCalled();
+    expect(repositories.Page.remove).toHaveBeenCalledWith(1);
   });
 });

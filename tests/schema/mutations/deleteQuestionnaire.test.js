@@ -23,6 +23,6 @@ describe("deleteQuestionnaire" , () => {
     const result = await executeQuery(deleteQuestionnaire, { id : 1 }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Questionnaire.remove).toHaveBeenCalled();
+    expect(repositories.Questionnaire.remove).toHaveBeenCalledWith(1);
   });
 });
