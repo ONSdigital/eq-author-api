@@ -96,6 +96,10 @@ query {
 }
 ```
 
+### Testing through GraphiQL
+
+There are [queries](tests/fixtures/queries.gql) and [example data](tests/fixtures/data.json) in the [fixtures folder](tests/fixtures). These can be used with graphiql to manually build up a questionnaire.
+
 ### DB migrations
 
 First start app using Docker.
