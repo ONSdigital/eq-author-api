@@ -1,5 +1,8 @@
+const ENV = process.env.NODE_ENV || 'production'
+
 var express = require("express");
 var graphqlHTTP = require("express-graphql");
+const graphqlExpress = require('graphql-server-express').graphqlExpress;
 var schema = require("./schema");
 var colors = require("colors");
 const cors = require("cors");
@@ -17,6 +20,12 @@ app.use(GRAPHIQL_ENDPOINT,
   pretty: GRAPHIQL_PRETTY,
   graphiql: GRAPHIQL_ENABLED,
 }));
+
+app.use('/graphql', cors(), graphqlExpress({ schema: schema }))
+
+app.use('/mode', (req, res) => {
+  res.send(process.env);
+})
 
 console.log('Starting server...')
 app.listen(EXPRESS_PORT, () => {
