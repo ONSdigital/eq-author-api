@@ -63,7 +63,7 @@ Changes to the application should hot reload via `nodemon`.
 
 ### Querying pages
 
-There is no concrete `Page` type in the GraphQL schema. Instead we use a `Page` interface, which other types implement e.g. `Question` and `Interstitial`.
+There is no concrete `Page` type in the GraphQL schema. Instead we use a `Page` interface, which other types implement e.g. `QuestionPage` and `InterstitialPage`.
 
 To query all pages, and request different fields depending on the type, use [inline fragments](http://graphql.org/learn/queries/#inline-fragments):
 
@@ -75,8 +75,8 @@ query {
         pages {
           id,
 
-          # inline fragment for `Question` type
-          ... on Question {
+          # inline fragment for `QuestionPage` type
+          ... on QuestionPage {
             guidance,
             answers {
               id,
@@ -84,8 +84,8 @@ query {
             }
           },
 
-          # For purposes of example only. `Interstitial` doesn't exist yet
-          ... on Interstitial { # doesn't exist yet
+          # For purposes of example only. `InterstitialPage` doesn't exist yet
+          ... on InterstitialPage { # doesn't exist yet
             someField
           }
 

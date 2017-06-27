@@ -18,7 +18,7 @@ describe("createPage" , () => {
         title,
         description,
         GroupId
-        ... on Question {
+        ... on QuestionPage {
           guidance
         }
       }

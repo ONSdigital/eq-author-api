@@ -2,6 +2,6 @@ module.exports = {
   Questionnaire : require("./QuestionnaireRepository"),
   Group : require("./GroupRepository"),
   Page : require("./PageRepository"),
-  Question : require("./QuestionRepository"),
+  QuestionPage : require("./QuestionPageRepository"),
   Answer : require("./AnswerRepository")
 };

@@ -9,7 +9,7 @@ describe("Page query" , () => {
         id,
         title,
         description,
-        ... on Question {
+        ... on QuestionPage {
           GroupId
         }
       }
@@ -22,7 +22,7 @@ describe("Page query" , () => {
   beforeEach(() => {
     repositories = {
       Page : mockRepository(),
-      Question : mockRepository()
+      QuestionPage : mockRepository()
     }
   });
 
@@ -31,6 +31,6 @@ describe("Page query" , () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Page.get).toHaveBeenCalledWith(id);
-    expect(repositories.Question.findAll).not.toHaveBeenCalled();
+    expect(repositories.QuestionPage.findAll).not.toHaveBeenCalled();
   });
 });

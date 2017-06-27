@@ -1,4 +1,4 @@
-const { Question, QuestionTypeEnum } = require("../types");
+const { QuestionPage, QuestionTypeEnum } = require("../types");
 const {
   GraphQLString,
   GraphQLBoolean,
@@ -7,7 +7,7 @@ const {
 } = require("graphql");
 
 module.exports = {
-  type: Question,
+  type: QuestionPage,
 
   args : {
     id : {
@@ -31,6 +31,6 @@ module.exports = {
   },
 
   resolve(source, args, ctx) {
-    return ctx.repositories.Question.update(args);
+    return ctx.repositories.QuestionPage.update(args);
   }
 };

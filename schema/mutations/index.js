@@ -8,9 +8,9 @@ const deleteGroup = require("./deleteGroup");
 const createPage = require("./createPage");
 const updatePage = require("./updatePage");
 const deletePage = require("./deletePage");
-const createQuestion = require("./createQuestion");
-const updateQuestion = require("./updateQuestion");
-const deleteQuestion = require("./deleteQuestion");
+const createQuestionPage = require("./createQuestionPage");
+const updateQuestionPage = require("./updateQuestionPage");
+const deleteQuestionPage = require("./deleteQuestionPage");
 const createAnswer = require("./createAnswer");
 const updateAnswer = require("./updateAnswer");
 const deleteAnswer = require("./deleteAnswer");
@@ -35,9 +35,9 @@ const mutations = new GraphQLObjectType({
     updatePage,
     deletePage,
 
-    createQuestion,
-    updateQuestion,
-    deleteQuestion,
+    createQuestionPage,
+    updateQuestionPage,
+    deleteQuestionPage,
 
     createAnswer,
     updateAnswer,

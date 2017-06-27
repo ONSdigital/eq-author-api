@@ -6,7 +6,7 @@ const PageTypeEnum = require("./PageTypeEnum");
 
 
 module.exports = new GraphQLObjectType({
-  name : "Question",
+  name : "QuestionPage",
   description: "A question",
 
   interfaces: () => [Page],
@@ -44,7 +44,7 @@ module.exports = new GraphQLObjectType({
     answers : {
       type: new GraphQLList(Answer),
       resolve({ id }, args, ctx) {
-        return ctx.repositories.Answer.findAll({ QuestionId : id });
+        return ctx.repositories.Answer.findAll({ QuestionPageId : id });
       }
     },
 

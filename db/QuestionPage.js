@@ -5,7 +5,7 @@ function Question() {
 }
 
 function restrictType(where) {
-  return Object.assign({}, where, { pageType : "Question" });
+  return Object.assign({}, where, { pageType : "QuestionPage" });
 }
 
 module.exports.findAll = function findAll(where = {}) {

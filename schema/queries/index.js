@@ -3,7 +3,7 @@ const questionnaires = require("./questionnaires");
 const questionnaire = require("./questionnaire");
 const group = require("./group");
 const page = require("./page");
-const question = require("./question");
+const questionPage = require("./questionPage");
 const answer = require("./answer");
 
 module.exports = new GraphQLObjectType({
@@ -15,7 +15,7 @@ module.exports = new GraphQLObjectType({
     questionnaire,
     group,
     page,
-    question,
+    questionPage,
     answer,
   }
 });

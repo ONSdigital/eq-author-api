@@ -12,7 +12,7 @@ describe("answer query" , () => {
         label,
         mandatory,
         type,
-        QuestionId
+        QuestionPageId
       }
     }
   `;

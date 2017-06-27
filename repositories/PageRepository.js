@@ -1,10 +1,10 @@
 const Page = require("../db/Page");
-const QuestionRepository = require("./QuestionRepository");
+const QuestionPageRepository = require("./QuestionPageRepository");
 
 function getRepositoryForType({ pageType }) {
   switch(pageType) {
-    case "Question":
-      return QuestionRepository;
+    case "QuestionPage":
+      return QuestionPageRepository;
     default:
       throw new TypeError(`Unknown pageType: '${pageType}'`);
   }

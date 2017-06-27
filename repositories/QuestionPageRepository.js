@@ -1,16 +1,16 @@
 const { head } = require("lodash");
-const Question = require("../db/Question");
+const QuestionPage = require("../db/QuestionPage");
 
 module.exports.findAll = function findAll(where, orderBy = "created_at", direction = "asc") {
-  return Question.findAll(where).orderBy(orderBy, direction);
+  return QuestionPage.findAll(where).orderBy(orderBy, direction);
 };
 
 module.exports.get = function get(id) {
-  return Question.findById(id);
+  return QuestionPage.findById(id);
 };
 
 module.exports.insert = function insert({ title, description, guidance, type, mandatory, GroupId }) {
-  return Question
+  return QuestionPage
     .create({
       title,
       description,
@@ -23,7 +23,7 @@ module.exports.insert = function insert({ title, description, guidance, type, ma
 }
 
 module.exports.update = function update({ id, title, description, guidance, type, mandatory }) {
-  return Question
+  return QuestionPage
     .update(id, {
       title,
       description,
@@ -35,7 +35,7 @@ module.exports.update = function update({ id, title, description, guidance, type
 };
 
 module.exports.remove = function remove(id) {
-  return Question
+  return QuestionPage
     .destroy(id)
     .then(head);
 };

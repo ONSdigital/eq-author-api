@@ -1,6 +1,6 @@
 module.exports = {
   Answer : require("./Answer"),
-  Question : require("./Question"),
+  QuestionPage : require("./QuestionPage"),
   Page : require("./Page"),
   Group : require("./Group"),
   Questionnaire : require("./Questionnaire"),

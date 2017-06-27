@@ -1,8 +1,8 @@
-const { Question } = require("../types");
+const { QuestionPage } = require("../types");
 const { GraphQLInt, GraphQLNonNull } = require("graphql");
 
 module.exports = {
-  type : Question,
+  type : QuestionPage,
 
   args : {
     id : {
@@ -11,6 +11,6 @@ module.exports = {
   },
 
   resolve(_, { id }, ctx) {
-    return ctx.repositories.Question.remove(id);
+    return ctx.repositories.QuestionPage.remove(id);
   }
 };

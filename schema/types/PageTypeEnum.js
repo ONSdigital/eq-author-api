@@ -2,15 +2,15 @@ const { GraphQLEnumType } = require("graphql");
 
 module.exports = new GraphQLEnumType({
   name: "PageType",
-  description: "The type of the question",
+  description: "The type of the Page",
 
   values: {
-    Question : {
-      value : "Question"
+    QuestionPage : {
+      value : "QuestionPage"
     },
 
-    Interstitial : {
-      value : "Interstitial"
+    InterstitialPage : {
+      value : "InterstitialPage"
     },
   }
 });

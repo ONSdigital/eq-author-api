@@ -1,10 +1,10 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("createQuestion" , () => {
+describe("createQuestionPage" , () => {
 
-  const createQuestion = `
-    mutation CreateQuestion(
+  const createQuestionPage = `
+    mutation CreateQuestionPage(
       $title: String!,
       $description: String!,
       $guidance: String!,
@@ -12,7 +12,7 @@ describe("createQuestion" , () => {
       $mandatory: Boolean,
       $GroupId: Int!
     ) {
-      createQuestion(
+      createQuestionPage(
         title: $title,
         description: $description,
         guidance: $guidance,
@@ -35,7 +35,7 @@ describe("createQuestion" , () => {
 
   beforeEach(() => {
     repositories = {
-      Question : mockRepository()
+      QuestionPage : mockRepository()
     };
   });
 
@@ -50,9 +50,9 @@ describe("createQuestion" , () => {
       GroupId: 1
     };
 
-    const result = await executeQuery(createQuestion, fixture, { repositories });
+    const result = await executeQuery(createQuestionPage, fixture, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Question.insert).toHaveBeenCalled();
+    expect(repositories.QuestionPage.insert).toHaveBeenCalled();
   });
 });

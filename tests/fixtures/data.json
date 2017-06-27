@@ -30,7 +30,7 @@
       "guidance": "1 being liking cheese, 5 being loving cheese. There is no option for not liking cheese",
       "type": "Integer",
       "mandatory": true,
-      "QuestionId": 1
+      "QuestionPageId": 1
     },
 
     {
@@ -39,7 +39,7 @@
       "guidance": "Think hard about this, it's a legally binding contract",
       "type": "Integer",
       "mandatory": true,
-      "QuestionId": 1
+      "QuestionPageId": 1
     }
   ]
 }

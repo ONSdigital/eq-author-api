@@ -1,4 +1,4 @@
-const { Question, QuestionTypeEnum } = require("../types");
+const { QuestionPage, QuestionTypeEnum } = require("../types");
 const {
   GraphQLString,
   GraphQLNonNull,
@@ -8,7 +8,7 @@ const {
 
 
 module.exports = {
-  type: Question,
+  type: QuestionPage,
 
   args : {
     title : {
@@ -32,6 +32,6 @@ module.exports = {
   },
 
   resolve(source, args, ctx) {
-    return ctx.repositories.Question.insert(args);
+    return ctx.repositories.QuestionPage.insert(args);
   }
 };

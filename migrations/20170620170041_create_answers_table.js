@@ -24,7 +24,7 @@ exports.up = function(knex) {
     ]).notNullable();
     table.boolean("mandatory").notNullable().defaultsTo(false);
 
-    table.integer("QuestionId")
+    table.integer("QuestionPageId")
       .unsigned()
       .index()
       .references("id")

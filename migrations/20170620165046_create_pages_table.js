@@ -9,8 +9,8 @@ exports.up = function(knex) {
     table.text("description");
 
     table.enum("pageType", [
-      "Question",
-      "Interstitial"
+      "QuestionPage",
+      "InterstitialPage"
     ]).notNullable();
 
     // temporarily subsume the Questions table 

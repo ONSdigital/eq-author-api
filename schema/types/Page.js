@@ -2,8 +2,8 @@ const { GraphQLInterfaceType, GraphQLString, GraphQLNonNull, GraphQLInt } = requ
 
 const resolveType = ({ pageType }) => {
   switch(pageType) {
-    case "Question":
-      return require("./Question");
+    case "QuestionPage":
+      return require("./QuestionPage");
     default:
       throw new TypeError(`Unknown type of Page: ${pageType}`);
   }
