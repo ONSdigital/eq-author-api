@@ -22,15 +22,12 @@ In most cases sensible defaults have been selected.
 | Environment Variable | Description |
 | -------------------- | ----------- |
 | PORT                 | The port which express listens on (defaults to `4000`). |
+| HOST                 | The hostname where API resides (defaults to `localhost`). |
 | SCHEME               | `http://` or `https://` (defaults to `http://`) |
 | GRAPHIQL_ENABLED     | Enable the Graphiql interface (`true` or `false`) |
 | GRAPHIQL_ENDPOINT    | The endpoint which graphiql listens on (defaults to `/graphiql`) |
-| PRETTY_PRINT_GRAPHQL | Pretty print Graphiql output (`true` or `false`) |
-| DATABASE             | Database name |
-| DATABASE_USERNAME    | Username of database user. |
-| DATABASE_PASSWORD    | Password of database user. |
-| DB_HOST              | Hostname of database server. |
-| DB_DIALECT           | Database dialect (e.g. `postgres`, `mysql`, `sqlite`) |
+| GRAPHIQL_PRETTY      | Pretty print Graphiql output (`true` or `false`) |
+| DB_CONNECTION_URI    | Connection string for database |
 
 ### Run using Docker
 
