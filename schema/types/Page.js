@@ -18,12 +18,19 @@ module.exports = new GraphQLInterfaceType({
     id: {
       type: new GraphQLNonNull(GraphQLInt)
     },
+
     title: {
       type: new GraphQLNonNull(GraphQLString)
     },
+
     description: {
       type: GraphQLString
     },
+
+    pageType : {
+      type: new GraphQLNonNull(require("./PageTypeEnum"))
+    },
+
     groupId: {
       type: new GraphQLNonNull(GraphQLInt)
     }
