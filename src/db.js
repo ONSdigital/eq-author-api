@@ -1,5 +1,5 @@
-var Sequelize = require('sequelize');
-var {
+const Sequelize = require('sequelize');
+const {
   DB_DATABASE,
   DB_USER,
   DB_PASSWORD,
@@ -8,7 +8,7 @@ var {
 } = require('./settings').db
 
 // Define the connection to the database.
-var conn = new Sequelize(
+const conn = new Sequelize(
   DB_DATABASE,
   DB_USER,
   DB_PASSWORD,
@@ -18,7 +18,7 @@ var conn = new Sequelize(
   }
 );
 
-var Message = conn.define('message', {
+const Message = conn.define('message', {
   text: {
     type: Sequelize.STRING,
     allowNull: false

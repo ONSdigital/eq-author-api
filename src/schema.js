@@ -9,11 +9,11 @@ const {
 
 // Import the Database connection.
 
-var Db = require("./db");
+const Db = require("./db");
 
 // Define the GraphQL types for the schema.
 // Eventually these might include things like Pages, Questions, Answers etc.
-var message = new GraphQLObjectType({
+const message = new GraphQLObjectType({
   name: "Message",
   description: "This represents a message",
 
