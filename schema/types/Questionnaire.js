@@ -31,6 +31,10 @@ module.exports = new GraphQLObjectType({
       type: GraphQLBoolean
     },
 
+    surveyId : {
+      type: GraphQLString
+    },
+
     groups : {
       type : new GraphQLList(Group),
 
