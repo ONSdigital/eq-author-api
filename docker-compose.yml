@@ -22,6 +22,7 @@ services:
       - DB_PASSWORD=mysecretpassword
       - DB_HOSTNAME=db
       - DB_DIALECT=postgres
+      - NODE_ENV=development
   db:
     image: postgres
     environment:

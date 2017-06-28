@@ -6,9 +6,7 @@ const express = {
 };
 
 const graphiql = {
-  GRAPHIQL_ENABLED: process.env.GRAPHIQL_ENABLED,
-  GRAPHIQL_ENDPOINT: process.env.GRAPHIQL_ENDPOINT || '/graphiql',
-  GRAPHIQL_PRETTY: process.env.GRAPHIQL_PRETTY
+  GRAPHIQL_ENDPOINT: process.env.GRAPHIQL_ENDPOINT || '/graphiql'
 };
 
 const db = {
