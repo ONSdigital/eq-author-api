@@ -29,15 +29,14 @@ module.exports.remove = function(id) {
     .then(head);
 };
 
-module.exports.update = function({ id, title, description, theme, legalBasis, navigation, surveyId }) {
+module.exports.update = function({ id, title, description, theme, legalBasis, navigation }) {
   return Questionnaire
     .update(id, {
       title,
       description,
       theme,
       legalBasis,
-      navigation,
-      surveyId
+      navigation
     })
     .then(head);
 }
