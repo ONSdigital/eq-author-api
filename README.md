@@ -3,8 +3,6 @@
 A GraphQL based API for the [eq-author](https://github.com/ONSdigital/eq-author)
 application.
 
-
-
 ## Installation
 
 ### Configuration
@@ -24,15 +22,12 @@ In most cases sensible defaults have been selected.
 | Environment Variable | Description |
 | -------------------- | ----------- |
 | PORT                 | The port which express listens on (defaults to `4000`). |
+| HOST                 | The hostname where API resides (defaults to `localhost`). |
 | SCHEME               | `http://` or `https://` (defaults to `http://`) |
 | GRAPHIQL_ENABLED     | Enable the Graphiql interface (`true` or `false`) |
 | GRAPHIQL_ENDPOINT    | The endpoint which graphiql listens on (defaults to `/graphiql`) |
-| PRETTY_PRINT_GRAPHQL | Pretty print Graphiql output (`true` or `false`) |
-| DATABASE             | Database name |
-| DATABASE_USERNAME    | Username of database user. |
-| DATABASE_PASSWORD    | Password of database user. |
-| DB_HOST              | Hostname of database server. |
-| DB_DIALECT           | Database dialect (e.g. `postgres`, `mysql`, `sqlite`) |
+| GRAPHIQL_PRETTY      | Pretty print Graphiql output (`true` or `false`) |
+| DB_CONNECTION_URI    | Connection string for database |
 
 ### Run using Docker
 
@@ -66,9 +61,76 @@ Changes to the application should hot reload via `nodemon`.
 
 ![browsing the API documentation](./doc/images/docs.gif)
 
-### Debugging
+### Querying pages
 
-Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1fd28091b23de0e147/developer-tools/nodejs-debugging/VSCode-README.md) to enable debugging through VS Code. Use this config for VS Code, rather than what is detailed in the guide:
+There is no concrete `Page` type in the GraphQL schema. Instead we use a `Page` interface, which other types implement e.g. `QuestionPage` and `InterstitialPage`.
+
+To query all pages, and request different fields depending on the type, use [inline fragments](http://graphql.org/learn/queries/#inline-fragments):
+
+```gql
+query {
+  getQuestionnaire(id: 1) {
+    questionnaire {
+      groups {
+        pages {
+          id,
+
+          # inline fragment for `QuestionPage` type
+          ... on QuestionPage {
+            guidance,
+            answers {
+              id,
+              label
+            }
+          },
+
+          # For purposes of example only. `InterstitialPage` doesn't exist yet
+          ... on InterstitialPage { # doesn't exist yet
+            someField
+          }
+
+        }
+      }
+    }
+  }
+}
+```
+
+### Testing through GraphiQL
+
+There are [queries](tests/fixtures/queries.gql) and [example data](tests/fixtures/data.json) in the [fixtures folder](tests/fixtures). These can be used with graphiql to manually build up a questionnaire.
+
+### DB migrations
+
+First start app using Docker.
+
+#### Create migration
+
+```
+yarn knex -- migrate:make name_of_migration
+```
+
+Where `name_of_migration` is the name you wish to use. e.g. `create_questionnaires_table`
+
+#### Apply migrations
+
+```
+DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:latest
+```
+
+#### Rollback migrations
+
+```
+DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:rollback
+```
+
+## Debugging (with VS Code)
+
+### Debugging app
+
+Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1fd28091b23de0e147/developer-tools/nodejs-debugging/VSCode-README.md) to enable debugging through VS Code. 
+
+Use this config for VS Code, rather than what is detailed in the guide. This will attach *to the running docker container*:
 
 ```json
 {
@@ -90,3 +152,24 @@ Follow [this guide](https://github.com/docker/labs/blob/83514855aff21eaed3925d1f
 }
 ```
 
+### Debugging tests
+
+Add the following to your `launch.json` configurations. This will *launch the tests and start debugging*:
+
+```json
+{
+  "name": "Debug Jest tests",
+  "type": "node",
+  "request": "launch",
+  "runtimeArgs": [
+    "--inspect-brk",
+    "./node_modules/.bin/jest",
+    "-i",
+    "--env",
+    "jest-environment-node-debug"
+  ],
+  "cwd": "${workspaceRoot}",
+  "protocol": "inspector",
+  "console": "integratedTerminal"
+}
+```

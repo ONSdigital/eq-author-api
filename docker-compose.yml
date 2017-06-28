@@ -13,15 +13,11 @@ services:
       - 4000:4000
       - 5858:5858 # open port for debugging
     environment:
-      - EXPRESS_PORT=4000
+      - DB_CONNECTION_URI=postgres://postgres:mysecretpassword@db:5432/postgres
+      - PORT=4000
       - GRAPHIQL_ENABLED=true
       - GRAPHIQL_ENDPOINT=/graphiql
       - GRAPHIQL_PRETTY=true
-      - DB_DATABASE=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=mysecretpassword
-      - DB_HOSTNAME=db
-      - DB_DIALECT=postgres
   db:
     image: postgres
     environment:

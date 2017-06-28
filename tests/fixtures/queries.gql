@@ -1,0 +1,252 @@
+query GetQuestionnaires {
+  questionnaires {
+    id
+  }
+}
+
+query GetQuestionnaire {
+  questionnaire(id: 1) {
+    id,
+    title
+    groups {
+      title,
+      description,
+      pages {
+        id,
+        title
+        ...on QuestionPage {
+          guidance,
+          answers {
+            id,
+            description,
+            guidance,
+            qCode,
+            label,
+            mandatory,
+            type
+            questionPageId
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation CreateQuestionnaire(
+  $title: String!,
+  $description: String!,
+  $theme: String!,
+  $legalBasis: LegalBasis!,
+  $navigation: Boolean,
+  $surveyId: String!
+) {
+  createQuestionnaire(
+    title: $title,
+    description: $description,
+    theme: $theme,
+    legalBasis: $legalBasis,
+    navigation: $navigation,
+    surveyId : $surveyId
+  ) {
+    id
+  }
+}
+
+
+mutation UpdateQuestionnaire(
+  $id:Int!,
+  $title: String!,
+  $description: String!,
+  $theme: String!,
+  $legalBasis: LegalBasis!,
+  $navigation: Boolean
+) {
+  updateQuestionnaire(
+    id:$id,
+    title: $title,
+    description: $description,
+    theme: $theme,
+    legalBasis: $legalBasis,
+    navigation: $navigation
+  ) {
+    id
+  }
+}
+
+mutation DeleteQuestionnaire($id:Int = 2) {
+  deleteQuestionnaire(id:$id) {
+    id
+  }
+}
+
+mutation CreateGroup(
+  $title: String!,
+  $description: String!,
+  $questionnaireId:Int!
+) {
+  createGroup(
+    title:$title,
+    description:$description,
+    questionnaireId:$questionnaireId
+  ) {
+    id
+  }
+}
+
+mutation UpdateGroup(
+  $id:Int!,
+  $title: String!,
+  $description: String!
+) {
+  updateGroup(
+    id:$id,
+    title:$title,
+    description:$description,
+  ) {
+    id
+  }
+}
+
+mutation DeleteGroup($id:Int!) {
+  deleteGroup(id:$id){
+    id
+  }
+}
+
+query GetPage {
+  page(id:1) {
+    title
+  }
+}
+
+mutation CreatePage(
+  $title: String!,
+  $description: String!,
+  $groupId:Int!
+) {
+  createPage(
+    title:$title,
+    description:$description,
+    groupId:$groupId
+  ) {
+    id
+  }
+}
+
+mutation UpdatePage(
+  $id:Int!,
+  $title: String!,
+  $description: String!
+) {
+  updatePage(
+    id:$id,
+    title:$title,
+    description:$description,
+  ) {
+    id
+  }
+}
+
+mutation DeletePage($id:Int!) {
+  deletePage(id:$id){
+    id
+  }
+}
+
+mutation CreateQuestionPage(
+  $title:String!,
+  $description: String!,
+  $guidance: String,
+  $type: QuestionType!,
+  $mandatory: Boolean,
+  $groupId: Int!
+) {
+  createQuestionPage(
+    title:$title,
+    description: $description,
+    guidance:$guidance,
+    type: $type,
+    mandatory: $mandatory,
+    groupId: $groupId
+  ) {
+    id
+  }
+}
+
+mutation UpdateQuestionPage(
+  $id: Int!,
+  $title: String,
+  $description: String,
+  $guidance: String,
+  $type: QuestionType,
+  $mandatory: Boolean
+) {
+  updateQuestionPage(
+    id: $id,
+    title: $title,
+    description: $description,
+    guidance: $guidance,
+    type: $type,
+    mandatory: $mandatory
+  ) {
+    id
+  }
+}
+
+mutation DeleteQuestionPage($id: Int!) {
+  deleteQuestionPage(id:$id) {
+    id
+  }
+}
+
+mutation CreateAnswer(
+  $description: String,
+  $guidance: String,
+  $qCode:  String,
+  $label: String,
+  $type: AnswerType!,
+  $mandatory: Boolean!,
+  $questionPageId: Int!
+) {
+  createAnswer(
+    description: $description,
+    guidance: $guidance,
+    qCode: $qCode,
+    label: $label,
+    type: $type,
+    mandatory: $mandatory,
+    questionPageId: $questionPageId
+  ) {
+    id
+  }
+}
+
+mutation UpdateAnswer(
+  $id: Int!,
+  $description: String,
+  $guidance: String,
+  $qCode: String,
+  $label: String,
+  $type: AnswerType,
+  $mandatory: Boolean
+) {
+  updateAnswer(
+    id:$id,
+    description: $description,
+    guidance: $guidance,
+    qCode: $qCode,
+    label: $label,
+    type: $type,
+    mandatory: $mandatory,
+  ) {
+    id,
+    mandatory
+  }
+}
+
+
+mutation DeleteAnswer($id:Int!) {
+  deleteAnswer(id:$id) {
+    id
+  }
+}

@@ -1,25 +1,44 @@
 {
   "name": "eq-author-api",
   "version": "1.0.0",
-  "main": "src/server.js",
+  "main": "app.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon --debug"
+    "start": "yarn start-app",
+    "lint": "eslint .",
+    "test": "jest .",
+    "start-app": "nodemon --inspect=0.0.0.0:5858",
+    "start-db": "docker run -ti sta-p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres --name postgres-db --rm postgres",
+    "stop-db": "docker stop postgres-db",
+    "knex": "knex --knexfile config/knexfile.js --cwd ."
   },
   "dependencies": {
     "colors": "^1.1.2",
+    "cors": "^2.8.3",
     "dotenv": "^4.0.0",
+    "eslint": "^4.0.0",
+    "eslint-plugin-jest": "^20.0.3",
     "express": "^4.15.3",
     "express-graphql": "^0.6.5",
     "graphql": "^0.9.6",
-    "cors": "^2.8.3",
-    "pg": "^6.2.3",
-    "pg-hstore": "^2.3.2",
-    "sequelize": "^3.30.4",
+    "graphql-relay": "^0.5.2",
+    "jest": "^20.0.4",
+    "jest-environment-node-debug": "^2.0.0",
+    "knex": "^0.13.0",
+    "lodash": "^4.17.4",
     "nodemon": "^1.11.0",
-    "sqlite3": "^3.1.8"
+    "pg": "^6.2.3",
+    "pg-hstore": "^2.3.2"
   },
- "engines": {
+  "engines": {
     "node": ">=7.10.0"
- }  
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "./dist"
+    ],
+    "setupTestFrameworkScriptFile": "./tests/setup.js"
+  }
 }
