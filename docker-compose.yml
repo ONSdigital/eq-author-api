@@ -18,6 +18,7 @@ services:
       - GRAPHIQL_ENABLED=true
       - GRAPHIQL_ENDPOINT=/graphiql
       - GRAPHIQL_PRETTY=true
+      - NODE_ENV=development
   db:
     image: postgres
     environment:
