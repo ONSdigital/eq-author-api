@@ -13,7 +13,7 @@ const {
 } = require('./config/settings');
 
 const app = express();
-app.use('/graphql', cors(), bodyParser.json(), graphqlExpress({schema: schema, context:repositories}))
+app.use('/graphql', cors(), bodyParser.json(), graphqlExpress({schema: schema, context:{ repositories: repositories }}));
 
 if (process.env.NODE_ENV === 'development'){
   app.use('/graphiql', cors(), graphiqlExpress({ endpointURL: '/graphql' }))
