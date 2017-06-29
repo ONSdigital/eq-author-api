@@ -1,8 +1,5 @@
-const ENV = process.env.NODE_ENV || 'production'
-
 const express = require("express");
-const graphqlExpress = require('graphql-server-express').graphqlExpress;
-const graphiqlExpress = require('graphql-server-express').graphiqlExpress;
+const { graphqlExpress, graphiqlExpress } = require("graphql-server-express");
 const schema = require("./schema");
 const colors = require("colors");
 const cors = require("cors");
