@@ -1,29 +1,23 @@
 const express = require("express");
-const graphqlHTTP = require("express-graphql");
+const { graphqlExpress, graphiqlExpress } = require("graphql-server-express");
+const repositories = require("./repositories");
 const colors = require("colors");
 const cors = require("cors");
-
+const bodyParser = require('body-parser');
 const schema = require("./schema");
-const repositories = require("./repositories");
+
 const {
   EXPRESS_URL,
   EXPRESS_PORT,
-  GRAPHIQL_ENABLED,
   GRAPHIQL_ENDPOINT,
-  GRAPHIQL_PRETTY
 } = require('./config/settings');
 
-var app = express();
-app.use(GRAPHIQL_ENDPOINT,
-  cors(),
-  graphqlHTTP({
-    schema: schema,
-    pretty: GRAPHIQL_PRETTY,
-    graphiql: GRAPHIQL_ENABLED,
-    context: { repositories }
-  })
-);
+const app = express();
+app.use('/graphql', cors(), bodyParser.json(), graphqlExpress({schema: schema, context:{ repositories: repositories }}));
 
+if (process.env.NODE_ENV === 'development'){
+  app.use('/graphiql', cors(), graphiqlExpress({ endpointURL: '/graphql' }))
+}
 
 console.log('Starting server...');
 

@@ -13,14 +13,15 @@
     "knex": "knex --knexfile config/knexfile.js --cwd ."
   },
   "dependencies": {
+    "body-parser": "^1.17.2",
     "colors": "^1.1.2",
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
     "eslint": "^4.0.0",
     "eslint-plugin-jest": "^20.0.3",
     "express": "^4.15.3",
-    "express-graphql": "^0.6.5",
     "graphql": "^0.9.6",
+    "graphql-server-express": "^0.9.0",
     "graphql-relay": "^0.5.2",
     "jest": "^20.0.4",
     "jest-environment-node-debug": "^2.0.0",
