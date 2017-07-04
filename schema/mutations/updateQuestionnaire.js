@@ -27,6 +27,9 @@ module.exports = {
     },
     navigation : {
       type : GraphQLBoolean
+    },
+    surveyId : {
+        type: GraphQLString
     }
   },
 
