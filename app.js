@@ -19,10 +19,8 @@ if (process.env.NODE_ENV === 'development'){
   app.use('/graphiql', cors(), graphiqlExpress({ endpointURL: '/graphql' }))
 }
 
-console.log('Starting server...');
-
 app.listen(EXPRESS_PORT, () => {
-  console.log(
+  console.log(  // eslint-disable-line no-console
     colors.green('eq-author-api'),
     'is running at',
     colors.yellow(EXPRESS_URL + GRAPHIQL_ENDPOINT)
