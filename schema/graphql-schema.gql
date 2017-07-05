@@ -1,0 +1,88 @@
+type Questionnaire {
+    id: Int
+    title: String
+    description: String
+    theme: String
+    legalBasis: LegalBasisEnum
+    navigation: Boolean
+    surveyId: String
+    groups: [Group]
+}
+
+type Group {
+    id: Int
+    title: String!
+    description: String
+    pages: [Page]
+    questionnaireId: Int!
+}
+
+type Page {
+    id: Int!
+    title: String!
+    description: String
+    pageType: PageType!
+    groupId: Int!
+}
+
+type QuestionPage implements Page {
+    id: Int!
+    title: String!
+    description: String!
+    guidance: String
+    pageType: PageType!
+    type: QuestionType!
+    mandatory: Boolean
+    answers:  [Answer]
+    groupId: Int!
+}
+
+type Answer {
+    id: Int
+    description: String
+    guidance: String
+    qCode: String
+    label: String
+    type: AnswerType
+    mandatory: Boolean
+    questionPageId: Int
+}
+
+enum PageType {
+  QuestionPage
+  InterstitialPage
+}
+
+enum QuestionType {
+    General
+    DateRange
+    RepeatingAnswer
+    Relationship
+}
+
+enum AnswerType {
+    Checkbox
+    Currency
+    Date
+    MonthYearDate
+    Integer
+    Percentage
+    PositiveInteger
+    Radio
+    TextArea
+    TextField
+    Relationship
+}
+
+type Queries {
+    questionnaires: [Questionnaire]
+    questionnaire(id: Int!): Questionnaire
+    group(id: Int!): Group
+    page(id: Int!): Page
+    questionPage(id: Int!): QuestionPage
+    answer(id: Int!): Answer
+}
+
+type Mutations {
+
+}
