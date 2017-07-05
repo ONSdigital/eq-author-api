@@ -3,7 +3,7 @@ type Questionnaire {
     title: String
     description: String
     theme: String
-    legalBasis: LegalBasisEnum
+    legalBasis: LegalBasis
     navigation: Boolean
     surveyId: String
     groups: [Group]
@@ -17,7 +17,7 @@ type Group {
     questionnaireId: Int!
 }
 
-type Page {
+interface Page {
     id: Int!
     title: String!
     description: String
@@ -74,7 +74,12 @@ enum AnswerType {
     Relationship
 }
 
-type Queries {
+enum LegalBasis {
+    Voluntary
+    StatisticsOfTradeAct
+}
+
+type Query {
     questionnaires: [Questionnaire]
     questionnaire(id: Int!): Questionnaire
     group(id: Int!): Group
@@ -83,6 +88,24 @@ type Queries {
     answer(id: Int!): Answer
 }
 
-type Mutations {
+type Mutation {
+    createQuestionnaire(title: String!, description: String, theme: String!, legalBasis: LegalBasis!, navigation: Boolean, surveyId: String!) : Questionnaire
+    updateQuestionnaire(id: Int!, title: String, description: String, theme: String, legalBasis: LegalBasis, navigation: Boolean, surveyId: String) : Questionnaire
+    deleteQuestionnaire(id: Int!) : Questionnaire
 
+    createGroup(title: String!, description: String, questionnaireId: Int!) : Group
+    updateGroup(id: Int!, title: String, description: String) : Group
+    deleteGroup(id: Int!) : Group
+
+    createPage(title: String!, description: String, groupId: Int!) : Page
+    updatePage(id: Int!, title: String!, description: String, groupId: Int!) : Page
+    deletePage(id: Int!) : Page
+
+    createQuestionPage(title: String!, description: String, guidance: String, type: QuestionType!, mandatory: Boolean, groupId: Int!) : QuestionPage
+    updateQuestionPage(id: Int!, title: String, description: String, guidance: String, type: QuestionType, mandatory: Boolean) : QuestionPage
+    deleteQuestionPage(id: Int!) : QuestionPage
+
+    createAnswer(description: String, guidance: String, label: String, qCode: String. type: AnswerType!, mandatory: Boolean!, questionPageId: Int!) : Answer
+    updateAnswer(id: Int!, description: String, guidance: String, label: String, qCode: String. type: AnswerType, mandatory: Boolean) : Answer
+    deleteAnswer(id: Int!) : Answer
 }
