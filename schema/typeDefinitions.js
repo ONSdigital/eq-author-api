@@ -98,7 +98,7 @@ type Mutation {
     deleteGroup(id: Int!) : Group
 
     createPage(title: String!, description: String, groupId: Int!) : Page
-    updatePage(id: Int!, title: String!, description: String, groupId: Int!) : Page
+    updatePage(id: Int!, title: String!, description: String) : Page
     deletePage(id: Int!) : Page
 
     createQuestionPage(title: String!, description: String, guidance: String, type: QuestionType!, mandatory: Boolean, groupId: Int!) : QuestionPage

@@ -1,6 +1,6 @@
 module.exports = {
     Query: {
-        questionnaires: (_, ctx) => ctx.repositories.Questionnaire.findAll(),
+        questionnaires: (_, {}, ctx) => ctx.repositories.Questionnaire.findAll(),
         questionnaire: (root, { id }, ctx) => ctx.repositories.Questionnaire.get(id),
         group: (parent, { id }, ctx) => ctx.repositories.Group.get(id),
         page: (parent, { id }, ctx) => ctx.repositories.Page.get(id),
