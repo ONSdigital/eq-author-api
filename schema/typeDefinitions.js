@@ -1,4 +1,4 @@
-type Questionnaire {
+module.exports = `type Questionnaire {
     id: Int
     title: String
     description: String
@@ -105,7 +105,8 @@ type Mutation {
     updateQuestionPage(id: Int!, title: String, description: String, guidance: String, type: QuestionType, mandatory: Boolean) : QuestionPage
     deleteQuestionPage(id: Int!) : QuestionPage
 
-    createAnswer(description: String, guidance: String, label: String, qCode: String. type: AnswerType!, mandatory: Boolean!, questionPageId: Int!) : Answer
-    updateAnswer(id: Int!, description: String, guidance: String, label: String, qCode: String. type: AnswerType, mandatory: Boolean) : Answer
+    createAnswer(description: String, guidance: String, label: String, qCode: String, type: AnswerType!, mandatory: Boolean!, questionPageId: Int!) : Answer
+    updateAnswer(id: Int!, description: String, guidance: String, label: String, qCode: String, type: AnswerType, mandatory: Boolean) : Answer
     deleteAnswer(id: Int!) : Answer
 }
+`
