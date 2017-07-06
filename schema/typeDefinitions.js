@@ -109,4 +109,4 @@ type Mutation {
     updateAnswer(id: Int!, description: String, guidance: String, label: String, qCode: String, type: AnswerType, mandatory: Boolean) : Answer
     deleteAnswer(id: Int!) : Answer
 }
-`
+`;
