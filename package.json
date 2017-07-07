@@ -17,9 +17,6 @@
     "colors": "^1.1.2",
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
-    "eslint": "^4.1.1",
-    "eslint-config-prettier": "^2.3.0",
-    "eslint-plugin-jest": "^20.0.3",
     "express": "^4.15.3",
     "graphql": "^0.9.6",
     "graphql-relay": "^0.5.2",
@@ -45,6 +42,10 @@
     "setupTestFrameworkScriptFile": "./tests/setup.js"
   },
   "devDependencies": {
-    "eslint-config-author": "https://github.com/ONSdigital/eslint-config-author"
+    "eslint": "^3.19.0",
+    "eslint-config-author": "https://github.com/ONSdigital/eslint-config-author",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-jasmine": "^2.6.2",
+    "eslint-plugin-jest": "^20.0.3"
   }
 }
