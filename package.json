@@ -43,5 +43,8 @@
       "./dist"
     ],
     "setupTestFrameworkScriptFile": "./tests/setup.js"
+  },
+  "devDependencies": {
+    "eslint-config-author": "https://github.com/ONSdigital/eslint-config-author"
   }
 }
