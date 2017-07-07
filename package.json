@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "eslint": "^3.19.0",
-    "eslint-config-author": "https://github.com/ONSdigital/eslint-config-author",
+    "eslint-config-ons-author": "https://github.com/ONSdigital/eslint-config-ons-author",
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-jasmine": "^2.6.2",
     "eslint-plugin-jest": "^20.0.3"

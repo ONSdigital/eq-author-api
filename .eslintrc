@@ -1,3 +1,11 @@
 {
-  "extends": ["eslint-config-author", "eslint-config-author/graphql"]
+  "extends": ["eslint-config-ons-author"],
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 8
+  }
 }
