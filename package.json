@@ -35,11 +35,14 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "./dist"],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "./dist"
+    ],
     "setupTestFrameworkScriptFile": "./tests/setup.js"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
-    "eslint-config-ons-author": "ONSdigital/eslint-config-ons-author#v1.0.2"
+    "eslint-config-eq-author": "^1.0.2"
   }
 }
