@@ -40,6 +40,6 @@
   },
   "devDependencies": {
     "eslint": "^3.19.0",
-    "eslint-config-ons-author": "ONSdigital/eslint-config-ons-author#v1.0.0"
+    "eslint-config-ons-author": "ONSdigital/eslint-config-ons-author#v1.0.2"
   }
 }
