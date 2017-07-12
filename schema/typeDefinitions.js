@@ -6,10 +6,10 @@ module.exports = `type Questionnaire {
     legalBasis: LegalBasis
     navigation: Boolean
     surveyId: String
-    groups: [Group]
+    sections: [Section]
 }
 
-type Group {
+type Section {
     id: Int
     title: String!
     description: String
@@ -22,7 +22,7 @@ interface Page {
     title: String!
     description: String
     pageType: PageType!
-    groupId: Int!
+    sectionId: Int!
 }
 
 type QuestionPage implements Page {
@@ -34,7 +34,7 @@ type QuestionPage implements Page {
     type: QuestionType!
     mandatory: Boolean
     answers:  [Answer]
-    groupId: Int!
+    sectionId: Int!
 }
 
 type Answer {
@@ -82,7 +82,7 @@ enum LegalBasis {
 type Query {
     questionnaires: [Questionnaire]
     questionnaire(id: Int!): Questionnaire
-    group(id: Int!): Group
+    section(id: Int!): Section
     page(id: Int!): Page
     questionPage(id: Int!): QuestionPage
     answer(id: Int!): Answer
@@ -93,15 +93,15 @@ type Mutation {
     updateQuestionnaire(id: Int!, title: String, description: String, theme: String, legalBasis: LegalBasis, navigation: Boolean, surveyId: String) : Questionnaire
     deleteQuestionnaire(id: Int!) : Questionnaire
 
-    createGroup(title: String!, description: String, questionnaireId: Int!) : Group
-    updateGroup(id: Int!, title: String, description: String) : Group
-    deleteGroup(id: Int!) : Group
+    createSection(title: String!, description: String, questionnaireId: Int!) : Section
+    updateSection(id: Int!, title: String, description: String) : Section
+    deleteSection(id: Int!) : Section
 
-    createPage(title: String!, description: String, groupId: Int!) : Page
+    createPage(title: String!, description: String, sectionId: Int!) : Page
     updatePage(id: Int!, title: String!, description: String) : Page
     deletePage(id: Int!) : Page
 
-    createQuestionPage(title: String!, description: String, guidance: String, type: QuestionType!, mandatory: Boolean, groupId: Int!) : QuestionPage
+    createQuestionPage(title: String!, description: String, guidance: String, type: QuestionType!, mandatory: Boolean, sectionId: Int!) : QuestionPage
     updateQuestionPage(id: Int!, title: String, description: String, guidance: String, type: QuestionType, mandatory: Boolean) : QuestionPage
     deleteQuestionPage(id: Int!) : QuestionPage
 

@@ -1,11 +1,10 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("Group query" , () => {
-
-  const group = `
-    query GetGroup($id: Int!) {
-      group(id: $id) {
+describe("Section query", () => {
+  const section = `
+    query GetSection($id: Int!) {
+      section(id: $id) {
         id,
         title,
         description
@@ -13,9 +12,9 @@ describe("Group query" , () => {
     }
   `;
 
-  const groupWithPages = `
-    query GetGroup($id: Int!) {
-      group(id: $id) {
+  const sectionWithPages = `
+    query GetSection($id: Int!) {
+      section(id: $id) {
         id,
         title,
         description,
@@ -31,26 +30,33 @@ describe("Group query" , () => {
 
   beforeEach(() => {
     repositories = {
-      Group : mockRepository(),
-      Page : mockRepository()
-    }
+      Section: mockRepository(),
+      Page: mockRepository()
+    };
   });
 
   it("should fetch page by id", async () => {
-    const result = await executeQuery(group, { id }, { repositories });
+    const result = await executeQuery(section, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Group.get).toHaveBeenCalledWith(id);
+    expect(repositories.Section.get).toHaveBeenCalledWith(id);
     expect(repositories.Page.findAll).not.toHaveBeenCalled();
   });
 
   it("should have an association with Pages", async () => {
-    repositories.Group.get.mockImplementation(() => ({ id, title : "test group title" }));
+    repositories.Section.get.mockImplementation(() => ({
+      id,
+      title: "test section title"
+    }));
 
-    const result = await executeQuery(groupWithPages, { id }, { repositories });
+    const result = await executeQuery(
+      sectionWithPages,
+      { id },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Group.get).toHaveBeenCalledWith(id);
-    expect(repositories.Page.findAll).toHaveBeenCalledWith({ GroupId : id });
+    expect(repositories.Section.get).toHaveBeenCalledWith(id);
+    expect(repositories.Page.findAll).toHaveBeenCalledWith({ SectionId: id });
   });
 });

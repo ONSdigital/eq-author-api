@@ -1,23 +1,22 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("createPage" , () => {
-
+describe("createPage", () => {
   const createPage = `
     mutation CreatePage(
       $title: String!,
       $description: String,
-      $groupId: Int!
+      $sectionId: Int!
     ) {
       createPage(
         title: $title,
         description: $description,
-        groupId: $groupId
+        sectionId: $sectionId
       ) {
         id,
         title,
         description,
-        groupId
+        sectionId
         ... on QuestionPage {
           guidance
         }
@@ -29,15 +28,15 @@ describe("createPage" , () => {
 
   beforeEach(() => {
     repositories = {
-      Page : mockRepository()
+      Page: mockRepository()
     };
   });
 
   it("should allow creation of Page", async () => {
     const fixture = {
-      "title": "Test page",
-      "description": "Test page description",
-      "groupId": 1
+      title: "Test page",
+      description: "Test page description",
+      sectionId: 1
     };
 
     const result = await executeQuery(createPage, fixture, { repositories });

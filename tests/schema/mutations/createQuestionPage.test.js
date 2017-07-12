@@ -1,8 +1,7 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("createQuestionPage" , () => {
-
+describe("createQuestionPage", () => {
   const createQuestionPage = `
     mutation CreateQuestionPage(
       $title: String!,
@@ -10,7 +9,7 @@ describe("createQuestionPage" , () => {
       $guidance: String!,
       $type: QuestionType!,
       $mandatory: Boolean,
-      $groupId: Int!
+      $sectionId: Int!
     ) {
       createQuestionPage(
         title: $title,
@@ -18,7 +17,7 @@ describe("createQuestionPage" , () => {
         guidance: $guidance,
         type: $type,
         mandatory: $mandatory,
-        groupId: $groupId
+        sectionId: $sectionId
       ) {
         id,
         title,
@@ -26,7 +25,7 @@ describe("createQuestionPage" , () => {
         guidance,
         type,
         mandatory,
-        groupId
+        sectionId
       }
     }
   `;
@@ -35,10 +34,9 @@ describe("createQuestionPage" , () => {
 
   beforeEach(() => {
     repositories = {
-      QuestionPage : mockRepository()
+      QuestionPage: mockRepository()
     };
   });
-
 
   it("should allow creation of Question", async () => {
     const fixture = {
@@ -47,10 +45,12 @@ describe("createQuestionPage" , () => {
       guidance: "Test question guidance",
       type: "General",
       mandatory: true,
-      groupId: 1
+      sectionId: 1
     };
 
-    const result = await executeQuery(createQuestionPage, fixture, { repositories });
+    const result = await executeQuery(createQuestionPage, fixture, {
+      repositories
+    });
 
     expect(result.errors).toBeUndefined();
     expect(repositories.QuestionPage.insert).toHaveBeenCalled();
