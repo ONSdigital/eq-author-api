@@ -1,4 +1,6 @@
-module.exports = {
+const { merge } = require("lodash");
+
+const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
     questionnaire: (root, { id }, ctx) =>
@@ -56,3 +58,19 @@ module.exports = {
       ctx.repositories.Answer.findAll({ QuestionPageId: id })
   }
 };
+
+const Deprecations = {
+  Query: {
+    group: Resolvers.Query.section
+  },
+  Mutation: {
+    createGroup: Resolvers.Mutation.createSection,
+    updateGroup: Resolvers.Mutation.updateSection,
+    deleteGroup: Resolvers.Mutation.deleteSection
+  },
+  Questionnaire: {
+    groups: Resolvers.Questionnaire.sections
+  }
+};
+
+module.exports = merge({}, Resolvers, Deprecations);
