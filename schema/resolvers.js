@@ -1,3 +1,5 @@
+const { merge } = require("lodash");
+
 const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
@@ -39,8 +41,6 @@ const Resolvers = {
 
   Questionnaire: {
     sections: (questionnaire, args, ctx) =>
-      ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
-    groups: (questionnaire, args, ctx) =>
       ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id })
   },
 
@@ -59,10 +59,18 @@ const Resolvers = {
   }
 };
 
-// BACKWARDS COMPATIBILITY FOR DEPRECATIONS
-Resolvers.Query.group = Resolvers.Query.section;
-Resolvers.Mutation.createGroup = Resolvers.Mutation.createSection;
-Resolvers.Mutation.updateGroup = Resolvers.Mutation.updateSection;
-Resolvers.Mutation.deleteGroup = Resolvers.Mutation.deleteSection;
+const Deprecations = {
+  Query: {
+    group: Resolvers.Query.section
+  },
+  Mutation: {
+    createGroup: Resolvers.Mutation.createSection,
+    updateGroup: Resolvers.Mutation.updateSection,
+    deleteGroup: Resolvers.Mutation.deleteSection
+  },
+  Questionnaire: {
+    groups: Resolvers.Questionnaire.sections
+  }
+};
 
-module.exports = Resolvers;
+module.exports = merge({}, Resolvers, Deprecations);
