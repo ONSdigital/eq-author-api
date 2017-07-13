@@ -1,15 +1,14 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("updateGroup" , () => {
-
-  const updateGroup = `
-    mutation UpdateGroup(
+describe("updateSection", () => {
+  const updateSection = `
+    mutation UpdateSection(
       $id: Int!,
       $title: String!,
       $description: String!
     ) {
-      updateGroup(
+      updateSection(
         id: $id,
         title: $title,
         description: $description,
@@ -24,20 +23,20 @@ describe("updateGroup" , () => {
 
   beforeEach(() => {
     repositories = {
-      Group : mockRepository()
-    }
+      Section: mockRepository()
+    };
   });
 
-  it("should allow update of Group", async () => {
+  it("should allow update of Section", async () => {
     const fixture = {
       id: 1,
-      title: "Updated group title",
-      description: "This is an updated group description"
+      title: "Updated section title",
+      description: "This is an updated section description"
     };
 
-    const result = await executeQuery(updateGroup, fixture, { repositories });
+    const result = await executeQuery(updateSection, fixture, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Group.update).toHaveBeenCalled();
+    expect(repositories.Section.update).toHaveBeenCalled();
   });
 });

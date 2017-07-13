@@ -1,8 +1,7 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("updateQuestionPage" , () => {
-
+describe("updateQuestionPage", () => {
   const updateQuestionPage = `
     mutation UpdateQuestionPage(
       $id: Int!,
@@ -26,7 +25,7 @@ describe("updateQuestionPage" , () => {
         guidance,
         type,
         mandatory,
-        groupId
+        sectionId
       }
     }
   `;
@@ -35,8 +34,8 @@ describe("updateQuestionPage" , () => {
 
   beforeEach(() => {
     repositories = {
-      QuestionPage : mockRepository()
-    }
+      QuestionPage: mockRepository()
+    };
   });
 
   it("should allow update of Question", async () => {
@@ -49,7 +48,9 @@ describe("updateQuestionPage" , () => {
       mandatory: false
     };
 
-    const result = await executeQuery(updateQuestionPage, fixture, { repositories });
+    const result = await executeQuery(updateQuestionPage, fixture, {
+      repositories
+    });
 
     expect(result.errors).toBeUndefined();
     expect(repositories.QuestionPage.update).toHaveBeenCalled();

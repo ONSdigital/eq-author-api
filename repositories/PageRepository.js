@@ -3,7 +3,7 @@ const Page = require("../db/Page");
 const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
 
-const fromDb = mapFields({ GroupId : "groupId" });
+const fromDb = mapFields({ SectionId : "sectionId" });
 
 function getRepositoryForType({ pageType }) {
   switch(pageType) {

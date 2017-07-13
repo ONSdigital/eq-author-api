@@ -1,15 +1,14 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("Page query" , () => {
-
+describe("Page query", () => {
   const page = `
     query GetPage($id: Int!) {
       page(id: $id) {
         id,
         title,
         description,
-        groupId
+        sectionId
       }
     }
   `;
@@ -19,9 +18,9 @@ describe("Page query" , () => {
 
   beforeEach(() => {
     repositories = {
-      Page : mockRepository(),
-      QuestionPage : mockRepository()
-    }
+      Page: mockRepository(),
+      QuestionPage: mockRepository()
+    };
   });
 
   it("should fetch page by id", async () => {

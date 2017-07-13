@@ -1,15 +1,14 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("createGroup" , () => {
-
-  const createGroup = `
-    mutation CreateGroup(
+describe("createSection", () => {
+  const createSection = `
+    mutation CreateSection(
       $title: String!,
       $description: String,
       $questionnaireId: Int!
     ) {
-      createGroup(
+      createSection(
         title: $title,
         description: $description,
         questionnaireId: $questionnaireId
@@ -24,20 +23,20 @@ describe("createGroup" , () => {
 
   beforeEach(() => {
     repositories = {
-      Group : mockRepository()
+      Section: mockRepository()
     };
   });
 
-  it("should allow creation of Group", async () => {
+  it("should allow creation of Section", async () => {
     const fixture = {
-      "title": "Test group",
-      "description": "Test group description",
-      "questionnaireId": 1
+      title: "Test section",
+      description: "Test section description",
+      questionnaireId: 1
     };
 
-    const result = await executeQuery(createGroup, fixture, { repositories });
+    const result = await executeQuery(createSection, fixture, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Group.insert).toHaveBeenCalled();
+    expect(repositories.Section.insert).toHaveBeenCalled();
   });
 });

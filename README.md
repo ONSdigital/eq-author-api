@@ -71,7 +71,7 @@ To query all pages, and request different fields depending on the type, use [inl
 query {
   getQuestionnaire(id: 1) {
     questionnaire {
-      groups {
+      sections {
         pages {
           id,
 
@@ -115,13 +115,13 @@ Where `name_of_migration` is the name you wish to use. e.g. `create_questionnair
 #### Apply migrations
 
 ```
-DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:latest
+docker-compose exec web yarn knex -- migrate:latest
 ```
 
 #### Rollback migrations
 
 ```
-DB_CONNECTION_URI=postgres://postgres:mysecretpassword@localhost:5432/postgres yarn knex -- migrate:rollback
+docker-compose exec web yarn knex -- migrate:rollback
 ```
 
 ## Debugging (with VS Code)
