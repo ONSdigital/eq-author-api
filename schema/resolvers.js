@@ -39,6 +39,8 @@ module.exports = {
 
   Questionnaire: {
     sections: (questionnaire, args, ctx) =>
+      ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
+    groups: (questionnaire, args, ctx) =>
       ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id })
   },
 

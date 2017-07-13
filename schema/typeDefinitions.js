@@ -7,6 +7,7 @@ module.exports = `type Questionnaire {
     navigation: Boolean
     surveyId: String
     sections: [Section]
+    groups: [Section] @deprecated(reason: "use 'sections' instead")
 }
 
 type Section {
