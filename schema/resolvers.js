@@ -1,4 +1,4 @@
-module.exports = {
+const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
     questionnaire: (root, { id }, ctx) =>
@@ -58,3 +58,11 @@ module.exports = {
       ctx.repositories.Answer.findAll({ QuestionPageId: id })
   }
 };
+
+// BACKWARDS COMPATIBILITY FOR DEPRECATIONS
+Resolvers.Query.group = Resolvers.Query.section;
+Resolvers.Mutation.createGroup = Resolvers.Mutation.createSection;
+Resolvers.Mutation.updateGroup = Resolvers.Mutation.updateSection;
+Resolvers.Mutation.deleteGroup = Resolvers.Mutation.deleteSection;
+
+module.exports = Resolvers;

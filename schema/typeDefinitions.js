@@ -84,6 +84,7 @@ type Query {
     questionnaires: [Questionnaire]
     questionnaire(id: Int!): Questionnaire
     section(id: Int!): Section
+    group(id: Int!): Section @deprecated(reason: "use 'section' instead")
     page(id: Int!): Page
     questionPage(id: Int!): QuestionPage
     answer(id: Int!): Answer
@@ -97,6 +98,9 @@ type Mutation {
     createSection(title: String!, description: String, questionnaireId: Int!) : Section
     updateSection(id: Int!, title: String, description: String) : Section
     deleteSection(id: Int!) : Section
+    createGroup(title: String!, description: String, questionnaireId: Int!) : Section @deprecated(reason: "use 'createSection' instead")
+    updateGroup(id: Int!, title: String, description: String) : Section @deprecated(reason: "use 'updateSection' instead")
+    deleteGroup(id: Int!) : Section @deprecated(reason: "use 'deleteSection' instead")
 
     createPage(title: String!, description: String, sectionId: Int!) : Page
     updatePage(id: Int!, title: String!, description: String) : Page
