@@ -1,8 +1,7 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("createAnswer" , () => {
-
+describe("createAnswer", () => {
   const createAnswer = `
     mutation CreateAnswer(
       $description: String,
@@ -38,7 +37,7 @@ describe("createAnswer" , () => {
 
   beforeEach(() => {
     repositories = {
-      Answer : mockRepository("question")
+      Answer: mockRepository()
     };
   });
 
