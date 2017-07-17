@@ -6,8 +6,4 @@
 
 ### Technical information
 
-#### Browser
-
-#### Operating System
-
 ### Screenshot
