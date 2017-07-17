@@ -10,7 +10,14 @@
     "start-app": "nodemon --inspect=0.0.0.0:5858",
     "start-db": "docker run -ti sta-p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres --name postgres-db --rm postgres",
     "stop-db": "docker stop postgres-db",
-    "knex": "knex --knexfile config/knexfile.js --cwd ."
+    "knex": "knex --knexfile config/knexfile.js --cwd .",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "dependencies": {
     "body-parser": "^1.17.2",
@@ -43,6 +50,9 @@
   },
   "devDependencies": {
     "eslint": "^3.19.0",
-    "eslint-config-eq-author": "^1.0.2"
+    "eslint-config-eq-author": "^1.0.2",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.0.2",
+    "prettier": "^1.5.3"
   }
 }
