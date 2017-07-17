@@ -91,6 +91,7 @@ type Query {
 }
 
 type Mutation {
+    # creates a Questionnaire along with an initial Section and Page
     createQuestionnaire(title: String!, description: String, theme: String!, legalBasis: LegalBasis!, navigation: Boolean, surveyId: String!) : Questionnaire
     updateQuestionnaire(id: Int!, title: String, description: String, theme: String, legalBasis: LegalBasis, navigation: Boolean, surveyId: String) : Questionnaire
     deleteQuestionnaire(id: Int!) : Questionnaire

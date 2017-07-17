@@ -1,9 +1,9 @@
-module.exports = function mockRepository() {
+module.exports = function mockRepository(returnValues = {}) {
   return {
-    get : jest.fn(),
-    findAll : jest.fn(),
-    insert : jest.fn(),
-    update : jest.fn(),
-    remove : jest.fn()
+    get: jest.fn(() => returnValues.get),
+    findAll: jest.fn(() => returnValues.findAll),
+    insert: jest.fn(() => returnValues.insert),
+    update: jest.fn(() => returnValues.update),
+    remove: jest.fn(() => returnValues.remove)
   };
-}
+};
