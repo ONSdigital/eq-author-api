@@ -14,21 +14,13 @@ const Resolvers = {
   Mutation: {
     createQuestionnaire: async (root, args, ctx) => {
       const questionnaire = await ctx.repositories.Questionnaire.insert(args);
-
-      const section = await ctx.repositories.Section.insert({
+      const section = {
         title: "",
         description: "",
         questionnaireId: questionnaire.id
-      });
+      };
 
-      await ctx.repositories.Page.insert({
-        pageType: "QuestionPage",
-        title: "",
-        description: "",
-        type: "General",
-        sectionId: section.id
-      });
-
+      await Resolvers.Mutation.createSection(root, section, ctx);
       return questionnaire;
     },
     updateQuestionnaire: (_, args, ctx) =>
@@ -36,7 +28,19 @@ const Resolvers = {
     deleteQuestionnaire: (_, { id }, ctx) =>
       ctx.repositories.Questionnaire.remove(id),
 
-    createSection: (root, args, ctx) => ctx.repositories.Section.insert(args),
+    createSection: async (root, args, ctx) => {
+      const section = await ctx.repositories.Section.insert(args);
+      const page = {
+        pageType: "QuestionPage",
+        title: "",
+        description: "",
+        type: "General",
+        sectionId: section.id
+      };
+
+      await ctx.repositories.Page.insert(page);
+      return section;
+    },
     updateSection: (_, args, ctx) => ctx.repositories.Section.update(args),
     deleteSection: (_, { id }, ctx) => ctx.repositories.Section.remove(id),
 
