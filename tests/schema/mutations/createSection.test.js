@@ -20,10 +20,15 @@ describe("createSection", () => {
   `;
 
   let repositories;
+  const QUESTIONNAIRE_ID = 123;
+  const SECTION_ID = 456;
 
   beforeEach(() => {
     repositories = {
-      Section: mockRepository()
+      Section: mockRepository({
+        insert: { id: SECTION_ID, title: "Test section" }
+      }),
+      Page: mockRepository({})
     };
   });
 
@@ -31,12 +36,20 @@ describe("createSection", () => {
     const fixture = {
       title: "Test section",
       description: "Test section description",
-      questionnaireId: 1
+      questionnaireId: QUESTIONNAIRE_ID
     };
 
     const result = await executeQuery(createSection, fixture, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Section.insert).toHaveBeenCalled();
+    expect(result.data.createSection.id).toBe(SECTION_ID);
+
+    expect(repositories.Section.insert).toHaveBeenCalledWith(
+      expect.objectContaining(fixture)
+    );
+
+    expect(repositories.Page.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ sectionId: SECTION_ID })
+    );
   });
 });
