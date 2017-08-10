@@ -3,5 +3,6 @@ module.exports = {
   Section: require("./SectionRepository"),
   Page: require("./PageRepository"),
   QuestionPage: require("./QuestionPageRepository"),
-  Answer: require("./AnswerRepository")
+  Answer: require("./AnswerRepository"),
+  Option: require("./OptionRepository")
 };

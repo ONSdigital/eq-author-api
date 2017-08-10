@@ -8,7 +8,8 @@ const Resolvers = {
     section: (parent, { id }, ctx) => ctx.repositories.Section.get(id),
     page: (parent, { id }, ctx) => ctx.repositories.Page.get(id),
     questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.get(id),
-    answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id)
+    answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id),
+    option: (root, { id }, ctx) => ctx.repositories.Option.get(id)
   },
 
   Mutation: {
@@ -55,9 +56,38 @@ const Resolvers = {
     deleteQuestionPage: (_, { id }, ctx) =>
       ctx.repositories.QuestionPage.remove(id),
 
-    createAnswer: (root, args, ctx) => ctx.repositories.Answer.insert(args),
+    createAnswer: async (root, args, ctx) => {
+      const answer = await ctx.repositories.Answer.insert(args);
+
+      if (answer.type === "Checkbox" || answer.type === "Radio") {
+        const defaultOptions = [];
+        const defaultOption = {
+          label: "",
+          description: "",
+          value: "",
+          qCode: "",
+          answerId: answer.id
+        };
+
+        defaultOptions.push(defaultOption);
+
+        if (answer.type === "Radio") {
+          defaultOptions.push(defaultOption);
+        }
+
+        defaultOptions.forEach(it =>
+          ctx.repositories.Option.insert(merge({}, it))
+        );
+      }
+
+      return answer;
+    },
     updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args),
-    deleteAnswer: (_, { id }, ctx) => ctx.repositories.Answer.remove(id)
+    deleteAnswer: (_, { id }, ctx) => ctx.repositories.Answer.remove(id),
+
+    createOption: (root, args, ctx) => ctx.repositories.Option.insert(args),
+    updateOption: (_, args, ctx) => ctx.repositories.Option.update(args),
+    deleteOption: (_, { id }, ctx) => ctx.repositories.Option.remove(id)
   },
 
   Questionnaire: {
