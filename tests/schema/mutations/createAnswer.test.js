@@ -37,7 +37,11 @@ describe("createAnswer", () => {
 
   beforeEach(() => {
     repositories = {
-      Answer: mockRepository()
+      Answer: mockRepository({
+        insert: {
+          type: "TextField"
+        }
+      })
     };
   });
 
