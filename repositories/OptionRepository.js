@@ -2,7 +2,7 @@ const { head, invert, map } = require("lodash/fp");
 const Option = require("../db/Option");
 const mapFields = require("../utils/mapFields");
 
-const mapping = { QuestionPageId: "questionPageId" };
+const mapping = { AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
@@ -15,7 +15,7 @@ module.exports.findAll = function findAll(
 };
 
 module.exports.get = function get(id) {
-  return Option.findById(id).then(head);
+  return Option.findById(id).then(fromDb);
 };
 
 module.exports.insert = function insert({

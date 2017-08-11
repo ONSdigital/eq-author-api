@@ -76,7 +76,7 @@ const Resolvers = {
         }
 
         defaultOptions.forEach(it =>
-          ctx.repositories.Option.insert(merge({}, it))
+          Resolvers.Mutation.createOption(root, it, ctx)
         );
       }
 
@@ -107,6 +107,11 @@ const Resolvers = {
   QuestionPage: {
     answers: ({ id }, args, ctx) =>
       ctx.repositories.Answer.findAll({ QuestionPageId: id })
+  },
+
+  Answer: {
+    options: ({ id }, args, ctx) =>
+      ctx.repositories.Option.findAll({ AnswerId: id })
   }
 };
 

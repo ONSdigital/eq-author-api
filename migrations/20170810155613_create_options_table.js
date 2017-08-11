@@ -11,7 +11,7 @@ exports.up = function(knex) {
     table.integer("childAnswerId");
 
     table
-      .integer("answerId")
+      .integer("AnswerId")
       .unsigned()
       .index()
       .references("id")
