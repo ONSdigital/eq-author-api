@@ -15,3 +15,7 @@ script:
   - docker build -t onsdigital/eq-author-api:$TAG -f Dockerfile .
   - echo "Pushing with tag [$TAG]"
   - docker push onsdigital/eq-author-api:$TAG
+
+branches:
+    only:
+        - master
