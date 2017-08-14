@@ -75,9 +75,11 @@ const Resolvers = {
           defaultOptions.push(defaultOption);
         }
 
-        defaultOptions.forEach(it =>
+        const promises = defaultOptions.map(it =>
           Resolvers.Mutation.createOption(root, it, ctx)
         );
+
+        await Promise.all(promises);
       }
 
       return answer;
@@ -110,6 +112,18 @@ const Resolvers = {
   },
 
   Answer: {
+    __resolveType: ({ type }) => {
+      switch (type) {
+        case "Checkbox":
+        case "Radio":
+          return "MultipleChoiceAnswer";
+        default:
+          return "BasicAnswer";
+      }
+    }
+  },
+
+  MultipleChoiceAnswer: {
     options: ({ id }, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: id })
   }
