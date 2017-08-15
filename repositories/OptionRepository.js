@@ -1,8 +1,8 @@
 const { head, invert, map } = require("lodash/fp");
-const Answer = require("../db/Answer");
+const Option = require("../db/Option");
 const mapFields = require("../utils/mapFields");
 
-const mapping = { QuestionPageId: "questionPageId" };
+const mapping = { AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
@@ -11,31 +11,29 @@ module.exports.findAll = function findAll(
   orderBy = "created_at",
   direction = "asc"
 ) {
-  return Answer.findAll(where).orderBy(orderBy, direction).then(map(fromDb));
+  return Option.findAll(where).orderBy(orderBy, direction).then(map(fromDb));
 };
 
 module.exports.get = function get(id) {
-  return Answer.findById(id).then(fromDb);
+  return Option.findById(id).then(fromDb);
 };
 
 module.exports.insert = function insert({
-  description,
-  guidance,
   label,
+  description,
+  value,
   qCode,
-  type,
-  mandatory,
-  questionPageId
+  childAnswerId,
+  answerId
 }) {
-  return Answer.create(
+  return Option.create(
     toDb({
-      description,
-      guidance,
       label,
+      description,
+      value,
       qCode,
-      type,
-      mandatory,
-      questionPageId
+      childAnswerId,
+      answerId
     })
   )
     .then(head)
@@ -44,25 +42,23 @@ module.exports.insert = function insert({
 
 module.exports.update = function update({
   id,
-  description,
-  guidance,
   label,
+  description,
+  value,
   qCode,
-  type,
-  mandatory
+  childAnswerId
 }) {
-  return Answer.update(id, {
-    description,
-    guidance,
+  return Option.update(id, {
     label,
+    description,
+    value,
     qCode,
-    type,
-    mandatory
+    childAnswerId
   })
     .then(head)
     .then(fromDb);
 };
 
 module.exports.remove = function remove(id) {
-  return Answer.destroy(id).then(head).then(fromDb);
+  return Option.destroy(id).then(head).then(fromDb);
 };

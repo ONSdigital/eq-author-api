@@ -1,5 +1,5 @@
 const graphqlTools = require("graphql-tools");
-const typeDefs = require("eq-author-graphql-schema/schema");
+const typeDefs = require("eq-author-graphql-schema");
 const resolvers = require("./resolvers");
 
 /**
