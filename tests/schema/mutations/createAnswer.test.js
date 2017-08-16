@@ -44,7 +44,9 @@ describe("createAnswer", () => {
     repositories = {
       Answer: mockRepository({
         insert: {
-          type: "TextField"
+          id: 1,
+          type: "TextField",
+          questionPageId: 1
         }
       })
     };
@@ -82,7 +84,9 @@ describe("createAnswer", () => {
     const createFixture = answerType => {
       repositories.Answer = mockRepository({
         insert: {
-          type: answerType
+          id: 1,
+          type: answerType,
+          questionPageId: 1
         }
       });
       return {
