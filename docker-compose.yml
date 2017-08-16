@@ -18,6 +18,9 @@ services:
       - GRAPHIQL_ENDPOINT=/graphiql
       - GRAPHIQL_PRETTY=true
       - NODE_ENV=development
+    entrypoint:
+      - yarn
+      - start:dev
   db:
     image: postgres
     environment:

@@ -4,12 +4,10 @@
   "main": "app.js",
   "license": "MIT",
   "scripts": {
-    "start": "yarn start-app",
+    "start": "yarn knex -- migrate:latest && nodemon",
+    "start:dev": "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
     "lint": "eslint .",
     "test": "jest .",
-    "start-app": "nodemon --inspect=0.0.0.0:5858",
-    "start-db": "docker run -ti sta-p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=postgres --name postgres-db --rm postgres",
-    "stop-db": "docker stop postgres-db",
     "knex": "knex --knexfile config/knexfile.js --cwd .",
     "precommit": "lint-staged"
   },

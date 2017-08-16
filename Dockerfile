@@ -3,7 +3,7 @@ EXPOSE 4000
 ENV PORT=4000
 WORKDIR /app
 
-ENTRYPOINT ["sh", "docker-entrypoint.sh"]
+ENTRYPOINT ["yarn", "start"]
 
 COPY . /app
 RUN yarn install
