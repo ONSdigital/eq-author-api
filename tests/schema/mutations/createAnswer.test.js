@@ -29,6 +29,11 @@ describe("createAnswer", () => {
         type,
         mandatory,
         questionPageId
+        ... on MultipleChoiceAnswer {
+          options {
+            id
+          }
+        }
       }
     }
   `;
@@ -37,7 +42,13 @@ describe("createAnswer", () => {
 
   beforeEach(() => {
     repositories = {
-      Answer: mockRepository()
+      Answer: mockRepository({
+        insert: {
+          id: 1,
+          type: "TextField",
+          questionPageId: 1
+        }
+      })
     };
   });
 
@@ -55,5 +66,59 @@ describe("createAnswer", () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Answer.insert).toHaveBeenCalled();
+  });
+
+  describe("multiple choice answers", () => {
+    let repositories;
+
+    beforeEach(() => {
+      repositories = {
+        Option: mockRepository({
+          insert: {
+            type: "Option"
+          }
+        })
+      };
+    });
+
+    const createFixture = answerType => {
+      repositories.Answer = mockRepository({
+        insert: {
+          id: 1,
+          type: answerType,
+          questionPageId: 1
+        }
+      });
+      return {
+        title: "Test answer",
+        description: "Test answer description",
+        guidance: "Test answer guidance",
+        type: answerType,
+        mandatory: false,
+        questionPageId: 1
+      };
+    };
+
+    it("should add a single default option for checkbox answers", async () => {
+      const fixture = createFixture("Checkbox");
+
+      const result = await executeQuery(createAnswer, fixture, {
+        repositories
+      });
+
+      expect(result.errors).toBeUndefined();
+      expect(repositories.Option.insert).toHaveBeenCalledTimes(1);
+    });
+
+    it("should create two default options for radio answers", async () => {
+      const fixture = createFixture("Radio");
+
+      const result = await executeQuery(createAnswer, fixture, {
+        repositories
+      });
+
+      expect(result.errors).toBeUndefined();
+      expect(repositories.Option.insert).toHaveBeenCalledTimes(2);
+    });
   });
 });
