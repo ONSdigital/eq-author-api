@@ -110,14 +110,16 @@ const Resolvers = {
 
   QuestionPage: {
     answers: ({ id }, args, ctx) =>
-      ctx.repositories.Answer.findAll({ QuestionPageId: id })
+      ctx.repositories.Answer.findAll({ QuestionPageId: id }),
+    section: ({ sectionId }, args, ctx) =>
+      ctx.repositories.Section.get(sectionId)
   },
 
   Answer: {
     __resolveType: ({ type }) =>
       includes(["Checkbox", "Radio"], type)
-    ? "MultipleChoiceAnswer"
-      : "BasicAnswer"
+        ? "MultipleChoiceAnswer"
+        : "BasicAnswer"
   },
 
   BasicAnswer: {
