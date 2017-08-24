@@ -11,7 +11,9 @@ describe("QuestionPage query", () => {
         guidance,
         type,
         mandatory,
-        sectionId
+        section {
+          id
+        }
       }
     }
   `;

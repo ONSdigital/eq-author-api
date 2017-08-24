@@ -1,8 +1,7 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("updateAnswer" , () => {
-
+describe("updateAnswer", () => {
   const updateAnswer = `
     mutation UpdateAnswer(
       $id: Int!,
@@ -29,7 +28,6 @@ describe("updateAnswer" , () => {
         label,
         type
         mandatory
-        questionPageId
       }
     }
   `;
@@ -38,8 +36,8 @@ describe("updateAnswer" , () => {
 
   beforeEach(() => {
     repositories = {
-      Answer : mockRepository()
-    }
+      Answer: mockRepository()
+    };
   });
 
   it("should allow update of Answer", async () => {

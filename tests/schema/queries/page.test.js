@@ -8,7 +8,9 @@ describe("Page query", () => {
         id,
         title,
         description,
-        sectionId
+        section {
+          id
+        }
       }
     }
   `;

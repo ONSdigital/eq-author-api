@@ -1,8 +1,7 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("answer query" , () => {
-
+describe("answer query", () => {
   const answer = `
     query GetAnswer($id: Int!) {
       answer(id: $id) {
@@ -12,7 +11,9 @@ describe("answer query" , () => {
         label,
         mandatory,
         type,
-        questionPageId
+        questionPage {
+          id
+        }
       }
     }
   `;
@@ -22,8 +23,8 @@ describe("answer query" , () => {
 
   beforeEach(() => {
     repositories = {
-      Answer : mockRepository()
-    }
+      Answer: mockRepository()
+    };
   });
 
   it("should fetch answer by id", async () => {

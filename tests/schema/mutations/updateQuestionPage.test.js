@@ -24,8 +24,7 @@ describe("updateQuestionPage", () => {
         description,
         guidance,
         type,
-        mandatory,
-        sectionId
+        mandatory
       }
     }
   `;

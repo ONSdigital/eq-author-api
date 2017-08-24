@@ -24,8 +24,7 @@ describe("createQuestionPage", () => {
         description,
         guidance,
         type,
-        mandatory,
-        sectionId
+        mandatory
       }
     }
   `;

@@ -16,7 +16,6 @@ describe("createPage", () => {
         id,
         title,
         description,
-        sectionId
         ... on QuestionPage {
           guidance
         }
