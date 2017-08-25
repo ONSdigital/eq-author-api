@@ -123,12 +123,12 @@ const Resolvers = {
   },
 
   BasicAnswer: {
-    questionPage: (answer, args, ctx) =>
+    page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId)
   },
 
   MultipleChoiceAnswer: {
-    questionPage: (answer, args, ctx) =>
+    page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id })

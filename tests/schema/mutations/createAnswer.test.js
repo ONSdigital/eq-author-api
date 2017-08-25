@@ -45,7 +45,7 @@ describe("createAnswer", () => {
         insert: {
           id: 1,
           type: "TextField",
-          questionPage: {
+          page: {
             id: 1
           }
         }

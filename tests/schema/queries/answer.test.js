@@ -11,7 +11,7 @@ describe("answer query", () => {
         label,
         mandatory,
         type,
-        questionPage {
+        page {
           id
         }
       }

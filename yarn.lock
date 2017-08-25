@@ -891,9 +891,9 @@ end-of-stream@1.0.0:
   dependencies:
     once "~1.3.0"
 
-"eq-author-graphql-schema@https://github.com/ONSdigital/eq-author-graphql-schema.git#replace-id-with-entities":
+"eq-author-graphql-schema@https://github.com/ONSdigital/eq-author-graphql-schema.git#b73c17a":
   version "1.0.0"
-  resolved "https://github.com/ONSdigital/eq-author-graphql-schema.git#b2b5347835f1dc5425555b09395bd44c2da535f2"
+  resolved "https://github.com/ONSdigital/eq-author-graphql-schema.git#b73c17a"
 
 errno@^0.1.4:
   version "0.1.4"
