@@ -27,8 +27,7 @@ describe("createAnswer", () => {
         qCode,
         label,
         type,
-        mandatory,
-        questionPageId
+        mandatory
         ... on MultipleChoiceAnswer {
           options {
             id
@@ -46,7 +45,9 @@ describe("createAnswer", () => {
         insert: {
           id: 1,
           type: "TextField",
-          questionPageId: 1
+          page: {
+            id: 1
+          }
         }
       })
     };

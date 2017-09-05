@@ -6,7 +6,6 @@ describe("Section query", () => {
     query GetSection($id: Int!) {
       section(id: $id) {
         id,
-        title,
         description
       }
     }
@@ -16,8 +15,6 @@ describe("Section query", () => {
     query GetSection($id: Int!) {
       section(id: $id) {
         id,
-        title,
-        description,
         pages {
           id
         }
@@ -25,13 +22,32 @@ describe("Section query", () => {
     }
   `;
 
+  const sectionWithQuestionnaire = `
+    query GetSection($id: Int!) {
+      section(id: $id) {
+        id,
+        questionnaire {
+          id
+        }
+      }
+    }
+  `;
+
   const id = 1;
+  const questionnaireId = 2;
+
   let repositories;
 
   beforeEach(() => {
     repositories = {
-      Section: mockRepository(),
-      Page: mockRepository()
+      Section: mockRepository({
+        get: {
+          id,
+          questionnaireId
+        }
+      }),
+      Page: mockRepository(),
+      Questionnaire: mockRepository()
     };
   });
 
@@ -44,11 +60,6 @@ describe("Section query", () => {
   });
 
   it("should have an association with Pages", async () => {
-    repositories.Section.get.mockImplementation(() => ({
-      id,
-      title: "test section title"
-    }));
-
     const result = await executeQuery(
       sectionWithPages,
       { id },
@@ -58,5 +69,19 @@ describe("Section query", () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.Section.get).toHaveBeenCalledWith(id);
     expect(repositories.Page.findAll).toHaveBeenCalledWith({ SectionId: id });
+  });
+
+  it("should have an association with Questionnaire", async () => {
+    const result = await executeQuery(
+      sectionWithQuestionnaire,
+      { id },
+      { repositories }
+    );
+
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Section.get).toHaveBeenCalledWith(id);
+    expect(repositories.Questionnaire.get).toHaveBeenCalledWith(
+      questionnaireId
+    );
   });
 });

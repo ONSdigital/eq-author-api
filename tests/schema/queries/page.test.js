@@ -5,21 +5,37 @@ describe("Page query", () => {
   const page = `
     query GetPage($id: Int!) {
       page(id: $id) {
+        id
+      }
+    }
+  `;
+
+  const pageWithSection = `
+    query GetPage($id: Int!) {
+      page(id: $id) {
         id,
-        title,
-        description,
-        sectionId
+        section {
+          id
+        }
       }
     }
   `;
 
   const id = 1;
+  const sectionId = 2;
   let repositories;
 
   beforeEach(() => {
     repositories = {
-      Page: mockRepository(),
-      QuestionPage: mockRepository()
+      Page: mockRepository({
+        get: {
+          id,
+          sectionId,
+          pageType: "QuestionPage"
+        }
+      }),
+      QuestionPage: mockRepository(),
+      Section: mockRepository()
     };
   });
 
@@ -29,5 +45,17 @@ describe("Page query", () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.Page.get).toHaveBeenCalledWith(id);
     expect(repositories.QuestionPage.findAll).not.toHaveBeenCalled();
+  });
+
+  it("should have association with Section", async () => {
+    const result = await executeQuery(
+      pageWithSection,
+      { id },
+      { repositories }
+    );
+
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Page.get).toHaveBeenCalledWith(id);
+    expect(repositories.Section.get).toHaveBeenCalledWith(sectionId);
   });
 });

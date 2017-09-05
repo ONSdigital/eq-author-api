@@ -1,4 +1,4 @@
-const { merge } = require("lodash");
+const { merge, includes } = require("lodash");
 
 const Resolvers = {
   Query: {
@@ -99,7 +99,9 @@ const Resolvers = {
 
   Section: {
     pages: (section, args, ctx) =>
-      ctx.repositories.Page.findAll({ SectionId: section.id })
+      ctx.repositories.Page.findAll({ SectionId: section.id }),
+    questionnaire: (section, args, ctx) =>
+      ctx.repositories.Questionnaire.get(section.questionnaireId)
   },
 
   Page: {
@@ -108,24 +110,32 @@ const Resolvers = {
 
   QuestionPage: {
     answers: ({ id }, args, ctx) =>
-      ctx.repositories.Answer.findAll({ QuestionPageId: id })
+      ctx.repositories.Answer.findAll({ QuestionPageId: id }),
+    section: ({ sectionId }, args, ctx) =>
+      ctx.repositories.Section.get(sectionId)
   },
 
   Answer: {
-    __resolveType: ({ type }) => {
-      switch (type) {
-        case "Checkbox":
-        case "Radio":
-          return "MultipleChoiceAnswer";
-        default:
-          return "BasicAnswer";
-      }
-    }
+    __resolveType: ({ type }) =>
+      includes(["Checkbox", "Radio"], type)
+        ? "MultipleChoiceAnswer"
+        : "BasicAnswer"
+  },
+
+  BasicAnswer: {
+    page: (answer, args, ctx) =>
+      ctx.repositories.QuestionPage.get(answer.questionPageId)
   },
 
   MultipleChoiceAnswer: {
-    options: ({ id }, args, ctx) =>
-      ctx.repositories.Option.findAll({ AnswerId: id })
+    page: (answer, args, ctx) =>
+      ctx.repositories.QuestionPage.get(answer.questionPageId),
+    options: (answer, args, ctx) =>
+      ctx.repositories.Option.findAll({ AnswerId: answer.id })
+  },
+
+  Option: {
+    answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
   }
 };
 

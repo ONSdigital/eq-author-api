@@ -16,7 +16,6 @@ describe("updatePage", () => {
         id,
         title,
         description,
-        sectionId
         ... on QuestionPage {
           guidance
         }
