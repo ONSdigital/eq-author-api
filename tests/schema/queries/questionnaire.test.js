@@ -5,18 +5,13 @@ describe("questionnaire query", () => {
   const questionnaire = `
     query GetQuestionnaire($id : Int!) {
       questionnaire(id: $id) {
-        id,
-        title,
-        description,
-        navigation,
-        legalBasis,
-        theme
+        id
       }
     }
   `;
 
-  const questionnaireWithPages = `
-    query GetQuestionnaireWithPages($id : Int!) {
+  const questionnaireWithSections = `
+    query GetQuestionnaireWithSections($id : Int!) {
       questionnaire(id: $id) {
         id,
         sections {
@@ -31,7 +26,9 @@ describe("questionnaire query", () => {
 
   beforeEach(() => {
     repositories = {
-      Questionnaire: mockRepository(),
+      Questionnaire: mockRepository({
+        get: { id }
+      }),
       Section: mockRepository()
     };
   });
@@ -45,10 +42,8 @@ describe("questionnaire query", () => {
   });
 
   it("should have an association with Sections", async () => {
-    repositories.Questionnaire.get.mockImplementation(() => ({ id }));
-
     const result = await executeQuery(
-      questionnaireWithPages,
+      questionnaireWithSections,
       { id },
       { repositories }
     );
