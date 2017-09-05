@@ -132,6 +132,10 @@ const Resolvers = {
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id })
+  },
+
+  Option: {
+    answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
   }
 };
 
