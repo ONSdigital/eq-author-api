@@ -23,7 +23,6 @@ query GetQuestionnaire {
             guidance
             qCode
             label
-            mandatory
             type
             questionPageId
           }
@@ -134,7 +133,6 @@ mutation CreateQuestionPage(
   $description: String!
   $guidance: String
   $type: QuestionType!
-  $mandatory: Boolean
   $sectionId: Int!
 ) {
   createQuestionPage(
@@ -142,7 +140,6 @@ mutation CreateQuestionPage(
     description: $description
     guidance: $guidance
     type: $type
-    mandatory: $mandatory
     sectionId: $sectionId
   ) {
     id
@@ -155,7 +152,6 @@ mutation UpdateQuestionPage(
   $description: String
   $guidance: String
   $type: QuestionType
-  $mandatory: Boolean
 ) {
   updateQuestionPage(
     id: $id
@@ -163,7 +159,6 @@ mutation UpdateQuestionPage(
     description: $description
     guidance: $guidance
     type: $type
-    mandatory: $mandatory
   ) {
     id
   }

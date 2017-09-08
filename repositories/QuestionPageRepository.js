@@ -25,7 +25,6 @@ module.exports.insert = function insert({
   description,
   guidance,
   type,
-  mandatory,
   sectionId
 }) {
   return QuestionPage.create(
@@ -34,7 +33,6 @@ module.exports.insert = function insert({
       description,
       guidance,
       type,
-      mandatory,
       sectionId
     })
   )
@@ -47,15 +45,13 @@ module.exports.update = function update({
   title,
   description,
   guidance,
-  type,
-  mandatory
+  type
 }) {
   return QuestionPage.update(id, {
     title,
     description,
     guidance,
-    type,
-    mandatory
+    type
   })
     .then(head)
     .then(fromDb);

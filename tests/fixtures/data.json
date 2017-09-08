@@ -19,7 +19,6 @@
     "description": "Please enter your thoughts and feelings about that much beloved dairy product",
     "guidance": "this is some guidance",
     "type": "General",
-    "mandatory": true,
     "sectionId": 1
   },
 

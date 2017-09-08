@@ -9,7 +9,6 @@ describe("updateQuestionPage", () => {
       $description: String!,
       $guidance: String!,
       $type: QuestionType!,
-      $mandatory: Boolean
     ) {
       updateQuestionPage(
         id: $id,
@@ -17,14 +16,12 @@ describe("updateQuestionPage", () => {
         description: $description,
         guidance: $guidance,
         type: $type,
-        mandatory: $mandatory
       ) {
         id,
         title,
         description,
         guidance,
         type,
-        mandatory
       }
     }
   `;
@@ -43,8 +40,7 @@ describe("updateQuestionPage", () => {
       title: "Updated question title",
       description: "This is an updated question description",
       guidance: "Updated question description",
-      type: "DateRange",
-      mandatory: false
+      type: "DateRange"
     };
 
     const result = await executeQuery(updateQuestionPage, fixture, {
