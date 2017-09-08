@@ -7,3 +7,4 @@ ENTRYPOINT ["yarn", "start"]
 
 COPY . /app
 RUN yarn install
+RUN yarn upgrade eq-author-graphql-schema
