@@ -8,7 +8,6 @@ describe("createQuestionPage", () => {
       $description: String!,
       $guidance: String!,
       $type: QuestionType!,
-      $mandatory: Boolean,
       $sectionId: Int!
     ) {
       createQuestionPage(
@@ -16,15 +15,13 @@ describe("createQuestionPage", () => {
         description: $description,
         guidance: $guidance,
         type: $type,
-        mandatory: $mandatory,
         sectionId: $sectionId
       ) {
         id,
         title,
         description,
         guidance,
-        type,
-        mandatory
+        type
       }
     }
   `;
@@ -43,7 +40,6 @@ describe("createQuestionPage", () => {
       description: "Test question description",
       guidance: "Test question guidance",
       type: "General",
-      mandatory: true,
       sectionId: 1
     };
 
