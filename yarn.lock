@@ -891,6 +891,7 @@ end-of-stream@1.0.0:
   dependencies:
     once "~1.3.0"
 
+<<<<<<< 9d6fe7769069ee1a6a6532615e044e89a5cfbd94
 eq-author-graphql-schema@ONSDigital/eq-author-graphql-schema#1d77674:
   version "1.0.0"
   uid "1d77674"
@@ -899,6 +900,11 @@ eq-author-graphql-schema@ONSDigital/eq-author-graphql-schema#1d77674:
 eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#1d77674:
   version "1.0.0"
   resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/1d77674"
+=======
+eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#16132f5:
+  version "1.0.0"
+  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/16132f5"
+>>>>>>> Remove type from QuestionPage.
 
 errno@^0.1.4:
   version "0.1.4"
