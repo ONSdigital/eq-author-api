@@ -35,7 +35,6 @@ const Resolvers = {
         pageType: "QuestionPage",
         title: "",
         description: "",
-        type: "General",
         sectionId: section.id
       };
 
