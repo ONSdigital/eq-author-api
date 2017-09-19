@@ -1,8 +1,7 @@
 const { head, map } = require("lodash/fp");
 const Questionnaire = require("../db/Questionnaire");
 const mapFields = require("../utils/mapFields");
-
-const mapping = { created_at: "createdAt" };
+const mapping = { created_at: "createdAt" }; // eslint-disable-line camelcase
 const fromDb = mapFields(mapping);
 
 module.exports.get = function(id) {
