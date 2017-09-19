@@ -944,9 +944,9 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#16132f5:
+eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#abea133:
   version "1.0.0"
-  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/16132f5"
+  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/abea133"
 
 errno@^0.1.4:
   version "0.1.4"
