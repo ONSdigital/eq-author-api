@@ -23,7 +23,7 @@
     "colors": "^1.1.2",
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
-    "eq-author-graphql-schema": "ONSdigital/eq-author-graphql-schema#b34dc52",
+    "eq-author-graphql-schema": "ONSdigital/eq-author-graphql-schema#ff87872",
     "express": "^4.15.3",
     "graphql": "^0.9.6",
     "graphql-iso-date": "^3.3.0",

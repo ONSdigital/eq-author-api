@@ -948,6 +948,10 @@ eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#b34dc52:
   version "1.0.0"
   resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/b34dc52"
 
+eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#ff87872:
+  version "1.0.0"
+  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/ff87872089cbfde430e3dbe9e90c1301fa01ae5d"
+
 errno@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/errno/-/errno-0.1.4.tgz#b896e23a9e5e8ba33871fc996abd3635fc9a1c7d"
