@@ -1,4 +1,5 @@
 const { merge, includes } = require("lodash");
+const GraphQLDate = require("graphql-iso-date").GraphQLDate;
 
 const Resolvers = {
   Query: {
@@ -135,7 +136,9 @@ const Resolvers = {
 
   Option: {
     answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
-  }
+  },
+
+  Date: GraphQLDate
 };
 
 const Deprecations = {
