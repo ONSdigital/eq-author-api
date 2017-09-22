@@ -944,9 +944,9 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#16132f5:
+eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#4620141:
   version "1.0.0"
-  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/16132f5"
+  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/4620141"
 
 errno@^0.1.4:
   version "0.1.4"
@@ -1669,6 +1669,10 @@ got@^6.7.1:
 graceful-fs@^4.1.11, graceful-fs@^4.1.2:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
+
+graphql-iso-date@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/graphql-iso-date/-/graphql-iso-date-3.3.0.tgz#cbe434b41e035e806338121b1b2b509a0f72bb80"
 
 graphql-relay@^0.5.2:
   version "0.5.2"
