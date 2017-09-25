@@ -1,21 +1,29 @@
-const { merge, includes } = require("lodash");
-const GraphQLDate = require("graphql-iso-date").GraphQLDate;
+const { GraphQLDate } = require("graphql-iso-date");
+const { includes } = require("lodash");
+
+const getId = args => args.newId || args.id;
+const getNewId = entity => entity.id.toString(10);
+const getInputArgs = args => args.input || args;
+const getIdFromArgs = args => getInputArgs(args).id;
 
 const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
-    questionnaire: (root, { id }, ctx) =>
-      ctx.repositories.Questionnaire.get(id),
-    section: (parent, { id }, ctx) => ctx.repositories.Section.get(id),
-    page: (parent, { id }, ctx) => ctx.repositories.Page.get(id),
-    questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.get(id),
-    answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id),
-    option: (root, { id }, ctx) => ctx.repositories.Option.get(id)
+    questionnaire: (root, args, ctx) =>
+      ctx.repositories.Questionnaire.get(getId(args)),
+    section: (parent, args, ctx) => ctx.repositories.Section.get(getId(args)),
+    page: (parent, args, ctx) => ctx.repositories.Page.get(getId(args)),
+    questionPage: (_, args, ctx) =>
+      ctx.repositories.QuestionPage.get(getId(args)),
+    answer: (root, args, ctx) => ctx.repositories.Answer.get(getId(args)),
+    option: (root, args, ctx) => ctx.repositories.Option.get(getId(args))
   },
 
   Mutation: {
     createQuestionnaire: async (root, args, ctx) => {
-      const questionnaire = await ctx.repositories.Questionnaire.insert(args);
+      const questionnaire = await ctx.repositories.Questionnaire.insert(
+        getInputArgs(args)
+      );
       const section = {
         title: "",
         description: "",
@@ -26,12 +34,12 @@ const Resolvers = {
       return questionnaire;
     },
     updateQuestionnaire: (_, args, ctx) =>
-      ctx.repositories.Questionnaire.update(args),
-    deleteQuestionnaire: (_, { id }, ctx) =>
-      ctx.repositories.Questionnaire.remove(id),
+      ctx.repositories.Questionnaire.update(getInputArgs(args)),
+    deleteQuestionnaire: (_, args, ctx) =>
+      ctx.repositories.Questionnaire.remove(getIdFromArgs(args)),
 
     createSection: async (root, args, ctx) => {
-      const section = await ctx.repositories.Section.insert(args);
+      const section = await ctx.repositories.Section.insert(getInputArgs(args));
       const page = {
         pageType: "QuestionPage",
         title: "",
@@ -42,22 +50,27 @@ const Resolvers = {
       await ctx.repositories.Page.insert(page);
       return section;
     },
-    updateSection: (_, args, ctx) => ctx.repositories.Section.update(args),
-    deleteSection: (_, { id }, ctx) => ctx.repositories.Section.remove(id),
+    updateSection: (_, args, ctx) =>
+      ctx.repositories.Section.update(getInputArgs(args)),
+    deleteSection: (_, args, ctx) =>
+      ctx.repositories.Section.remove(getIdFromArgs(args)),
 
-    createPage: (root, args, ctx) => ctx.repositories.Page.insert(args),
-    updatePage: (_, args, ctx) => ctx.repositories.Page.update(args),
-    deletePage: (_, { id }, ctx) => ctx.repositories.Page.remove(id),
+    createPage: (root, args, ctx) =>
+      ctx.repositories.Page.insert(getInputArgs(args)),
+    updatePage: (_, args, ctx) =>
+      ctx.repositories.Page.update(getInputArgs(args)),
+    deletePage: (_, args, ctx) =>
+      ctx.repositories.Page.remove(getIdFromArgs(args)),
 
     createQuestionPage: (root, args, ctx) =>
-      ctx.repositories.QuestionPage.insert(args),
+      ctx.repositories.QuestionPage.insert(getInputArgs(args)),
     updateQuestionPage: (_, args, ctx) =>
-      ctx.repositories.QuestionPage.update(args),
-    deleteQuestionPage: (_, { id }, ctx) =>
-      ctx.repositories.QuestionPage.remove(id),
+      ctx.repositories.QuestionPage.update(getInputArgs(args)),
+    deleteQuestionPage: (_, args, ctx) =>
+      ctx.repositories.QuestionPage.remove(getIdFromArgs(args)),
 
     createAnswer: async (root, args, ctx) => {
-      const answer = await ctx.repositories.Answer.insert(args);
+      const answer = await ctx.repositories.Answer.insert(getInputArgs(args));
 
       if (answer.type === "Checkbox" || answer.type === "Radio") {
         const defaultOptions = [];
@@ -84,20 +97,27 @@ const Resolvers = {
 
       return answer;
     },
-    updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args),
-    deleteAnswer: (_, { id }, ctx) => ctx.repositories.Answer.remove(id),
+    updateAnswer: (_, args, ctx) =>
+      ctx.repositories.Answer.update(getInputArgs(args)),
+    deleteAnswer: (_, args, ctx) =>
+      ctx.repositories.Answer.remove(getIdFromArgs(args)),
 
-    createOption: (root, args, ctx) => ctx.repositories.Option.insert(args),
-    updateOption: (_, args, ctx) => ctx.repositories.Option.update(args),
-    deleteOption: (_, { id }, ctx) => ctx.repositories.Option.remove(id)
+    createOption: (root, args, ctx) =>
+      ctx.repositories.Option.insert(getInputArgs(args)),
+    updateOption: (_, args, ctx) =>
+      ctx.repositories.Option.update(getInputArgs(args)),
+    deleteOption: (_, args, ctx) =>
+      ctx.repositories.Option.remove(getIdFromArgs(args))
   },
 
   Questionnaire: {
+    newId: getNewId,
     sections: (questionnaire, args, ctx) =>
       ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id })
   },
 
   Section: {
+    newId: getNewId,
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ SectionId: section.id }),
     questionnaire: (section, args, ctx) =>
@@ -109,6 +129,7 @@ const Resolvers = {
   },
 
   QuestionPage: {
+    newId: getNewId,
     answers: ({ id }, args, ctx) =>
       ctx.repositories.Answer.findAll({ QuestionPageId: id }),
     section: ({ sectionId }, args, ctx) =>
@@ -123,11 +144,13 @@ const Resolvers = {
   },
 
   BasicAnswer: {
+    newId: getNewId,
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId)
   },
 
   MultipleChoiceAnswer: {
+    newId: getNewId,
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
@@ -135,24 +158,11 @@ const Resolvers = {
   },
 
   Option: {
+    newId: getNewId,
     answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
   },
 
   Date: GraphQLDate
 };
 
-const Deprecations = {
-  Query: {
-    group: Resolvers.Query.section
-  },
-  Mutation: {
-    createGroup: Resolvers.Mutation.createSection,
-    updateGroup: Resolvers.Mutation.updateSection,
-    deleteGroup: Resolvers.Mutation.deleteSection
-  },
-  Questionnaire: {
-    groups: Resolvers.Questionnaire.sections
-  }
-};
-
-module.exports = merge({}, Resolvers, Deprecations);
+module.exports = Resolvers;
