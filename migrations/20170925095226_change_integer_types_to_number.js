@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema.raw(`
     ALTER TABLE "Answers"
     DROP CONSTRAINT "Answers_type_check",
@@ -16,7 +16,7 @@ exports.up = function(knex, Promise) {
   `);
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.raw(`
     ALTER TABLE "Answers"
     DROP CONSTRAINT "Answers_type_check",
