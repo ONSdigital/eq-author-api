@@ -3,18 +3,8 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("createQuestionPage", () => {
   const createQuestionPage = `
-    mutation CreateQuestionPage(
-      $title: String!,
-      $description: String!,
-      $guidance: String!,
-      $sectionId: Int!
-    ) {
-      createQuestionPage(
-        title: $title,
-        description: $description,
-        guidance: $guidance,
-        sectionId: $sectionId
-      ) {
+    mutation CreateQuestionPage($input: CreateQuestionPageInput!) {
+      createQuestionPage(input: $input) {
         id,
         title,
         description,
@@ -32,18 +22,20 @@ describe("createQuestionPage", () => {
   });
 
   it("should allow creation of Question", async () => {
-    const fixture = {
+    const input = {
       title: "Test question",
       description: "Test question description",
       guidance: "Test question guidance",
-      sectionId: 1
+      sectionId: "1"
     };
 
-    const result = await executeQuery(createQuestionPage, fixture, {
-      repositories
-    });
+    const result = await executeQuery(
+      createQuestionPage,
+      { input },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.QuestionPage.insert).toHaveBeenCalled();
+    expect(repositories.QuestionPage.insert).toHaveBeenCalledWith(input);
   });
 });

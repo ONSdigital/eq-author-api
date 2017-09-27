@@ -3,24 +3,8 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("updateAnswer", () => {
   const updateAnswer = `
-    mutation UpdateAnswer(
-      $id: Int!,
-      $description: String,
-      $guidance: String,
-      $qCode: String,
-      $label: String,
-      $type: AnswerType!,
-      $mandatory: Boolean
-    ) {
-      updateAnswer(
-        id: $id,
-        description: $description,
-        guidance: $guidance,
-        qCode: $qCode,
-        label: $label,
-        type: $type,
-        mandatory: $mandatory,
-      ) {
+    mutation UpdateAnswer($input: UpdateAnswerInput!) {
+      updateAnswer(input: $input) {
         id,
         description,
         guidance,
@@ -41,8 +25,8 @@ describe("updateAnswer", () => {
   });
 
   it("should allow update of Answer", async () => {
-    const fixture = {
-      id: 1,
+    const input = {
+      id: "1",
       description: "This is an updated answer description",
       guidance: "This is an update answer guidance",
       qCode: "123",
@@ -51,9 +35,13 @@ describe("updateAnswer", () => {
       mandatory: false
     };
 
-    const result = await executeQuery(updateAnswer, fixture, { repositories });
+    const result = await executeQuery(
+      updateAnswer,
+      { input },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.update).toHaveBeenCalled();
+    expect(repositories.Answer.update).toHaveBeenCalledWith(input);
   });
 });

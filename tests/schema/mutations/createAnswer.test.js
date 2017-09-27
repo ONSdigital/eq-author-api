@@ -3,24 +3,8 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("createAnswer", () => {
   const createAnswer = `
-    mutation CreateAnswer(
-      $description: String,
-      $guidance: String,
-      $qCode: String,
-      $label: String,
-      $type: AnswerType!,
-      $mandatory: Boolean!,
-      $questionPageId: Int!
-    ) {
-      createAnswer(
-        description: $description,
-        guidance: $guidance,
-        qCode: $qCode,
-        label: $label,
-        type: $type,
-        mandatory: $mandatory,
-        questionPageId: $questionPageId
-      ) {
+    mutation CreateAnswer($input: CreateAnswerInput!) {
+      createAnswer(input: $input) {
         id,
         description,
         guidance,
@@ -43,10 +27,10 @@ describe("createAnswer", () => {
     repositories = {
       Answer: mockRepository({
         insert: {
-          id: 1,
+          id: "1",
           type: "TextField",
           page: {
-            id: 1
+            id: "1"
           }
         }
       })
@@ -54,19 +38,22 @@ describe("createAnswer", () => {
   });
 
   it("should allow creation of Answer", async () => {
-    const fixture = {
-      title: "Test answer",
+    const input = {
       description: "Test answer description",
       guidance: "Test answer guidance",
       type: "TextField",
       mandatory: false,
-      questionPageId: 1
+      questionPageId: "1"
     };
 
-    const result = await executeQuery(createAnswer, fixture, { repositories });
+    const result = await executeQuery(
+      createAnswer,
+      { input },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.insert).toHaveBeenCalled();
+    expect(repositories.Answer.insert).toHaveBeenCalledWith(input);
   });
 
   describe("multiple choice answers", () => {
@@ -85,18 +72,19 @@ describe("createAnswer", () => {
     const createFixture = answerType => {
       repositories.Answer = mockRepository({
         insert: {
-          id: 1,
+          id: "1",
           type: answerType,
-          questionPageId: 1
+          questionPageId: "1"
         }
       });
       return {
-        title: "Test answer",
-        description: "Test answer description",
-        guidance: "Test answer guidance",
-        type: answerType,
-        mandatory: false,
-        questionPageId: 1
+        input: {
+          description: "Test answer description",
+          guidance: "Test answer guidance",
+          type: answerType,
+          mandatory: false,
+          questionPageId: "1"
+        }
       };
     };
 

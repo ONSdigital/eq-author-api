@@ -1,25 +1,10 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("updateQuestionnaire" , () => {
-
+describe("updateQuestionnaire", () => {
   const updateQuestionnaire = `
-    mutation UpdateQuestionnaire(
-      $id: Int!,
-      $title: String!,
-      $description: String!,
-      $theme: String!,
-      $legalBasis: LegalBasis!,
-      $navigation: Boolean
-    ) {
-      updateQuestionnaire(
-        id: $id,
-        title: $title,
-        description: $description,
-        theme: $theme,
-        legalBasis: $legalBasis,
-        navigation: $navigation
-      ) {
+    mutation UpdateQuestionnaire($input: UpdateQuestionnaireInput!) {
+      updateQuestionnaire(input: $input) {
         id
       }
     }
@@ -29,13 +14,13 @@ describe("updateQuestionnaire" , () => {
 
   beforeEach(() => {
     repositories = {
-      Questionnaire : mockRepository()
-    }
+      Questionnaire: mockRepository()
+    };
   });
 
   it("should allow update of Questionnaire", async () => {
-    const fixture = {
-      id: 1,
+    const input = {
+      id: "1",
       title: "Test questionnaire",
       description: "This is a test questionnaire",
       theme: "test theme",
@@ -43,9 +28,13 @@ describe("updateQuestionnaire" , () => {
       navigation: false
     };
 
-    const result = await executeQuery(updateQuestionnaire, fixture, { repositories });
+    const result = await executeQuery(
+      updateQuestionnaire,
+      { input },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Questionnaire.update).toHaveBeenCalled();
+    expect(repositories.Questionnaire.update).toHaveBeenCalledWith(input);
   });
 });

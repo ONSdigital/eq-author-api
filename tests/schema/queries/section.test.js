@@ -3,7 +3,7 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("Section query", () => {
   const section = `
-    query GetSection($id: Int!) {
+    query GetSection($id: ID!) {
       section(id: $id) {
         id,
         description
@@ -12,7 +12,7 @@ describe("Section query", () => {
   `;
 
   const sectionWithPages = `
-    query GetSection($id: Int!) {
+    query GetSection($id: ID!) {
       section(id: $id) {
         id,
         pages {
@@ -23,7 +23,7 @@ describe("Section query", () => {
   `;
 
   const sectionWithQuestionnaire = `
-    query GetSection($id: Int!) {
+    query GetSection($id: ID!) {
       section(id: $id) {
         id,
         questionnaire {
@@ -33,8 +33,8 @@ describe("Section query", () => {
     }
   `;
 
-  const id = 1;
-  const questionnaireId = 2;
+  const id = "1";
+  const questionnaireId = "2";
 
   let repositories;
 

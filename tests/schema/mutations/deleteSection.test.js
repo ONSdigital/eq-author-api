@@ -3,8 +3,8 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("deleteSection", () => {
   const deleteSection = `
-    mutation DeleteSection($id:Int!) {
-      deleteSection(id:$id) {
+    mutation DeleteSection($input:DeleteSectionInput!) {
+      deleteSection(input:$input) {
         id
       }
     }
@@ -19,13 +19,14 @@ describe("deleteSection", () => {
   });
 
   it("should allow deletion of Section", async () => {
+    const input = { id: "1" };
     const result = await executeQuery(
       deleteSection,
-      { id: 1 },
+      { input },
       { repositories }
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Section.remove).toHaveBeenCalledWith(1);
+    expect(repositories.Section.remove).toHaveBeenCalledWith(input.id);
   });
 });

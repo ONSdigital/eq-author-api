@@ -3,22 +3,8 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("createQuestionnaire", () => {
   const createQuestionnaire = `
-    mutation CreateQuestionnaire(
-      $title: String!,
-      $description: String!,
-      $theme: String!,
-      $legalBasis: LegalBasis!,
-      $navigation: Boolean,
-      $surveyId : String!
-    ) {
-      createQuestionnaire(
-        title: $title,
-        description: $description,
-        theme: $theme,
-        legalBasis: $legalBasis,
-        navigation: $navigation,
-        surveyId : $surveyId
-      ) {
+    mutation CreateQuestionnaire($input: CreateQuestionnaireInput!) {
+      createQuestionnaire(input: $input) {
         id,
         title,
         description,
@@ -31,8 +17,8 @@ describe("createQuestionnaire", () => {
 
   let repositories;
 
-  const QUESTIONNAIRE_ID = 123;
-  const SECTION_ID = 456;
+  const QUESTIONNAIRE_ID = "123";
+  const SECTION_ID = "456";
 
   beforeEach(() => {
     repositories = {
@@ -47,7 +33,7 @@ describe("createQuestionnaire", () => {
   });
 
   it("should allow creation of Questionnaire", async () => {
-    const fixture = {
+    const input = {
       title: "Test questionnaire",
       description: "This is a test questionnaire",
       theme: "test theme",
@@ -56,14 +42,16 @@ describe("createQuestionnaire", () => {
       surveyId: "abc"
     };
 
-    const result = await executeQuery(createQuestionnaire, fixture, {
-      repositories
-    });
+    const result = await executeQuery(
+      createQuestionnaire,
+      { input },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
     expect(result.data.createQuestionnaire.id).toBe(QUESTIONNAIRE_ID);
 
-    expect(repositories.Questionnaire.insert).toHaveBeenCalled();
+    expect(repositories.Questionnaire.insert).toHaveBeenCalledWith(input);
     expect(repositories.Section.insert).toHaveBeenCalledWith(
       expect.objectContaining({ questionnaireId: QUESTIONNAIRE_ID })
     );

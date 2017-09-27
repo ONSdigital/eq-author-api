@@ -3,7 +3,7 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("questionnaire query", () => {
   const questionnaire = `
-    query GetQuestionnaire($id : Int!) {
+    query GetQuestionnaire($id : ID!) {
       questionnaire(id: $id) {
         id
       }
@@ -11,7 +11,7 @@ describe("questionnaire query", () => {
   `;
 
   const questionnaireWithSections = `
-    query GetQuestionnaireWithSections($id : Int!) {
+    query GetQuestionnaireWithSections($id : ID!) {
       questionnaire(id: $id) {
         id,
         sections {
@@ -21,7 +21,7 @@ describe("questionnaire query", () => {
     }
   `;
 
-  const id = 1;
+  const id = "1";
   let repositories;
 
   beforeEach(() => {

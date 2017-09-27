@@ -3,16 +3,8 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("createPage", () => {
   const createPage = `
-    mutation CreatePage(
-      $title: String!,
-      $description: String,
-      $sectionId: Int!
-    ) {
-      createPage(
-        title: $title,
-        description: $description,
-        sectionId: $sectionId
-      ) {
+    mutation CreatePage($input: CreatePageInput!) {
+      createPage(input: $input) {
         id,
         title,
         description,
@@ -32,15 +24,15 @@ describe("createPage", () => {
   });
 
   it("should allow creation of Page", async () => {
-    const fixture = {
+    const input = {
       title: "Test page",
       description: "Test page description",
-      sectionId: 1
+      sectionId: "1"
     };
 
-    const result = await executeQuery(createPage, fixture, { repositories });
+    const result = await executeQuery(createPage, { input }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Page.insert).toHaveBeenCalled();
+    expect(repositories.Page.insert).toHaveBeenCalledWith(input);
   });
 });

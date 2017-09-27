@@ -3,8 +3,6 @@ const { includes } = require("lodash");
 
 const getId = args => args.newId || args.id;
 const getNewId = entity => entity.id.toString(10);
-const getInputArgs = args => args.input || args;
-const getIdFromArgs = args => getInputArgs(args).id;
 
 const Resolvers = {
   Query: {
@@ -22,7 +20,7 @@ const Resolvers = {
   Mutation: {
     createQuestionnaire: async (root, args, ctx) => {
       const questionnaire = await ctx.repositories.Questionnaire.insert(
-        getInputArgs(args)
+        args.input
       );
       const section = {
         title: "",
@@ -30,16 +28,16 @@ const Resolvers = {
         questionnaireId: questionnaire.id
       };
 
-      await Resolvers.Mutation.createSection(root, section, ctx);
+      await Resolvers.Mutation.createSection(root, { input: section }, ctx);
       return questionnaire;
     },
     updateQuestionnaire: (_, args, ctx) =>
-      ctx.repositories.Questionnaire.update(getInputArgs(args)),
+      ctx.repositories.Questionnaire.update(args.input),
     deleteQuestionnaire: (_, args, ctx) =>
-      ctx.repositories.Questionnaire.remove(getIdFromArgs(args)),
+      ctx.repositories.Questionnaire.remove(args.input.id),
 
     createSection: async (root, args, ctx) => {
-      const section = await ctx.repositories.Section.insert(getInputArgs(args));
+      const section = await ctx.repositories.Section.insert(args.input);
       const page = {
         pageType: "QuestionPage",
         title: "",
@@ -51,26 +49,23 @@ const Resolvers = {
       return section;
     },
     updateSection: (_, args, ctx) =>
-      ctx.repositories.Section.update(getInputArgs(args)),
+      ctx.repositories.Section.update(args.input),
     deleteSection: (_, args, ctx) =>
-      ctx.repositories.Section.remove(getIdFromArgs(args)),
+      ctx.repositories.Section.remove(args.input.id),
 
-    createPage: (root, args, ctx) =>
-      ctx.repositories.Page.insert(getInputArgs(args)),
-    updatePage: (_, args, ctx) =>
-      ctx.repositories.Page.update(getInputArgs(args)),
-    deletePage: (_, args, ctx) =>
-      ctx.repositories.Page.remove(getIdFromArgs(args)),
+    createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
+    updatePage: (_, args, ctx) => ctx.repositories.Page.update(args.input),
+    deletePage: (_, args, ctx) => ctx.repositories.Page.remove(args.input.id),
 
     createQuestionPage: (root, args, ctx) =>
-      ctx.repositories.QuestionPage.insert(getInputArgs(args)),
+      ctx.repositories.QuestionPage.insert(args.input),
     updateQuestionPage: (_, args, ctx) =>
-      ctx.repositories.QuestionPage.update(getInputArgs(args)),
+      ctx.repositories.QuestionPage.update(args.input),
     deleteQuestionPage: (_, args, ctx) =>
-      ctx.repositories.QuestionPage.remove(getIdFromArgs(args)),
+      ctx.repositories.QuestionPage.remove(args.input.id),
 
     createAnswer: async (root, args, ctx) => {
-      const answer = await ctx.repositories.Answer.insert(getInputArgs(args));
+      const answer = await ctx.repositories.Answer.insert(args.input);
 
       if (answer.type === "Checkbox" || answer.type === "Radio") {
         const defaultOptions = [];
@@ -89,7 +84,7 @@ const Resolvers = {
         }
 
         const promises = defaultOptions.map(it =>
-          Resolvers.Mutation.createOption(root, it, ctx)
+          Resolvers.Mutation.createOption(root, { input: it }, ctx)
         );
 
         await Promise.all(promises);
@@ -97,17 +92,15 @@ const Resolvers = {
 
       return answer;
     },
-    updateAnswer: (_, args, ctx) =>
-      ctx.repositories.Answer.update(getInputArgs(args)),
+    updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args.input),
     deleteAnswer: (_, args, ctx) =>
-      ctx.repositories.Answer.remove(getIdFromArgs(args)),
+      ctx.repositories.Answer.remove(args.input.id),
 
     createOption: (root, args, ctx) =>
-      ctx.repositories.Option.insert(getInputArgs(args)),
-    updateOption: (_, args, ctx) =>
-      ctx.repositories.Option.update(getInputArgs(args)),
+      ctx.repositories.Option.insert(args.input),
+    updateOption: (_, args, ctx) => ctx.repositories.Option.update(args.input),
     deleteOption: (_, args, ctx) =>
-      ctx.repositories.Option.remove(getIdFromArgs(args))
+      ctx.repositories.Option.remove(args.input.id)
   },
 
   Questionnaire: {
