@@ -3,7 +3,7 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("answer query", () => {
   const answer = `
-    query GetAnswer($id: Int!) {
+    query GetAnswer($id: ID!) {
       answer(id: $id) {
         id
       }
@@ -11,7 +11,7 @@ describe("answer query", () => {
   `;
 
   const answerWithOption = `
-    query GetAnswer($id: Int!) {
+    query GetAnswer($id: ID!) {
       answer(id: $id) {
         id,
         ... on MultipleChoiceAnswer {
@@ -24,7 +24,7 @@ describe("answer query", () => {
   `;
 
   const answerWithPage = `
-    query GetAnswer($id: Int!) {
+    query GetAnswer($id: ID!) {
       answer(id: $id) {
         id,
         page {
@@ -35,8 +35,8 @@ describe("answer query", () => {
   `;
 
   let repositories;
-  const id = 1;
-  const questionPageId = 2;
+  const id = "1";
+  const questionPageId = "2";
 
   beforeEach(() => {
     repositories = {

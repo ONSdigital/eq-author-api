@@ -3,7 +3,7 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("Page query", () => {
   const page = `
-    query GetPage($id: Int!) {
+    query GetPage($id: ID!) {
       page(id: $id) {
         id
       }
@@ -11,7 +11,7 @@ describe("Page query", () => {
   `;
 
   const pageWithSection = `
-    query GetPage($id: Int!) {
+    query GetPage($id: ID!) {
       page(id: $id) {
         id,
         section {
@@ -21,8 +21,8 @@ describe("Page query", () => {
     }
   `;
 
-  const id = 1;
-  const sectionId = 2;
+  const id = "1";
+  const sectionId = "2";
   let repositories;
 
   beforeEach(() => {

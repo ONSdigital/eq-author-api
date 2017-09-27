@@ -3,7 +3,7 @@ const mockRepository = require("../../utils/mockRepository");
 
 describe("option query", () => {
   const option = `
-    query GetOption($id: Int!) {
+    query GetOption($id: ID!) {
       option(id: $id) {
         id,
         description
@@ -12,7 +12,7 @@ describe("option query", () => {
   `;
 
   const optionWithAnswer = `
-    query GetOption($id: Int!) {
+    query GetOption($id: ID!) {
       option(id: $id) {
         id,
         answer {
@@ -23,8 +23,8 @@ describe("option query", () => {
   `;
 
   let repositories;
-  const id = 1;
-  const answerId = 2;
+  const id = "1";
+  const answerId = "2";
 
   beforeEach(() => {
     repositories = {

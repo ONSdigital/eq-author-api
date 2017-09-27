@@ -1,11 +1,10 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
 
-describe("deleteAnswer" , () => {
-
+describe("deleteAnswer", () => {
   const deleteAnswer = `
-    mutation DeleteAnswer($id:Int!) {
-      deleteAnswer(id:$id){
+    mutation DeleteAnswer($input:DeleteAnswerInput!) {
+      deleteAnswer(input:$input){
         id
       }
     }
@@ -15,14 +14,19 @@ describe("deleteAnswer" , () => {
 
   beforeEach(() => {
     repositories = {
-      Answer : mockRepository()
-    }
+      Answer: mockRepository()
+    };
   });
 
   it("should allow deletion of Answer", async () => {
-    const result = await executeQuery(deleteAnswer, { id : 1 }, { repositories });
+    const input = { id: "1" };
+    const result = await executeQuery(
+      deleteAnswer,
+      { input },
+      { repositories }
+    );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.remove).toHaveBeenCalledWith(1);
+    expect(repositories.Answer.remove).toHaveBeenCalledWith(input.id);
   });
 });
