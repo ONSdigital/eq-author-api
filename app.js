@@ -3,26 +3,26 @@ const { graphqlExpress, graphiqlExpress } = require("graphql-server-express");
 const repositories = require("./repositories");
 const colors = require("colors");
 const cors = require("cors");
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 const schema = require("./schema");
+const morgan = require("morgan");
 
-const {
-  EXPRESS_URL,
-  EXPRESS_PORT,
-  GRAPHIQL_ENDPOINT,
-} = require('./config/settings');
+const { PORT } = require("./config/settings");
 
 const app = express();
-app.use('/graphql', cors(), bodyParser.json(), graphqlExpress({schema: schema, context:{ repositories: repositories }}));
+app.use(morgan("tiny"));
 
-if (process.env.NODE_ENV === 'development'){
-  app.use('/graphiql', cors(), graphiqlExpress({ endpointURL: '/graphql' }))
+app.use(
+  "/graphql",
+  cors(),
+  bodyParser.json(),
+  graphqlExpress({ schema: schema, context: { repositories: repositories } })
+);
+
+if (process.env.NODE_ENV === "development") {
+  app.use("/graphiql", cors(), graphiqlExpress({ endpointURL: "/graphql" }));
 }
 
-app.listen(EXPRESS_PORT, () => {
-  console.log(  // eslint-disable-line no-console
-    colors.green('eq-author-api'),
-    'is running at',
-    colors.yellow(EXPRESS_URL + GRAPHIQL_ENDPOINT)
-  );
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(colors.green("Listening on port"), PORT); // eslint-disable-line
 });
