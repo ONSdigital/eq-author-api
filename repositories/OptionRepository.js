@@ -1,21 +1,26 @@
 const { head, invert, map } = require("lodash/fp");
 const Option = require("../db/Option");
 const mapFields = require("../utils/mapFields");
-
 const mapping = { AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
 module.exports.findAll = function findAll(
-  where,
+  where = {},
   orderBy = "created_at",
   direction = "asc"
 ) {
-  return Option.findAll(where).orderBy(orderBy, direction).then(map(fromDb));
+  return Option.findAll()
+    .where({ isDeleted: false })
+    .where(where)
+    .orderBy(orderBy, direction)
+    .then(map(fromDb));
 };
 
 module.exports.get = function get(id) {
-  return Option.findById(id).then(fromDb);
+  return Option.findById(id)
+    .where({ isDeleted: false })
+    .then(fromDb);
 };
 
 module.exports.insert = function insert({
@@ -46,19 +51,27 @@ module.exports.update = function update({
   description,
   value,
   qCode,
-  childAnswerId
+  childAnswerId,
+  isDeleted
 }) {
   return Option.update(id, {
     label,
     description,
     value,
     qCode,
-    childAnswerId
+    childAnswerId,
+    isDeleted
   })
     .then(head)
     .then(fromDb);
 };
 
 module.exports.remove = function remove(id) {
-  return Option.destroy(id).then(head).then(fromDb);
+  return Option.update(id, { isDeleted: true })
+    .then(head)
+    .then(fromDb);
+};
+
+module.exports.undelete = function(id) {
+  return Option.update(id, { isDeleted: false }).then(head);
 };
