@@ -7,31 +7,23 @@ const colors = require("colors");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const schema = require("./schema");
-const pino = require("express-pino-logger")();
+const pinoMiddleware = require("express-pino-logger");
 const { PORT } = require("./config/settings");
+const createLogger = require("./utils/createLogger");
 
 const app = express();
+const pino = pinoMiddleware();
+const logger = createLogger(pino.logger);
 
+addErrorLoggingToSchema(schema, logger);
 app.use(pino);
-
-const logger = {
-  log: error => {
-    console.error(error);
-    return error;
-  }
-};
-
-const withErrorLogging = schema => {
-  addErrorLoggingToSchema(schema, logger);
-  return schema;
-};
 
 app.use(
   "/graphql",
   cors(),
   bodyParser.json(),
   graphqlExpress({
-    schema: withErrorLogging(schema),
+    schema,
     context: { repositories },
     formatError: logger.log
   })

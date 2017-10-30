@@ -955,15 +955,15 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#a3c5b69:
-  version "0.1.1"
-  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/a3c5b6982d2ec4c57f1ea6311bae7f8e35f12c8e"
-
 end-of-stream@^1.1.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.0.tgz#7a90d833efda6cfa6eac0f4949dbb0fad3a63206"
   dependencies:
     once "^1.4.0"
+
+eq-author-graphql-schema@ONSdigital/eq-author-graphql-schema#a3c5b69:
+  version "0.1.1"
+  resolved "https://codeload.github.com/ONSdigital/eq-author-graphql-schema/tar.gz/a3c5b6982d2ec4c57f1ea6311bae7f8e35f12c8e"
 
 errno@^0.1.4:
   version "0.1.4"
