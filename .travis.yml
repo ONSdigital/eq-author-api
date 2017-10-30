@@ -2,19 +2,25 @@ language: node_js
 node_js:
   - "7"
 
+before_install:
+  - yarn add codecov
+
 cache:
   yarn: true
   directories:
       - "node_modules"
 
 script:
-  - yarn test
   - yarn lint -- --max-warnings=0
+  - yarn test
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - export TAG=`if [ "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]; then echo "latest"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
   - docker build -t onsdigital/eq-author-api:$TAG -f Dockerfile .
   - echo "Pushing with tag [$TAG]"
   - docker push onsdigital/eq-author-api:$TAG
+
+after_success:
+ - codecov
 
 branches:
     only:
