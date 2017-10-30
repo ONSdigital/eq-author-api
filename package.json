@@ -44,9 +44,12 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "./dist"
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!config/**/*",
+      "!migrations/*",
+      "!coverage/**/*",
+      "!tests/**/*"
     ],
     "setupTestFrameworkScriptFile": "./tests/setup.js"
   },
