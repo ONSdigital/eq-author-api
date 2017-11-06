@@ -4,6 +4,12 @@ const { includes } = require("lodash");
 const getId = args => args.newId || args.id;
 const getNewId = entity => entity.id.toString(10);
 
+const whereIn = (field, values) => {
+  return function() {
+    this.where("id", "in", values);
+  };
+};
+
 const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
@@ -14,6 +20,8 @@ const Resolvers = {
     questionPage: (_, args, ctx) =>
       ctx.repositories.QuestionPage.get(getId(args)),
     answer: (root, args, ctx) => ctx.repositories.Answer.get(getId(args)),
+    answers: (root, { ids }, ctx) =>
+      ctx.repositories.Answer.findAll(whereIn("id", ids)),
     option: (root, args, ctx) => ctx.repositories.Option.get(getId(args))
   },
 
