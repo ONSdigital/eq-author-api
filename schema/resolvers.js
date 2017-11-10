@@ -35,6 +35,8 @@ const Resolvers = {
       ctx.repositories.Questionnaire.update(args.input),
     deleteQuestionnaire: (_, args, ctx) =>
       ctx.repositories.Questionnaire.remove(args.input.id),
+    undeleteQuestionnaire: (_, args, ctx) =>
+      ctx.repositories.Questionnaire.undelete(args.input.id),
 
     createSection: async (root, args, ctx) => {
       const section = await ctx.repositories.Section.insert(args.input);
@@ -52,10 +54,14 @@ const Resolvers = {
       ctx.repositories.Section.update(args.input),
     deleteSection: (_, args, ctx) =>
       ctx.repositories.Section.remove(args.input.id),
+    undeleteSection: (_, args, ctx) =>
+      ctx.repositories.Section.undelete(args.input.id),
 
     createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
     updatePage: (_, args, ctx) => ctx.repositories.Page.update(args.input),
     deletePage: (_, args, ctx) => ctx.repositories.Page.remove(args.input.id),
+    undeletePage: (_, args, ctx) =>
+      ctx.repositories.Page.undelete(args.input.id),
 
     createQuestionPage: (root, args, ctx) =>
       ctx.repositories.QuestionPage.insert(args.input),
@@ -63,6 +69,8 @@ const Resolvers = {
       ctx.repositories.QuestionPage.update(args.input),
     deleteQuestionPage: (_, args, ctx) =>
       ctx.repositories.QuestionPage.remove(args.input.id),
+    undeleteQuestionPage: (_, args, ctx) =>
+      ctx.repositories.QuestionPage.undelete(args.input.id),
 
     createAnswer: async (root, args, ctx) => {
       const answer = await ctx.repositories.Answer.insert(args.input);
@@ -95,12 +103,16 @@ const Resolvers = {
     updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args.input),
     deleteAnswer: (_, args, ctx) =>
       ctx.repositories.Answer.remove(args.input.id),
+    undeleteAnswer: (_, args, ctx) =>
+      ctx.repositories.Answer.undelete(args.input.id),
 
     createOption: (root, args, ctx) =>
       ctx.repositories.Option.insert(args.input),
     updateOption: (_, args, ctx) => ctx.repositories.Option.update(args.input),
     deleteOption: (_, args, ctx) =>
-      ctx.repositories.Option.remove(args.input.id)
+      ctx.repositories.Option.remove(args.input.id),
+    undeleteOption: (_, args, ctx) =>
+      ctx.repositories.Option.undelete(args.input.id)
   },
 
   Questionnaire: {

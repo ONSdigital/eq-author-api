@@ -4,12 +4,9 @@ function Answer() {
   return db("Answers");
 }
 
-module.exports.findAll = function findAll(where = {}) {
-  return Answer()
-    .where(where)
-    .select();
+module.exports.findAll = function findAll() {
+  return Answer().select();
 };
-
 
 module.exports.findById = function findById(id) {
   return Answer()
@@ -35,4 +32,4 @@ module.exports.destroy = function destroy(id) {
     .where("id", parseInt(id, 10))
     .delete()
     .returning("*");
-}
+};

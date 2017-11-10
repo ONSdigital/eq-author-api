@@ -5,15 +5,19 @@ const mapping = { created_at: "createdAt" }; // eslint-disable-line camelcase
 const fromDb = mapFields(mapping);
 
 module.exports.get = function(id) {
-  return Questionnaire.findById(id).then(fromDb);
+  return Questionnaire.findById(id)
+    .where({ isDeleted: false })
+    .then(fromDb);
 };
 
 module.exports.findAll = function findAll(
-  where,
+  where = {},
   orderBy = "created_at",
   direction = "asc"
 ) {
-  return Questionnaire.findAll(where)
+  return Questionnaire.findAll()
+    .where({ isDeleted: false })
+    .where(where)
     .orderBy(orderBy, direction)
     .then(map(fromDb));
 };
@@ -36,10 +40,6 @@ module.exports.insert = function({
   }).then(head);
 };
 
-module.exports.remove = function(id) {
-  return Questionnaire.destroy(id).then(head);
-};
-
 module.exports.update = function({
   id,
   title,
@@ -47,7 +47,8 @@ module.exports.update = function({
   theme,
   legalBasis,
   navigation,
-  surveyId
+  surveyId,
+  isDeleted
 }) {
   return Questionnaire.update(id, {
     title,
@@ -55,6 +56,15 @@ module.exports.update = function({
     description,
     theme,
     legalBasis,
-    navigation
+    navigation,
+    isDeleted
   }).then(head);
+};
+
+module.exports.remove = function(id) {
+  return Questionnaire.update(id, { isDeleted: true }).then(head);
+};
+
+module.exports.undelete = function(id) {
+  return Questionnaire.update(id, { isDeleted: false }).then(head);
 };

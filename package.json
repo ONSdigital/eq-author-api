@@ -8,7 +8,7 @@
     "start": "yarn knex -- migrate:latest && nodemon",
     "start:dev": "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
     "lint": "eslint .",
-    "test": "jest .",
+    "test": "NODE_ENV=test jest .",
     "knex": "knex --knexfile config/knexfile.js --cwd .",
     "precommit": "lint-staged"
   },
@@ -23,7 +23,7 @@
     "colors": "^1.1.2",
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
-    "eq-author-graphql-schema": "ONSdigital/eq-author-graphql-schema#a3c5b69",
+    "eq-author-graphql-schema": "^0.3.0",
     "express": "^4.15.3",
     "express-pino-logger": "^2.0.0",
     "graphql": "^0.9.6",
@@ -60,6 +60,7 @@
     "eslint-config-eq-author": "^1.0.2",
     "husky": "^0.14.3",
     "lint-staged": "^4.0.2",
-    "prettier": "^1.5.3"
+    "prettier": "^1.5.3",
+    "sqlite3": "^3.1.13"
   }
 }

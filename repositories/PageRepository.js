@@ -2,7 +2,6 @@ const { map, head } = require("lodash/fp");
 const Page = require("../db/Page");
 const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
-
 const fromDb = mapFields({ SectionId: "sectionId" });
 
 function getRepositoryForType({ pageType }) {
@@ -15,15 +14,21 @@ function getRepositoryForType({ pageType }) {
 }
 
 module.exports.findAll = function findAll(
-  where,
+  where = {},
   orderBy = "created_at",
   direction = "asc"
 ) {
-  return Page.findAll(where).orderBy(orderBy, direction).then(map(fromDb));
+  return Page.findAll()
+    .where({ isDeleted: false })
+    .where(where)
+    .orderBy(orderBy, direction)
+    .then(map(fromDb));
 };
 
 module.exports.get = function get(id) {
-  return Page.findById(id).then(fromDb);
+  return Page.findById(id)
+    .where({ isDeleted: false })
+    .then(fromDb);
 };
 
 module.exports.insert = function insert(args) {
@@ -39,5 +44,11 @@ module.exports.update = function update(args) {
 };
 
 module.exports.remove = function remove(id) {
-  return Page.destroy(id).then(head).then(fromDb);
+  return Page.update(id, { isDeleted: true })
+    .then(head)
+    .then(fromDb);
+};
+
+module.exports.undelete = function(id) {
+  return Page.update(id, { isDeleted: false }).then(head);
 };

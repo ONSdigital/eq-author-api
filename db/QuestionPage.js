@@ -4,16 +4,15 @@ function Question() {
   return db("Pages");
 }
 
-function restrictType(where) {
-  return Object.assign({}, where, { pageType : "QuestionPage" });
+function restrictType(where = {}) {
+  return Object.assign({}, where, { pageType: "QuestionPage" });
 }
 
-module.exports.findAll = function findAll(where = {}) {
+module.exports.findAll = function findAll() {
   return Question()
-    .where(restrictType(where))
+    .where(restrictType())
     .select();
 };
-
 
 module.exports.findById = function findById(id) {
   return Question()
@@ -39,4 +38,4 @@ module.exports.destroy = function destroy(id) {
     .where(restrictType({ id: parseInt(id, 10) }))
     .delete()
     .returning("*");
-}
+};
