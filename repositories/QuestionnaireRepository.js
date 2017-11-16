@@ -28,7 +28,8 @@ module.exports.insert = function({
   theme,
   legalBasis,
   navigation,
-  surveyId
+  surveyId,
+  summary
 }) {
   return Questionnaire.create({
     title,
@@ -36,7 +37,8 @@ module.exports.insert = function({
     theme,
     legalBasis,
     navigation,
-    surveyId
+    surveyId,
+    summary
   }).then(head);
 };
 
@@ -48,7 +50,8 @@ module.exports.update = function({
   legalBasis,
   navigation,
   surveyId,
-  isDeleted
+  isDeleted,
+  summary
 }) {
   return Questionnaire.update(id, {
     title,
@@ -57,7 +60,8 @@ module.exports.update = function({
     theme,
     legalBasis,
     navigation,
-    isDeleted
+    isDeleted,
+    summary
   }).then(head);
 };
 
