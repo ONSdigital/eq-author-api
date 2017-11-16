@@ -3,10 +3,7 @@ const SUMMARY_COLUMN = "summary";
 
 exports.up = function(knex) {
   return knex.schema.table(QUESTIONNAIRES_TABLE, table => {
-    table
-      .boolean(SUMMARY_COLUMN)
-      .notNullable()
-      .defaultsTo(false);
+    table.bool(SUMMARY_COLUMN).defaultsTo(false);
   });
 };
 
