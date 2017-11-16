@@ -22,8 +22,6 @@ In most cases sensible defaults have been selected.
 | Environment Variable | Description |
 | -------------------- | ----------- |
 | PORT                 | The port which express listens on (defaults to `4000`). |
-| HOST                 | The hostname where API resides (defaults to `localhost`). |
-| SCHEME               | `http://` or `https://` (defaults to `http://`) |
 | GRAPHIQL_ENABLED     | Enable the Graphiql interface (`true` or `false`) |
 | GRAPHIQL_ENDPOINT    | The endpoint which graphiql listens on (defaults to `/graphiql`) |
 | GRAPHIQL_PRETTY      | Pretty print Graphiql output (`true` or `false`) |
