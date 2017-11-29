@@ -1,4 +1,4 @@
-FROM node:7
+FROM node:8
 EXPOSE 4000
 ENV PORT=4000
 WORKDIR /app
