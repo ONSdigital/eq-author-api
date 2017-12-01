@@ -10,6 +10,7 @@ const schema = require("./schema");
 const pinoMiddleware = require("express-pino-logger");
 const { PORT } = require("./config/settings");
 const createLogger = require("./utils/createLogger");
+const status = require("./middleware/status");
 
 const app = express();
 const pino = pinoMiddleware();
@@ -28,6 +29,8 @@ app.use(
     formatError: logger.log
   })
 );
+
+app.get("/status", status);
 
 if (process.env.NODE_ENV === "development") {
   app.use("/graphiql", cors(), graphiqlExpress({ endpointURL: "/graphql" }));
