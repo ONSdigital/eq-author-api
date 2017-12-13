@@ -126,7 +126,8 @@ const Resolvers = {
   Questionnaire: {
     newId: getNewId,
     sections: (questionnaire, args, ctx) =>
-      ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id })
+      ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
+    createdBy: questionnaire => ({ name: questionnaire.createdBy })
   },
 
   Section: {

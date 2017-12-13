@@ -21,13 +21,24 @@ describe("questionnaire query", () => {
     }
   `;
 
+  const questionnaireWithCreatedBy = `
+  query GetQuestionnaireWithSections($id : ID!) {
+    questionnaire(id: $id) {
+      id,
+      createdBy {
+        name
+      }
+    }
+  }
+`;
+
   const id = "1";
   let repositories;
 
   beforeEach(() => {
     repositories = {
       Questionnaire: mockRepository({
-        get: { id }
+        get: { id, createdBy: "foo" }
       }),
       Section: mockRepository()
     };
@@ -52,6 +63,21 @@ describe("questionnaire query", () => {
     expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
     expect(repositories.Section.findAll).toHaveBeenCalledWith({
       QuestionnaireId: id
+    });
+  });
+
+  it("should have an association with a User", async () => {
+    const result = await executeQuery(
+      questionnaireWithCreatedBy,
+      { id },
+      { repositories }
+    );
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data.questionnaire).toMatchObject({
+      createdBy: {
+        name: "foo"
+      }
     });
   });
 });
