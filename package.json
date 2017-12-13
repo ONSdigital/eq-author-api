@@ -33,7 +33,7 @@
     "graphql-tools": "^2.5.1",
     "jest": "^20.0.4",
     "jest-environment-node-debug": "^2.0.0",
-    "knex": "^0.13.0",
+    "knex": "0.14.2",
     "lodash": "^4.17.4",
     "nodemon": "^1.11.0",
     "pg": "^6.2.3",
