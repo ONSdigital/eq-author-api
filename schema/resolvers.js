@@ -1,9 +1,6 @@
 const { GraphQLDate } = require("graphql-iso-date");
 const { includes } = require("lodash");
 
-const getId = args => args.newId || args.id;
-const getNewId = entity => entity.id.toString(10);
-
 const whereIn = (field, values) => {
   return function() {
     this.where("id", "in", values);
@@ -13,16 +10,15 @@ const whereIn = (field, values) => {
 const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
-    questionnaire: (root, args, ctx) =>
-      ctx.repositories.Questionnaire.get(getId(args)),
-    section: (parent, args, ctx) => ctx.repositories.Section.get(getId(args)),
-    page: (parent, args, ctx) => ctx.repositories.Page.get(getId(args)),
-    questionPage: (_, args, ctx) =>
-      ctx.repositories.QuestionPage.get(getId(args)),
-    answer: (root, args, ctx) => ctx.repositories.Answer.get(getId(args)),
+    questionnaire: (root, { id }, ctx) =>
+      ctx.repositories.Questionnaire.get(id),
+    section: (parent, { id }, ctx) => ctx.repositories.Section.get(id),
+    page: (parent, { id }, ctx) => ctx.repositories.Page.get(id),
+    questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.get(id),
+    answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id),
     answers: (root, { ids }, ctx) =>
       ctx.repositories.Answer.findAll(whereIn("id", ids)),
-    option: (root, args, ctx) => ctx.repositories.Option.get(getId(args))
+    option: (root, { id }, ctx) => ctx.repositories.Option.get(id)
   },
 
   Mutation: {
@@ -124,14 +120,12 @@ const Resolvers = {
   },
 
   Questionnaire: {
-    newId: getNewId,
     sections: (questionnaire, args, ctx) =>
       ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
     createdBy: questionnaire => ({ name: questionnaire.createdBy })
   },
 
   Section: {
-    newId: getNewId,
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ SectionId: section.id }),
     questionnaire: (section, args, ctx) =>
@@ -143,7 +137,6 @@ const Resolvers = {
   },
 
   QuestionPage: {
-    newId: getNewId,
     answers: ({ id }, args, ctx) =>
       ctx.repositories.Answer.findAll({ QuestionPageId: id }),
     section: ({ sectionId }, args, ctx) =>
@@ -158,13 +151,11 @@ const Resolvers = {
   },
 
   BasicAnswer: {
-    newId: getNewId,
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId)
   },
 
   MultipleChoiceAnswer: {
-    newId: getNewId,
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
@@ -172,7 +163,6 @@ const Resolvers = {
   },
 
   Option: {
-    newId: getNewId,
     answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
   },
 
