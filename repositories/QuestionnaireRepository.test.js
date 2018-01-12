@@ -2,6 +2,7 @@ const knex = require("../db/index");
 
 const createQuestionnaireTable = require("../migrations/20170620163533_create_questionnaires_table");
 const addSummaryColumn = require("../migrations/20171116131851_add_summary_column");
+const addCreatedByColumn = require("../migrations/20171211100317_add_created_by_to_questionnaires");
 const QuestionnaireRepository = require("../repositories/QuestionnaireRepository");
 
 const buildQuestionnaire = (json = {}) => {
@@ -11,7 +12,8 @@ const buildQuestionnaire = (json = {}) => {
       surveyId: "1",
       theme: "default",
       legalBasis: "Voluntary",
-      navigation: 0
+      navigation: 0,
+      createdBy: "foo"
     },
     json
   );
@@ -23,6 +25,7 @@ describe("QuestionnaireRepository", () => {
   beforeEach(async () => {
     await createQuestionnaireTable.up(knex);
     await addSummaryColumn.up(knex);
+    await addCreatedByColumn.up(knex);
     await knex.schema.table("Questionnaires", t =>
       t
         .boolean("isDeleted")

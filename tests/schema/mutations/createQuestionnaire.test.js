@@ -39,7 +39,8 @@ describe("createQuestionnaire", () => {
       theme: "test theme",
       legalBasis: "Voluntary",
       navigation: true,
-      surveyId: "abc"
+      surveyId: "abc",
+      createdBy: "John Doe"
     };
 
     const result = await executeQuery(

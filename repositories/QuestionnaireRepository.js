@@ -29,7 +29,8 @@ module.exports.insert = function({
   legalBasis,
   navigation,
   surveyId,
-  summary
+  summary,
+  createdBy
 }) {
   return Questionnaire.create({
     title,
@@ -38,7 +39,8 @@ module.exports.insert = function({
     legalBasis,
     navigation,
     surveyId,
-    summary
+    summary,
+    createdBy
   }).then(head);
 };
 
