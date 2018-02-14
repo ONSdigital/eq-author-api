@@ -1,8 +1,13 @@
-const { map, head } = require("lodash/fp");
+const { map, head, invert } = require("lodash/fp");
 const Page = require("../db/Page");
 const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
-const fromDb = mapFields({ SectionId: "sectionId" });
+const db = require("../db");
+const { movePage, getNextOrderValue } = require("./spacedOrderStrategy");
+
+const mapping = { SectionId: "sectionId" };
+const fromDb = mapFields(mapping);
+const toDb = mapFields(invert(mapping));
 
 function getRepositoryForType({ pageType }) {
   switch (pageType) {
@@ -15,12 +20,17 @@ function getRepositoryForType({ pageType }) {
 
 module.exports.findAll = function findAll(
   where = {},
-  orderBy = "created_at",
+  orderBy = "position",
   direction = "asc"
 ) {
   return Page.findAll()
+    .columns(
+      "*",
+      // convert arbitrary "order" values to 0-indexed position values
+      db.raw(`ROW_NUMBER () OVER (ORDER BY "order") - 1 as "position"`)
+    )
     .where({ isDeleted: false })
-    .where(where)
+    .where(toDb(where))
     .orderBy(orderBy, direction)
     .then(map(fromDb));
 };
@@ -34,12 +44,31 @@ module.exports.get = function get(id) {
 module.exports.insert = function insert(args) {
   const repository = getRepositoryForType(args);
 
-  return repository.insert(args);
+  return db.transaction(trx => {
+    // for some reason mutating causes app to hang
+    // so we have to immutably add in `order`
+    args = Object.assign({}, args, {
+      order: getNextOrderValue(trx, args.sectionId)
+    });
+
+    const result = repository.insert(args, trx);
+
+    if (args.position === undefined) {
+      return result;
+    }
+
+    return result.then(({ id, sectionId }) =>
+      movePage(trx, {
+        id,
+        sectionId,
+        position: args.position
+      })
+    );
+  });
 };
 
 module.exports.update = function update(args) {
   const repository = getRepositoryForType(args);
-
   return repository.update(args);
 };
 
@@ -51,4 +80,8 @@ module.exports.remove = function remove(id) {
 
 module.exports.undelete = function(id) {
   return Page.update(id, { isDeleted: false }).then(head);
+};
+
+module.exports.move = ({ id, sectionId, position }) => {
+  return db.transaction(trx => movePage(trx, { id, sectionId, position }));
 };

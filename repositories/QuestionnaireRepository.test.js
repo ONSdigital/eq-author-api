@@ -1,8 +1,4 @@
-const knex = require("../db/index");
-
-const createQuestionnaireTable = require("../migrations/20170620163533_create_questionnaires_table");
-const addSummaryColumn = require("../migrations/20171116131851_add_summary_column");
-const addCreatedByColumn = require("../migrations/20171211100317_add_created_by_to_questionnaires");
+const knex = require("../db");
 const QuestionnaireRepository = require("../repositories/QuestionnaireRepository");
 
 const buildQuestionnaire = (json = {}) => {
@@ -12,7 +8,7 @@ const buildQuestionnaire = (json = {}) => {
       surveyId: "1",
       theme: "default",
       legalBasis: "Voluntary",
-      navigation: 0,
+      navigation: false,
       createdBy: "foo"
     },
     json
@@ -20,122 +16,64 @@ const buildQuestionnaire = (json = {}) => {
 };
 
 describe("QuestionnaireRepository", () => {
-  let questionnaire;
+  beforeAll(() => knex.migrate.latest());
+  afterAll(() => knex.migrate.rollback().then(() => knex.destroy()));
+  afterEach(() => knex("Questionnaires").delete());
 
-  beforeEach(async () => {
-    await createQuestionnaireTable.up(knex);
-    await addSummaryColumn.up(knex);
-    await addCreatedByColumn.up(knex);
-    await knex.schema.table("Questionnaires", t =>
-      t
-        .boolean("isDeleted")
-        .notNull()
-        .defaultTo(false)
-    );
-    questionnaire = buildQuestionnaire();
-  });
-
-  it("should create new Questionnaire", () => {
-    return QuestionnaireRepository.insert(questionnaire).then(result =>
-      expect(result).toEqual(1)
-    );
-  });
-
-  it("should retrieve a single questionnaire", () => {
-    return QuestionnaireRepository.insert(questionnaire).then(() => {
-      expect(QuestionnaireRepository.get(1)).resolves.toMatchObject(
-        questionnaire
-      );
+  it("should create new Questionnaire", async () => {
+    const questionnaire = buildQuestionnaire({
+      title: "creating a new questionnaire "
     });
+    const result = await QuestionnaireRepository.insert(questionnaire);
+
+    expect(result).toMatchObject(questionnaire);
   });
 
-  it("should retrieve all questionnaires", () => {
-    return QuestionnaireRepository.insert(questionnaire)
-      .then(() =>
-        QuestionnaireRepository.insert(buildQuestionnaire({ surveyId: 2 }))
-      )
-      .then(() => QuestionnaireRepository.findAll())
-      .then(result => {
-        expect(result).toMatchObject([
-          {
-            id: 1,
-            isDeleted: 0
-          },
-          {
-            id: 2,
-            isDeleted: 0
-          }
-        ]);
-      });
+  it("should retrieve a single questionnaire", async () => {
+    const questionnaire = buildQuestionnaire({ title: "foo bar" });
+
+    const { id } = await QuestionnaireRepository.insert(questionnaire);
+
+    const result = await QuestionnaireRepository.get(id);
+
+    expect(result.id).toBe(id);
+    expect(result).toMatchObject(questionnaire);
   });
 
-  it("should remove questionnaire", () => {
-    return QuestionnaireRepository.insert(questionnaire)
-      .then(() => QuestionnaireRepository.findAll())
-      .then(result => {
-        return expect(result).toMatchObject([
-          {
-            id: 1,
-            isDeleted: 0
-          }
-        ]);
-      })
-      .then(() => QuestionnaireRepository.remove(1))
-      .then(() => QuestionnaireRepository.findAll())
-      .then(result => {
-        return expect(result).toMatchObject([]);
-      });
+  it("should retrieve all questionnaires", async () => {
+    const { id: id1 } = await QuestionnaireRepository.insert(
+      buildQuestionnaire()
+    );
+    const { id: id2 } = await QuestionnaireRepository.insert(
+      buildQuestionnaire({ surveyId: 2 })
+    );
+
+    const results = await QuestionnaireRepository.findAll();
+
+    expect(results).toContainEqual(
+      expect.objectContaining({ id: id1, isDeleted: false })
+    );
+    expect(results).toContainEqual(
+      expect.objectContaining({ id: id2, isDeleted: false })
+    );
   });
 
-  it("should remove the correct questionnaire", () => {
-    return QuestionnaireRepository.insert(questionnaire)
-      .then(() =>
-        QuestionnaireRepository.insert(buildQuestionnaire({ surveyId: 2 }))
-      )
-      .then(() => QuestionnaireRepository.findAll())
-      .then(result => {
-        return expect(result).toMatchObject([
-          {
-            id: 1,
-            isDeleted: 0
-          },
-          {
-            id: 2,
-            isDeleted: 0
-          }
-        ]);
-      })
-      .then(() => QuestionnaireRepository.remove(2))
-      .then(() => QuestionnaireRepository.findAll())
-      .then(result => {
-        return expect(result).toMatchObject([
-          {
-            id: 1,
-            isDeleted: 0
-          }
-        ]);
-      });
+  it("should remove questionnaire", async () => {
+    const { id } = await QuestionnaireRepository.insert(buildQuestionnaire());
+
+    await QuestionnaireRepository.remove(id);
+    const result = await QuestionnaireRepository.get(id);
+
+    expect(result).toMatchObject({});
   });
 
-  it("should update questionnaires", () => {
-    return QuestionnaireRepository.insert(questionnaire)
-      .then(() =>
-        QuestionnaireRepository.update({ id: 1, surveyId: "updated" })
-      )
-      .then(() => QuestionnaireRepository.get(1))
-      .then(result => {
-        expect(result).toMatchObject({
-          surveyId: "updated"
-        });
-      });
-  });
+  it("should update questionnaires", async () => {
+    const { id } = await QuestionnaireRepository.insert(buildQuestionnaire());
+    const result = await QuestionnaireRepository.update({
+      id,
+      surveyId: "456"
+    });
 
-  afterEach(async () => {
-    await addSummaryColumn.down(knex);
-    await createQuestionnaireTable.down(knex);
-  });
-
-  afterAll(() => {
-    knex.destroy();
+    expect(result).toMatchObject({ surveyId: "456" });
   });
 });

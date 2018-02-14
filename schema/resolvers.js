@@ -66,9 +66,12 @@ const Resolvers = {
     deletePage: (_, args, ctx) => ctx.repositories.Page.remove(args.input.id),
     undeletePage: (_, args, ctx) =>
       ctx.repositories.Page.undelete(args.input.id),
+    movePage: (_, args, ctx) => ctx.repositories.Page.move(args.input),
 
     createQuestionPage: (root, args, ctx) =>
-      ctx.repositories.QuestionPage.insert(args.input),
+      ctx.repositories.Page.insert(
+        Object.assign({}, args.input, { pageType: "QuestionPage" })
+      ),
     updateQuestionPage: (_, args, ctx) =>
       ctx.repositories.QuestionPage.update(args.input),
     deleteQuestionPage: (_, args, ctx) =>

@@ -5,11 +5,8 @@ module.exports = {
   },
 
   test: {
-    client: "sqlite3",
-    connection: {
-      filename: ":memory:"
-    },
-    useNullAsDefault: true
+    client: "postgresql",
+    connection: process.env.DB_CONNECTION_URI
   },
 
   staging: {
