@@ -30,6 +30,7 @@ module.exports.insert = function insert({
   qCode,
   type,
   mandatory,
+  hasOtherOption,
   questionPageId
 }) {
   return Answer.create(
@@ -40,6 +41,7 @@ module.exports.insert = function insert({
       qCode,
       type,
       mandatory,
+      hasOtherOption,
       questionPageId
     })
   )
@@ -55,7 +57,8 @@ module.exports.update = function update({
   qCode,
   type,
   mandatory,
-  isDeleted
+  isDeleted,
+  hasOtherOption
 }) {
   return Answer.update(id, {
     description,
@@ -64,7 +67,8 @@ module.exports.update = function update({
     qCode,
     type,
     mandatory,
-    isDeleted
+    isDeleted,
+    hasOtherOption
   })
     .then(head)
     .then(fromDb);

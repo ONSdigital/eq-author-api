@@ -28,7 +28,6 @@ module.exports.insert = function insert({
   description,
   value,
   qCode,
-  childAnswerId,
   answerId
 }) {
   return Option.create(
@@ -37,7 +36,6 @@ module.exports.insert = function insert({
       description,
       value,
       qCode,
-      childAnswerId,
       answerId
     })
   )
@@ -51,7 +49,6 @@ module.exports.update = function update({
   description,
   value,
   qCode,
-  childAnswerId,
   isDeleted
 }) {
   return Option.update(id, {
@@ -59,7 +56,6 @@ module.exports.update = function update({
     description,
     value,
     qCode,
-    childAnswerId,
     isDeleted
   })
     .then(head)
