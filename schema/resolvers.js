@@ -1,5 +1,5 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes } = require("lodash");
+const { includes, merge, isNil } = require("lodash");
 
 const whereIn = (field, values) => {
   return function() {
@@ -119,7 +119,42 @@ const Resolvers = {
     deleteOption: (_, args, ctx) =>
       ctx.repositories.Option.remove(args.input.id),
     undeleteOption: (_, args, ctx) =>
-      ctx.repositories.Option.undelete(args.input.id)
+      ctx.repositories.Option.undelete(args.input.id),
+    createOtherAnswer: async (root, args, ctx) => {
+      const parentAnswer = await ctx.repositories.Answer.get(
+        args.input.parentAnswerId
+      );
+
+      if (!isNil(parentAnswer.otherAnswerId)) {
+        return parentAnswer;
+      }
+
+      if (parentAnswer.type === "Radio" || parentAnswer.type === "Checkbox") {
+        const otherAnswer = await ctx.repositories.Answer.insert({
+          mandatory: false,
+          type: "TextField"
+        });
+        await ctx.repositories.Answer.update(
+          merge(parentAnswer, { otherAnswerId: otherAnswer.id })
+        );
+      }
+
+      return parentAnswer;
+    },
+    deleteOtherAnswer: async (_, args, ctx) => {
+      const parentAnswer = await ctx.repositories.Answer.get(
+        args.input.parentAnswerId
+      );
+
+      if (isNil(parentAnswer.otherAnswerId)) {
+        return parentAnswer;
+      }
+
+      await ctx.repositories.Answer.remove(parentAnswer.otherAnswerId);
+      return ctx.repositories.Answer.update(
+        merge(parentAnswer, { otherAnswerId: null })
+      );
+    }
   },
 
   Questionnaire: {
@@ -162,7 +197,11 @@ const Resolvers = {
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
-      ctx.repositories.Option.findAll({ AnswerId: answer.id })
+      ctx.repositories.Option.findAll({ AnswerId: answer.id }),
+    otherAnswer: (answer, args, ctx) =>
+      !isNil(answer.otherAnswerId)
+        ? ctx.repositories.Answer.get(answer.otherAnswerId)
+        : null
   },
 
   Option: {
