@@ -397,5 +397,39 @@ describe("PagesRepository", () => {
 
       expect(map(updatedResults, "id")).toEqual(map(pages.reverse(), "id"));
     });
+
+    it("handles moving single page to it's own position", async () => {
+      const { section } = await setup();
+      const pages = await createPages(section.id, 3);
+
+      await PageRepository.move({
+        id: pages[1].id,
+        sectionId: section.id,
+        position: 1
+      });
+
+      const updatedResults = await PageRepository.findAll({
+        sectionId: section.id
+      });
+
+      expect(map(updatedResults, "id")).toEqual(map(pages, "id"));
+    });
+
+    it("handles moving only page in a section", async () => {
+      const { section } = await setup();
+      const pages = await createPages(section.id, 1);
+
+      await PageRepository.move({
+        id: pages[0].id,
+        sectionId: section.id,
+        position: 1000
+      });
+
+      const updatedResults = await PageRepository.findAll({
+        sectionId: section.id
+      });
+
+      expect(map(updatedResults, "id")).toEqual(map(pages, "id"));
+    });
   });
 });

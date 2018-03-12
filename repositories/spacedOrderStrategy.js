@@ -46,27 +46,31 @@ const movePage = async (trx, { id, sectionId, position }) => {
 
   let rows = await getAdjacentRows(trx, sectionId, position);
 
-  // position > number of rows, then we need to get max current value
+  // there are two cases in which there are no adjacent rows
+  // 1. inserting into empty list
+  // 2. inserting at position beyond end of list (e.g. inserting at position 10, where only 10 items in list)
   if (rows.length === 0) {
     const [{ order }] = await getNextOrderValue(trx, sectionId);
     rows = [order, order + SPACING];
   }
-  // inserting at end of list
-  if (rows.length === 1) {
+
+  if (position === 0) {
+    // inserting at start of list, there is no actual left-hand value
+    rows = [0, rows[0]];
+  } else if (rows.length === 1) {
+    // inserting at end of list, there is no actual right-hand value
     rows = [rows[0], rows[0] + SPACING];
   }
-  // inserting at start of list
-  if (position === 0) {
-    rows = [0, rows[0]];
-  }
 
-  // make some space in case where "order" values have converged
   if (valuesHaveConverged(...rows)) {
     await makeSpaceAfter(trx, rows[0], sectionId);
+    // now that space has been made for insertion, bring local data up to date
     rows[1] += SPACING;
   }
 
   const [page] = await setOrder(trx, id, sectionId, calculateMidPoint(...rows));
+
+  // assign position to the page object, so that data can be resolved locally by graphql
   return Object.assign(page, { position });
 };
 
