@@ -1,6 +1,6 @@
-const db = require("./index");
+const knex = require("./index");
 
-function Question() {
+function Question(db = knex) {
   return db("Pages");
 }
 
@@ -27,8 +27,8 @@ module.exports.update = function update(id, updates) {
     .returning("*");
 };
 
-module.exports.create = function create(obj) {
-  return Question()
+module.exports.create = function create(obj, db) {
+  return Question(db)
     .insert(restrictType(obj))
     .returning("*");
 };

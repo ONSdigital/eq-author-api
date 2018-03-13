@@ -1,6 +1,8 @@
 const { head, invert, map } = require("lodash/fp");
 const QuestionPage = require("../db/QuestionPage");
 const mapFields = require("../utils/mapFields");
+const knex = require("../db");
+
 const mapping = { SectionId: "sectionId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
@@ -23,19 +25,19 @@ module.exports.get = function get(id) {
     .then(fromDb);
 };
 
-module.exports.insert = function insert({
-  title,
-  description,
-  guidance,
-  sectionId
-}) {
+module.exports.insert = function insert(
+  { title, description, guidance, sectionId, order },
+  db = knex
+) {
   return QuestionPage.create(
     toDb({
       title,
       description,
       guidance,
-      sectionId
-    })
+      sectionId,
+      order
+    }),
+    db
   )
     .then(head)
     .then(fromDb);

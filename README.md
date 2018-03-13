@@ -162,9 +162,7 @@ Add the following to your `launch.json` configurations. This will *launch the te
   "runtimeArgs": [
     "--inspect-brk",
     "./node_modules/.bin/jest",
-    "-i",
-    "--env",
-    "jest-environment-node-debug"
+    "-i"
   ],
   "cwd": "${workspaceRoot}",
   "protocol": "inspector",

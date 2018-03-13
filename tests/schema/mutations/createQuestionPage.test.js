@@ -17,7 +17,7 @@ describe("createQuestionPage", () => {
 
   beforeEach(() => {
     repositories = {
-      QuestionPage: mockRepository()
+      Page: mockRepository()
     };
   });
 
@@ -36,6 +36,9 @@ describe("createQuestionPage", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.QuestionPage.insert).toHaveBeenCalledWith(input);
+    expect(repositories.Page.insert).toHaveBeenCalledWith({
+      ...input,
+      pageType: "QuestionPage"
+    });
   });
 });

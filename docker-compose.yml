@@ -23,7 +23,7 @@ services:
       - yarn
       - start:dev
   db:
-    image: postgres
+    image: postgres:9.4-alpine
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=mysecretpassword

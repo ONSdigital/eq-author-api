@@ -6,24 +6,22 @@
   "scripts": {
     "prestart": "yarn upgrade eq-author-graphql-schema",
     "start": "yarn knex -- migrate:latest && nodemon",
-    "start:dev": "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
+    "start:dev":
+      "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
     "lint": "eslint .",
-    "test": "NODE_ENV=test jest .",
+    "test": "NODE_ENV=test ./scripts/test.sh",
     "knex": "knex --knexfile config/knexfile.js --cwd .",
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.js": ["prettier --write", "git add"]
   },
   "dependencies": {
     "body-parser": "^1.17.2",
     "colors": "^1.1.2",
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
-    "eq-author-graphql-schema": "^0.5.0",
+    "eq-author-graphql-schema": "0.6.0",
     "express": "^4.15.3",
     "express-pino-logger": "^2.0.0",
     "graphql": "^0.9.6",
@@ -31,13 +29,13 @@
     "graphql-relay": "^0.5.2",
     "graphql-server-express": "^0.9.0",
     "graphql-tools": "^2.5.1",
-    "jest": "^20.0.4",
-    "jest-environment-node-debug": "^2.0.0",
+    "jest": "^22.3.0",
     "knex": "0.14.2",
     "lodash": "^4.17.4",
     "nodemon": "^1.11.0",
     "pg": "^6.2.3",
-    "pg-hstore": "^2.3.2"
+    "pg-hstore": "^2.3.2",
+    "wait-for-postgres": "^1.5.3"
   },
   "engines": {
     "node": ">=7.10.0"
@@ -52,11 +50,10 @@
       "!migrations/*",
       "!coverage/**/*",
       "!tests/**/*"
-    ],
-    "setupTestFrameworkScriptFile": "./tests/setup.js"
+    ]
   },
   "devDependencies": {
-    "eslint": "^3.19.0",
+    "eslint": "^4.18.0",
     "eslint-config-eq-author": "^1.0.2",
     "husky": "^0.14.3",
     "lint-staged": "^4.0.2",
