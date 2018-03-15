@@ -15,9 +15,6 @@ services:
       - 5858:5858 # open port for debugging
     environment:
       - DB_CONNECTION_URI=postgres://postgres:mysecretpassword@db:5432/postgres
-      - GRAPHIQL_ENABLED=true
-      - GRAPHIQL_ENDPOINT=/graphiql
-      - GRAPHIQL_PRETTY=true
       - NODE_ENV=development
     entrypoint:
       - yarn

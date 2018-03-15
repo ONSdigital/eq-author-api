@@ -22,9 +22,6 @@ In most cases sensible defaults have been selected.
 | Environment Variable | Description |
 | -------------------- | ----------- |
 | PORT                 | The port which express listens on (defaults to `4000`). |
-| GRAPHIQL_ENABLED     | Enable the Graphiql interface (`true` or `false`) |
-| GRAPHIQL_ENDPOINT    | The endpoint which graphiql listens on (defaults to `/graphiql`) |
-| GRAPHIQL_PRETTY      | Pretty print Graphiql output (`true` or `false`) |
 | DB_CONNECTION_URI    | Connection string for database |
 
 ### Run using Docker
@@ -169,4 +166,4 @@ Add the following to your `launch.json` configuration:
 }
 ```
 
-Then start your tests [as described above](#Tests). You can now start a debugging session, and pick the jest process to attach to.
+Then start your tests [as described above](#tests). You can now start a debugging session, and pick the jest process to attach to.
