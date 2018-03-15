@@ -1,10 +1,18 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes, merge, isNil } = require("lodash");
+const { includes, isNil, first } = require("lodash");
 
 const whereIn = (field, values) => {
   return function() {
     this.where("id", "in", values);
   };
+};
+
+const assertMultipleChoiceAnswer = answer => {
+  if (isNil(answer) || !includes(["Checkbox", "Radio"], answer.type)) {
+    throw new Error(
+      `Answer with id '${answer.id}' must be a Checkbox or Radio.`
+    );
+  }
 };
 
 const Resolvers = {
@@ -124,36 +132,15 @@ const Resolvers = {
       const parentAnswer = await ctx.repositories.Answer.get(
         args.input.parentAnswerId
       );
-
-      if (!isNil(parentAnswer.otherAnswerId)) {
-        return parentAnswer;
-      }
-
-      if (parentAnswer.type === "Radio" || parentAnswer.type === "Checkbox") {
-        const otherAnswer = await ctx.repositories.Answer.insert({
-          mandatory: false,
-          type: "TextField"
-        });
-        await ctx.repositories.Answer.update(
-          merge(parentAnswer, { otherAnswerId: otherAnswer.id })
-        );
-      }
-
-      return parentAnswer;
+      assertMultipleChoiceAnswer(parentAnswer);
+      return ctx.repositories.Answer.createOtherAnswer(parentAnswer);
     },
     deleteOtherAnswer: async (_, args, ctx) => {
       const parentAnswer = await ctx.repositories.Answer.get(
         args.input.parentAnswerId
       );
-
-      if (isNil(parentAnswer.otherAnswerId)) {
-        return parentAnswer;
-      }
-
-      await ctx.repositories.Answer.remove(parentAnswer.otherAnswerId);
-      return ctx.repositories.Answer.update(
-        merge(parentAnswer, { otherAnswerId: null })
-      );
+      assertMultipleChoiceAnswer(parentAnswer);
+      return ctx.repositories.Answer.deleteOtherAnswer(parentAnswer);
     }
   },
 
@@ -198,10 +185,10 @@ const Resolvers = {
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
-    otherAnswer: (answer, args, ctx) =>
-      !isNil(answer.otherAnswerId)
-        ? ctx.repositories.Answer.get(answer.otherAnswerId)
-        : null
+    otherAnswer: async (answer, args, ctx) =>
+      first(
+        await ctx.repositories.Answer.findAll({ parentAnswerId: answer.id })
+      )
   },
 
   Option: {

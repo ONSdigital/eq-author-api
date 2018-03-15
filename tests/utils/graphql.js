@@ -43,12 +43,7 @@ const createOtherAnswer = `
   mutation CreateOtherAnswer($input: CreateOtherAnswerInput!) {
     createOtherAnswer(input: $input) {
       id
-      ... on MultipleChoiceAnswer {
-        otherAnswer {
-          id
-          type
-        }
-      }
+      type
     }
   }
 `;
@@ -57,7 +52,25 @@ const deleteOtherAnswer = `
   mutation DeleteOtherAnswer($input: DeleteOtherAnswerInput!) {
     deleteOtherAnswer(input: $input) {
       id
+      type
+    }
+  }
+`;
+
+const getAnswer = `
+  query GetAnswer($id: ID!) {
+    answer(id: $id) {
+      id
+      description
+      guidance
+      qCode
+      label
+      type
+      mandatory
       ... on MultipleChoiceAnswer {
+        options {
+          id
+        },
         otherAnswer {
           id
           type
@@ -71,5 +84,6 @@ module.exports = {
   createQuestionnaire,
   createAnswer,
   createOtherAnswer,
-  deleteOtherAnswer
+  deleteOtherAnswer,
+  getAnswer
 };

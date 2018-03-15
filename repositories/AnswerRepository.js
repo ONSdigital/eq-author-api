@@ -4,6 +4,11 @@ const mapFields = require("../utils/mapFields");
 const mapping = { QuestionPageId: "questionPageId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
+const db = require("../db");
+const {
+  createOtherAnswer,
+  deleteOtherAnswer
+} = require("./strategies/multipleChoiceOtherAnswerStrategy");
 
 module.exports.findAll = function findAll(
   where = {},
@@ -56,7 +61,7 @@ module.exports.update = function update({
   type,
   mandatory,
   isDeleted,
-  otherAnswerId
+  parentAnswerId
 }) {
   return Answer.update(id, {
     description,
@@ -66,7 +71,7 @@ module.exports.update = function update({
     type,
     mandatory,
     isDeleted,
-    otherAnswerId
+    parentAnswerId
   })
     .then(head)
     .then(fromDb);
@@ -80,4 +85,12 @@ module.exports.remove = function remove(id) {
 
 module.exports.undelete = function(id) {
   return Answer.update(id, { isDeleted: false }).then(head);
+};
+
+module.exports.createOtherAnswer = ({ id }) => {
+  return db.transaction(trx => createOtherAnswer(trx, { id }));
+};
+
+module.exports.deleteOtherAnswer = ({ id }) => {
+  return db.transaction(trx => deleteOtherAnswer(trx, { id }));
 };
