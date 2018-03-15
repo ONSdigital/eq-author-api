@@ -21,13 +21,14 @@ const setOrder = (trx, id, SectionId, order) => {
     .returning("*");
 };
 
-const getAdjacentRows = (trx, sectionId, position) => {
+const getAdjacentRows = (trx, id, sectionId, position) => {
   return trx("Pages")
     .columns("id", "order")
     .where({
       SectionId: sectionId,
       isDeleted: false
     })
+    .where("id", "!=", id)
     .orderBy("order")
     .offset(Math.max(0, position - 1))
     .limit(2)
@@ -44,7 +45,7 @@ const makeSpaceAfter = (trx, order, SectionId) => {
 const movePage = async (trx, { id, sectionId, position }) => {
   position = Math.max(0, position);
 
-  let rows = await getAdjacentRows(trx, sectionId, position);
+  let rows = await getAdjacentRows(trx, id, sectionId, position);
 
   // there are two cases in which there are no adjacent rows
   // 1. inserting into empty list
