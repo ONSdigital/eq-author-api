@@ -122,6 +122,12 @@ docker-compose exec web yarn knex -- migrate:latest
 docker-compose exec web yarn knex -- migrate:rollback
 ```
 
+## Tests
+
+`yarn test` will start a single run of unit and integration tests.
+
+`yarn test --watch` will start unit and integration tests in watch mode.
+
 ## Debugging (with VS Code)
 
 ### Debugging app
@@ -135,16 +141,16 @@ Use this config for VS Code, rather than what is detailed in the guide. This wil
   "version": "0.2.0",
   "configurations": [
     {
-        "name": "Attach",
-        "type": "node",
-        "request": "attach",
-        "port": 5858,
-        "address": "localhost",
-        "restart": true,
-        "sourceMaps": false,
-        "outDir": null,
-        "localRoot": "${workspaceRoot}",
-        "remoteRoot": "/app"
+      "name": "Attach to Container",
+      "type": "node",
+      "request": "attach",
+      "port": 5858,
+      "address": "localhost",
+      "restart": true,
+      "sourceMaps": false,
+      "localRoot": "${workspaceRoot}",
+      "remoteRoot": "/app",
+      "protocol": "inspector"
     }
   ]
 }
@@ -152,20 +158,15 @@ Use this config for VS Code, rather than what is detailed in the guide. This wil
 
 ### Debugging tests
 
-Add the following to your `launch.json` configurations. This will *launch the tests and start debugging*:
+Add the following to your `launch.json` configuration:
 
 ```json
 {
-  "name": "Debug Jest tests",
+  "name": "Attach by Process ID",
   "type": "node",
-  "request": "launch",
-  "runtimeArgs": [
-    "--inspect-brk",
-    "./node_modules/.bin/jest",
-    "-i"
-  ],
-  "cwd": "${workspaceRoot}",
-  "protocol": "inspector",
-  "console": "integratedTerminal"
+  "request": "attach",
+  "processId": "${command:PickProcess}"
 }
 ```
+
+Then start your tests [as described above](#Tests). You can now start a debugging session, and pick the jest process to attach to.
