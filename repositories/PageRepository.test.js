@@ -4,6 +4,8 @@ const SectionRepository = require("../repositories/SectionRepository");
 const PageRepository = require("../repositories/PageRepository");
 const { last, head, map, times } = require("lodash");
 
+const reverse = array => array.slice().reverse();
+
 const buildQuestionnaire = questionnaire => ({
   title: "Test questionnaire",
   surveyId: "1",
@@ -154,7 +156,7 @@ describe("PagesRepository", () => {
         sectionId: section.id
       });
 
-      expect(map(updatePages, "id")).toEqual(map(pages.reverse(), "id"));
+      expect(map(updatePages, "id")).toEqual(map(reverse(pages), "id"));
     });
 
     it("gracefully handles position values greater than number of pages", async () => {
@@ -208,12 +210,7 @@ describe("PagesRepository", () => {
         sectionId: section2.id
       });
 
-      expect(updatedResults).toContainEqual(
-        expect.objectContaining({
-          id: head(results).id,
-          position: "0"
-        })
-      );
+      expect(head(updatedResults)).toMatchObject({ id: head(results).id });
     });
 
     it("correctly re-orders pages as they're moved between sections", async () => {
@@ -383,11 +380,11 @@ describe("PagesRepository", () => {
 
       const pages = await createPages(section.id, 3);
 
-      await eachP([pages[1], pages[0]], page =>
+      await eachP(reverse(pages), page =>
         PageRepository.move({
           id: page.id,
           sectionId: section.id,
-          position: 3
+          position: 2
         })
       );
 
@@ -395,7 +392,7 @@ describe("PagesRepository", () => {
         sectionId: section.id
       });
 
-      expect(map(updatedResults, "id")).toEqual(map(pages.reverse(), "id"));
+      expect(map(updatedResults, "id")).toEqual(map(reverse(pages), "id"));
     });
 
     it("handles moving single page to it's own position", async () => {
