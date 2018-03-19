@@ -80,10 +80,24 @@ const getAnswer = `
   }
 `;
 
+const getAnswers = `
+  query GetAnswers($id: ID!) {
+    page(id: $id) {
+      ... on QuestionPage {
+        answers {
+          id
+          type
+        }
+      }
+    }
+  }
+`;
+
 module.exports = {
   createQuestionnaire,
   createAnswer,
   createOtherAnswer,
   deleteOtherAnswer,
-  getAnswer
+  getAnswer,
+  getAnswers
 };

@@ -1,5 +1,5 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes, isNil, first } = require("lodash");
+const { includes, isNil } = require("lodash");
 
 const whereIn = (field, values) => {
   return function() {
@@ -163,7 +163,9 @@ const Resolvers = {
 
   QuestionPage: {
     answers: ({ id }, args, ctx) =>
-      ctx.repositories.Answer.findAll({ QuestionPageId: id }),
+      ctx.repositories.Answer.findAll({
+        QuestionPageId: id
+      }),
     section: ({ sectionId }, args, ctx) =>
       ctx.repositories.Section.get(sectionId)
   },
@@ -186,9 +188,7 @@ const Resolvers = {
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
     otherAnswer: async (answer, args, ctx) =>
-      first(
-        await ctx.repositories.Answer.findAll({ parentAnswerId: answer.id })
-      )
+      ctx.repositories.Answer.getOtherAnswer(answer.id)
   },
 
   Option: {

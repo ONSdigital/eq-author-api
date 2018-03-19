@@ -6,7 +6,8 @@ const {
   createAnswer,
   createOtherAnswer,
   deleteOtherAnswer,
-  getAnswer
+  getAnswer,
+  getAnswers
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -161,5 +162,23 @@ describe("resolvers", () => {
 
     const updatedParent = await refreshAnswerDetails(parentAnswer.id);
     expect(updatedParent.otherAnswer).toMatchObject(otherAnswer);
+  });
+
+  it("should filter out Other answers from regular answers", async () => {
+    const checkboxAnswer = await createNewAnswer(pages[0].id, "Checkbox");
+    await createNewOtherAnswer(checkboxAnswer);
+
+    const textFieldAnswer = await createNewAnswer(pages[0].id, "TextField");
+
+    const result = await executeQuery(getAnswers, { id: pages[0].id }, ctx);
+    expect(result.data.page.answers).toHaveLength(2);
+    expect(result.data.page.answers).toContainEqual({
+      id: checkboxAnswer.id,
+      type: checkboxAnswer.type
+    });
+    expect(result.data.page.answers).toContainEqual({
+      id: textFieldAnswer.id,
+      type: textFieldAnswer.type
+    });
   });
 });
