@@ -6,15 +6,17 @@
   "scripts": {
     "prestart": "yarn upgrade eq-author-graphql-schema",
     "start": "yarn knex -- migrate:latest && nodemon",
-    "start:dev":
-      "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
+    "start:dev": "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
     "lint": "eslint .",
     "test": "NODE_ENV=test ./scripts/test.sh",
     "knex": "knex --knexfile config/knexfile.js --cwd .",
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.js": ["prettier --write", "git add"]
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "dependencies": {
     "body-parser": "^1.17.2",
@@ -30,7 +32,7 @@
     "graphql-server-express": "^0.9.0",
     "graphql-tools": "^2.5.1",
     "jest": "^22.3.0",
-    "knex": "0.14.2",
+    "knex": "0.14.3",
     "lodash": "^4.17.4",
     "nodemon": "^1.11.0",
     "pg": "^6.2.3",
