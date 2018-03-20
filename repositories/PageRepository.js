@@ -3,7 +3,10 @@ const Page = require("../db/Page");
 const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
 const db = require("../db");
-const { movePage, getNextOrderValue } = require("./spacedOrderStrategy");
+const {
+  movePage,
+  getNextOrderValue
+} = require("./strategies/spacedOrderStrategy");
 
 const mapping = { SectionId: "sectionId" };
 const fromDb = mapFields(mapping);

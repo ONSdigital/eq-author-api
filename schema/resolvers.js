@@ -1,10 +1,18 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes } = require("lodash");
+const { includes, isNil } = require("lodash");
 
 const whereIn = (field, values) => {
   return function() {
     this.where("id", "in", values);
   };
+};
+
+const assertMultipleChoiceAnswer = answer => {
+  if (isNil(answer) || !includes(["Checkbox", "Radio"], answer.type)) {
+    throw new Error(
+      `Answer with id '${answer.id}' must be a Checkbox or Radio.`
+    );
+  }
 };
 
 const Resolvers = {
@@ -119,7 +127,21 @@ const Resolvers = {
     deleteOption: (_, args, ctx) =>
       ctx.repositories.Option.remove(args.input.id),
     undeleteOption: (_, args, ctx) =>
-      ctx.repositories.Option.undelete(args.input.id)
+      ctx.repositories.Option.undelete(args.input.id),
+    createOtherAnswer: async (root, args, ctx) => {
+      const parentAnswer = await ctx.repositories.Answer.get(
+        args.input.parentAnswerId
+      );
+      assertMultipleChoiceAnswer(parentAnswer);
+      return ctx.repositories.Answer.createOtherAnswer(parentAnswer);
+    },
+    deleteOtherAnswer: async (_, args, ctx) => {
+      const parentAnswer = await ctx.repositories.Answer.get(
+        args.input.parentAnswerId
+      );
+      assertMultipleChoiceAnswer(parentAnswer);
+      return ctx.repositories.Answer.deleteOtherAnswer(parentAnswer);
+    }
   },
 
   Questionnaire: {
@@ -141,7 +163,9 @@ const Resolvers = {
 
   QuestionPage: {
     answers: ({ id }, args, ctx) =>
-      ctx.repositories.Answer.findAll({ QuestionPageId: id }),
+      ctx.repositories.Answer.findAll({
+        QuestionPageId: id
+      }),
     section: ({ sectionId }, args, ctx) =>
       ctx.repositories.Section.get(sectionId)
   },
@@ -162,7 +186,9 @@ const Resolvers = {
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
-      ctx.repositories.Option.findAll({ AnswerId: answer.id })
+      ctx.repositories.Option.findAll({ AnswerId: answer.id }),
+    otherAnswer: async (answer, args, ctx) =>
+      ctx.repositories.Answer.getOtherAnswer(answer.id)
   },
 
   Option: {

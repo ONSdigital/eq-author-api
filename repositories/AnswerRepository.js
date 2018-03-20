@@ -4,6 +4,11 @@ const mapFields = require("../utils/mapFields");
 const mapping = { QuestionPageId: "questionPageId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
+const db = require("../db");
+const {
+  createOtherAnswer,
+  deleteOtherAnswer
+} = require("./strategies/multipleChoiceOtherAnswerStrategy");
 
 module.exports.findAll = function findAll(
   where = {},
@@ -11,7 +16,7 @@ module.exports.findAll = function findAll(
   direction = "asc"
 ) {
   return Answer.findAll()
-    .where({ isDeleted: false })
+    .where({ isDeleted: false, parentAnswerId: null })
     .where(where)
     .orderBy(orderBy, direction)
     .then(map(fromDb));
@@ -55,7 +60,8 @@ module.exports.update = function update({
   qCode,
   type,
   mandatory,
-  isDeleted
+  isDeleted,
+  parentAnswerId
 }) {
   return Answer.update(id, {
     description,
@@ -64,7 +70,8 @@ module.exports.update = function update({
     qCode,
     type,
     mandatory,
-    isDeleted
+    isDeleted,
+    parentAnswerId
   })
     .then(head)
     .then(fromDb);
@@ -78,4 +85,25 @@ module.exports.remove = function remove(id) {
 
 module.exports.undelete = function(id) {
   return Answer.update(id, { isDeleted: false }).then(head);
+};
+
+module.exports.getOtherAnswer = function(
+  id,
+  where = {},
+  orderBy = "created_at",
+  direction = "asc"
+) {
+  return Answer.findAll()
+    .where({ isDeleted: false, parentAnswerId: id })
+    .where(where)
+    .orderBy(orderBy, direction)
+    .first();
+};
+
+module.exports.createOtherAnswer = ({ id }) => {
+  return db.transaction(trx => createOtherAnswer(trx, { id }));
+};
+
+module.exports.deleteOtherAnswer = ({ id }) => {
+  return db.transaction(trx => deleteOtherAnswer(trx, { id }));
 };
