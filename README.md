@@ -1,5 +1,7 @@
 # eq-author-api
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ONSdigital/eq-author-api.svg)](https://greenkeeper.io/)
+
 A GraphQL based API for the [eq-author](https://github.com/ONSdigital/eq-author)
 application.
 
