@@ -52,6 +52,32 @@ module.exports.insert = function insert({
     .then(fromDb);
 };
 
+module.exports.insertChild = function insert({
+  description,
+  guidance,
+  label,
+  qCode,
+  type,
+  mandatory,
+  questionPageId,
+  parentAnswerId
+}) {
+  return Answer.create(
+    toDb({
+      description,
+      guidance,
+      label,
+      qCode,
+      type,
+      mandatory,
+      questionPageId,
+      parentAnswerId
+    })
+  )
+    .then(head)
+    .then(fromDb);
+};
+
 module.exports.update = function update({
   id,
   description,
@@ -98,6 +124,17 @@ module.exports.getOtherAnswer = function(
     .where(where)
     .orderBy(orderBy, direction)
     .first();
+};
+
+module.exports.getChildAnswer = function(
+  id,
+  where = {},
+  orderBy = "created_at",
+  direction = "asc"
+) {
+  return Answer.findAll()
+    .where({ parentAnswerId: id })
+    .orderBy(orderBy, direction);
 };
 
 module.exports.createOtherAnswer = ({ id }) => {

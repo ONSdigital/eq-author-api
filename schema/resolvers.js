@@ -1,5 +1,5 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes, isNil } = require("lodash");
+const { includes, isNil, forEach } = require("lodash");
 
 const whereIn = (field, values) => {
   return function() {
@@ -92,6 +92,7 @@ const Resolvers = {
 
       if (answer.type === "Checkbox" || answer.type === "Radio") {
         const defaultOptions = [];
+
         const defaultOption = {
           label: "",
           description: "",
@@ -113,11 +114,65 @@ const Resolvers = {
         await Promise.all(promises);
       }
 
+      if (answer.type === "DateRange") {
+        const compositeArgs = [];
+
+        const defaultOption = {
+          label: "",
+          description: "",
+          guidence: "",
+          qCode: "",
+          type: "Composite",
+          parentAnswerId: answer.id
+        };
+
+        compositeArgs.push(defaultOption);
+
+        await compositeArgs.map(it =>
+          Resolvers.Mutation.createCompositeAnswerChild(
+            root,
+            { input: it },
+            ctx
+          )
+        );
+        await compositeArgs.map(it =>
+          Resolvers.Mutation.createCompositeAnswerChild(
+            root,
+            { input: it },
+            ctx
+          )
+        );
+      }
+
       return answer;
+    },
+    createCompositeAnswerChild: (root, args, ctx) => {
+      ctx.repositories.Answer.insertChild(args.input);
     },
     updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args.input),
     deleteAnswer: (_, args, ctx) =>
       ctx.repositories.Answer.remove(args.input.id),
+
+    deleteCompositeAnswer: async (_, args, ctx) => {
+      await ctx.repositories.Answer.remove(args.input.id);
+      const answerArray = await ctx.repositories.Answer.getChildAnswer(
+        args.input.id,
+        { isDeleted: false }
+      );
+      forEach(answerArray, indivAnswer =>
+        ctx.repositories.Answer.remove(indivAnswer.id)
+      );
+    },
+    unDeleteCompositeAnswer: async (_, args, ctx) => {
+      await ctx.repositories.Answer.undelete(args.input.id);
+      const answerArray = await ctx.repositories.Answer.getChildAnswer(
+        args.input.id,
+        { isDeleted: true }
+      );
+      forEach(answerArray, indivAnswer =>
+        ctx.repositories.Answer.undelete(indivAnswer.id)
+      );
+    },
     undeleteAnswer: (_, args, ctx) =>
       ctx.repositories.Answer.undelete(args.input.id),
 
@@ -171,10 +226,15 @@ const Resolvers = {
   },
 
   Answer: {
-    __resolveType: ({ type }) =>
-      includes(["Checkbox", "Radio"], type)
-        ? "MultipleChoiceAnswer"
-        : "BasicAnswer"
+    __resolveType: ({ type }) => {
+      if (includes(["Checkbox", "Radio"], type)) {
+        return "MultipleChoiceAnswer";
+      } else if ("DateRange" == type) {
+        return "CompositeAnswer";
+      } else {
+        return "BasicAnswer";
+      }
+    }
   },
 
   BasicAnswer: {
@@ -189,6 +249,13 @@ const Resolvers = {
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
     otherAnswer: async (answer, args, ctx) =>
       ctx.repositories.Answer.getOtherAnswer(answer.id)
+  },
+
+  CompositeAnswer: {
+    page: (answer, args, ctx) =>
+      ctx.repositories.QuestionPage.get(answer.questionPageId),
+    answers: async (answer, args, ctx) =>
+      ctx.repositories.Answer.getChildAnswer(answer.id, { isDeleted: false })
   },
 
   Option: {
