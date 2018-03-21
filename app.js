@@ -14,13 +14,13 @@ const status = require("./middleware/status");
 
 const app = express();
 const pino = pinoMiddleware();
-const logger = createLogger(pino.logger);
 
+const logger = createLogger(pino.logger);
 addErrorLoggingToSchema(schema, logger);
-app.use(pino);
 
 app.use(
   "/graphql",
+  pino,
   cors(),
   bodyParser.json(),
   graphqlExpress({
@@ -33,7 +33,12 @@ app.use(
 app.get("/status", status);
 
 if (process.env.NODE_ENV === "development") {
-  app.use("/graphiql", cors(), graphiqlExpress({ endpointURL: "/graphql" }));
+  app.use(
+    "/graphiql",
+    pino,
+    cors(),
+    graphiqlExpress({ endpointURL: "/graphql" })
+  );
 }
 
 app.listen(PORT, "0.0.0.0", () => {
