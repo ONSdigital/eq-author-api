@@ -2,9 +2,10 @@ language: node_js
 node_js:
   - "8"
 
-before_install:
-  - yarn add codecov
 
+install:
+  - yarn install --frozen-lockfile
+  - yarn add codecov
 cache:
   yarn: true
   directories:
