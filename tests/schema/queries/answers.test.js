@@ -8,7 +8,7 @@ describe("answers query", () => {
         label
         ... on BasicAnswer {
           secondaryLabel
-          }
+        }
         id
       }
     }
