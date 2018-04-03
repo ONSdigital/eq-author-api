@@ -6,6 +6,9 @@ describe("answers query", () => {
     query GetAnswers($ids: [ID]!) {
       answers(ids: $ids) {
         label
+        ... on BasicAnswer {
+          secondaryLabel
+        }
         id
       }
     }
@@ -13,7 +16,11 @@ describe("answers query", () => {
 
   let repositories;
   const ids = ["1", "2", "3"];
-  const answers = ids.map(id => ({ id, label: `Label${1}` }));
+  const answers = ids.map(id => ({
+    id,
+    label: `Label${1}`,
+    secondaryLabel: `Label${1}`
+  }));
 
   beforeEach(() => {
     repositories = {
