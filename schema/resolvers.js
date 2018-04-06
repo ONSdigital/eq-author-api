@@ -196,8 +196,24 @@ const Resolvers = {
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
-    otherAnswer: async (answer, args, ctx) =>
-      ctx.repositories.Answer.getOtherAnswer(answer.id)
+    other: async ({ id }, args, ctx) => {
+      const answer = await ctx.repositories.Answer.getOtherAnswer(id);
+
+      if (isNil(answer)) {
+        return null;
+      }
+
+      const option = await ctx.repositories.Option.getOtherOption(answer.id);
+
+      if (isNil(option)) {
+        return null;
+      }
+
+      return {
+        answer,
+        option
+      };
+    }
   },
 
   Option: {

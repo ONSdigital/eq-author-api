@@ -11,7 +11,7 @@ module.exports.findAll = function findAll(
   direction = "asc"
 ) {
   return Option.findAll()
-    .where({ isDeleted: false })
+    .where({ isDeleted: false, otherAnswerId: null })
     .where(where)
     .orderBy(orderBy, direction)
     .then(map(fromDb));
@@ -72,4 +72,15 @@ module.exports.undelete = function(id) {
   return Option.update(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
+};
+
+module.exports.getOtherOption = function(
+  answerId,
+  orderBy = "created_at",
+  direction = "asc"
+) {
+  return Option.findAll()
+    .where({ isDeleted: false, otherAnswerId: answerId })
+    .orderBy(orderBy, direction)
+    .first();
 };

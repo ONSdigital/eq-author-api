@@ -30,9 +30,14 @@ const createAnswer = `
         options {
           id
         },
-        otherAnswer {
-          id
-          type
+        other {
+          answer {
+            id
+            type
+          },
+          option {
+            id
+          }
         }
       }
     }
@@ -71,9 +76,14 @@ const getAnswer = `
         options {
           id
         },
-        otherAnswer {
-          id
-          type
+        other {
+          answer {
+            id
+            type
+          }
+          option {
+            id
+          }
         }
       }
     }
