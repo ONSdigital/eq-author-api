@@ -158,7 +158,14 @@ const Resolvers = {
   },
 
   Page: {
-    __resolveType: ({ pageType }) => pageType
+    __resolveType: ({ pageType }) => pageType,
+    position: ({ position, id }, args, ctx) => {
+      if (position !== undefined) {
+        return position;
+      }
+
+      return ctx.repositories.Page.getPosition({ id });
+    }
   },
 
   QuestionPage: {
@@ -166,8 +173,10 @@ const Resolvers = {
       ctx.repositories.Answer.findAll({
         QuestionPageId: id
       }),
-    section: ({ sectionId }, args, ctx) =>
-      ctx.repositories.Section.get(sectionId)
+    section: ({ sectionId }, args, ctx) => {
+      return ctx.repositories.Section.get(sectionId);
+    },
+    position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx)
   },
 
   Answer: {

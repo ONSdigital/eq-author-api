@@ -357,8 +357,8 @@ describe("PagesRepository", () => {
         buildPage({ sectionId: section.id, position: 1 })
       );
 
-      // by moving 10 times the `order` values will converge - (1000 / 2^10) < 1
-      const plan = times(10, i => (i % 2 === 0 ? page1 : page2));
+      // by moving more than 10 times the `order` values will converge, since (1000 / 2^12) < 1
+      const plan = times(12, i => (i % 2 === 0 ? page1 : page2));
 
       await eachP(plan, page =>
         PageRepository.move({
@@ -427,6 +427,15 @@ describe("PagesRepository", () => {
       });
 
       expect(map(updatedResults, "id")).toEqual(map(pages, "id"));
+    });
+
+    it("can get position for a single page", async () => {
+      const { section } = await setup();
+      const pages = await createPages(section.id, 5);
+
+      const position = await PageRepository.getPosition({ id: pages[2].id });
+
+      expect(position).toBe(pages[2].position);
     });
   });
 });

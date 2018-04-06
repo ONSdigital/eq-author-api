@@ -5,7 +5,9 @@ const mapFields = require("../utils/mapFields");
 const db = require("../db");
 const {
   movePage,
-  getNextOrderValue
+  getNextOrderValue,
+  calculatedPositionCol,
+  getPosition
 } = require("./strategies/spacedOrderStrategy");
 
 const mapping = { SectionId: "sectionId" };
@@ -27,11 +29,7 @@ module.exports.findAll = function findAll(
   direction = "asc"
 ) {
   return Page.findAll()
-    .columns(
-      "*",
-      // convert arbitrary "order" values to 0-indexed position values
-      db.raw(`ROW_NUMBER () OVER (ORDER BY "order") - 1 as "position"`)
-    )
+    .columns("*", calculatedPositionCol(db))
     .where({ isDeleted: false })
     .where(toDb(where))
     .orderBy(orderBy, direction)
@@ -60,13 +58,15 @@ module.exports.insert = function insert(args) {
       return result;
     }
 
-    return result.then(({ id, sectionId }) =>
-      movePage(trx, {
-        id,
-        sectionId,
-        position: args.position
-      })
-    );
+    return result
+      .then(({ id, sectionId }) =>
+        movePage(trx, {
+          id,
+          sectionId,
+          position: args.position
+        })
+      )
+      .then(fromDb);
   });
 };
 
@@ -86,5 +86,13 @@ module.exports.undelete = function(id) {
 };
 
 module.exports.move = ({ id, sectionId, position }) => {
-  return db.transaction(trx => movePage(trx, { id, sectionId, position }));
+  return db.transaction(trx =>
+    movePage(trx, { id, sectionId, position }).then(fromDb)
+  );
+};
+
+module.exports.getPosition = ({ id }) => {
+  return Page.findById(id).then(({ SectionId }) =>
+    getPosition(db, SectionId, id)
+  );
 };
