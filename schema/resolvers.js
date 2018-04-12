@@ -128,14 +128,14 @@ const Resolvers = {
       ctx.repositories.Option.remove(args.input.id),
     undeleteOption: (_, args, ctx) =>
       ctx.repositories.Option.undelete(args.input.id),
-    createOtherAnswer: async (root, args, ctx) => {
+    createOther: async (root, args, ctx) => {
       const parentAnswer = await ctx.repositories.Answer.get(
         args.input.parentAnswerId
       );
       assertMultipleChoiceAnswer(parentAnswer);
       return ctx.repositories.Answer.createOtherAnswer(parentAnswer);
     },
-    deleteOtherAnswer: async (_, args, ctx) => {
+    deleteOther: async (_, args, ctx) => {
       const parentAnswer = await ctx.repositories.Answer.get(
         args.input.parentAnswerId
       );

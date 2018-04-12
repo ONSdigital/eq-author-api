@@ -1,4 +1,4 @@
-const createQuestionnaire = `mutation CreateQuestionnaire($input: CreateQuestionnaireInput!) {
+const createQuestionnaireMutation = `mutation CreateQuestionnaire($input: CreateQuestionnaireInput!) {
     createQuestionnaire(input: $input) {
       id
       title
@@ -16,7 +16,7 @@ const createQuestionnaire = `mutation CreateQuestionnaire($input: CreateQuestion
   }
 `;
 
-const createAnswer = `
+const createAnswerMutation = `
   mutation CreateAnswer($input: CreateAnswerInput!) {
     createAnswer(input: $input) {
       id,
@@ -44,25 +44,35 @@ const createAnswer = `
   }
 `;
 
-const createOtherAnswer = `
-  mutation CreateOtherAnswer($input: CreateOtherAnswerInput!) {
-    createOtherAnswer(input: $input) {
-      id
-      type
+const createOtherMutation = `
+  mutation CreateOther($input: CreateOtherInput!) {
+    createOther(input: $input) {
+      option {
+        id
+      }
+      answer {
+        id
+        type
+      }
     }
   }
 `;
 
-const deleteOtherAnswer = `
-  mutation DeleteOtherAnswer($input: DeleteOtherAnswerInput!) {
-    deleteOtherAnswer(input: $input) {
-      id
-      type
+const deleteOtherMutation = `
+  mutation DeleteOther($input: DeleteOtherInput!) {
+    deleteOther(input: $input) {
+      option {
+        id
+      }
+      answer {
+        id
+        type
+      }
     }
   }
 `;
 
-const getAnswer = `
+const getAnswerQuery = `
   query GetAnswer($id: ID!) {
     answer(id: $id) {
       id
@@ -90,7 +100,7 @@ const getAnswer = `
   }
 `;
 
-const getAnswers = `
+const getAnswersQuery = `
   query GetAnswers($id: ID!) {
     page(id: $id) {
       ... on QuestionPage {
@@ -104,10 +114,10 @@ const getAnswers = `
 `;
 
 module.exports = {
-  createQuestionnaire,
-  createAnswer,
-  createOtherAnswer,
-  deleteOtherAnswer,
-  getAnswer,
-  getAnswers
+  createQuestionnaireMutation,
+  createAnswerMutation,
+  createOtherMutation,
+  deleteOtherMutation,
+  getAnswerQuery,
+  getAnswersQuery
 };

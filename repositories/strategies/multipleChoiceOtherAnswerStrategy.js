@@ -39,7 +39,8 @@ const deleteOption = async (trx, { id }) =>
     .update({
       isDeleted: true
     })
-    .returning("*");
+    .returning("*")
+    .then(head);
 
 const createOtherAnswer = async (trx, { id }) => {
   const existingOtherAnswer = await findOtherAnswer(trx, id);
@@ -50,9 +51,12 @@ const createOtherAnswer = async (trx, { id }) => {
     );
   }
 
-  const otherAnswer = await createAnswer(trx, id, "TextField");
-  await createOption(trx, otherAnswer);
-  return otherAnswer;
+  const answer = await createAnswer(trx, id, "TextField");
+  const option = await createOption(trx, answer);
+  return {
+    option,
+    answer
+  };
 };
 
 const deleteOtherAnswer = async (trx, { id }) => {
@@ -62,8 +66,12 @@ const deleteOtherAnswer = async (trx, { id }) => {
     throw new Error(`Answer with id ${id} does not have an "other" answer.`);
   }
 
-  await deleteOption(trx, otherAnswer);
-  return deleteAnswer(trx, otherAnswer);
+  const option = await deleteOption(trx, otherAnswer);
+  const answer = await deleteAnswer(trx, otherAnswer);
+  return {
+    option,
+    answer
+  };
 };
 
 module.exports = {
