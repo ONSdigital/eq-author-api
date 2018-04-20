@@ -13,7 +13,7 @@ module.exports.get = function(id) {
 module.exports.findAll = function findAll(
   where = {},
   orderBy = "created_at",
-  direction = "asc"
+  direction = "desc"
 ) {
   return Questionnaire.findAll()
     .where({ isDeleted: false })

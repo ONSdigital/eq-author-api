@@ -40,7 +40,7 @@ describe("QuestionnaireRepository", () => {
     expect(result).toMatchObject(questionnaire);
   });
 
-  it("should retrieve all questionnaires", async () => {
+  it("should retrieve all questionnaires sorted by date desc", async () => {
     const { id: id1 } = await QuestionnaireRepository.insert(
       buildQuestionnaire()
     );
@@ -50,12 +50,10 @@ describe("QuestionnaireRepository", () => {
 
     const results = await QuestionnaireRepository.findAll();
 
-    expect(results).toContainEqual(
+    expect(results).toEqual([
+      expect.objectContaining({ id: id2, isDeleted: false }),
       expect.objectContaining({ id: id1, isDeleted: false })
-    );
-    expect(results).toContainEqual(
-      expect.objectContaining({ id: id2, isDeleted: false })
-    );
+    ]);
   });
 
   it("should remove questionnaire", async () => {
