@@ -82,7 +82,9 @@ module.exports.remove = function remove(id) {
 };
 
 module.exports.undelete = function(id) {
-  return Page.update(id, { isDeleted: false }).then(head);
+  return Page.update(id, { isDeleted: false })
+    .then(head)
+    .then(fromDb);
 };
 
 module.exports.move = ({ id, sectionId, position }) => {

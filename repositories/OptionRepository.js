@@ -69,5 +69,7 @@ module.exports.remove = function remove(id) {
 };
 
 module.exports.undelete = function(id) {
-  return Option.update(id, { isDeleted: false }).then(head);
+  return Option.update(id, { isDeleted: false })
+    .then(head)
+    .then(fromDb);
 };

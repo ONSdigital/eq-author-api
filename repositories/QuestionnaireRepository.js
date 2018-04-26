@@ -41,7 +41,9 @@ module.exports.insert = function({
     surveyId,
     summary,
     createdBy
-  }).then(head);
+  })
+    .then(head)
+    .then(fromDb);
 };
 
 module.exports.update = function({
@@ -64,13 +66,19 @@ module.exports.update = function({
     navigation,
     isDeleted,
     summary
-  }).then(head);
+  })
+    .then(head)
+    .then(fromDb);
 };
 
 module.exports.remove = function(id) {
-  return Questionnaire.update(id, { isDeleted: true }).then(head);
+  return Questionnaire.update(id, { isDeleted: true })
+    .then(head)
+    .then(fromDb);
 };
 
 module.exports.undelete = function(id) {
-  return Questionnaire.update(id, { isDeleted: false }).then(head);
+  return Questionnaire.update(id, { isDeleted: false })
+    .then(head)
+    .then(fromDb);
 };
