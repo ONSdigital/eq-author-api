@@ -88,7 +88,9 @@ module.exports.remove = function remove(id) {
 };
 
 module.exports.undelete = function(id) {
-  return Answer.update(id, { isDeleted: false }).then(head);
+  return Answer.update(id, { isDeleted: false })
+    .then(head)
+    .then(fromDb);
 };
 
 module.exports.getOtherAnswer = function(
@@ -101,13 +103,14 @@ module.exports.getOtherAnswer = function(
     .where({ isDeleted: false, parentAnswerId: id })
     .where(where)
     .orderBy(orderBy, direction)
-    .first();
+    .first()
+    .then(fromDb);
 };
 
 module.exports.createOtherAnswer = ({ id }) => {
-  return db.transaction(trx => createOtherAnswer(trx, { id }));
+  return db.transaction(trx => createOtherAnswer(trx, { id }).then(fromDb));
 };
 
 module.exports.deleteOtherAnswer = ({ id }) => {
-  return db.transaction(trx => deleteOtherAnswer(trx, { id }));
+  return db.transaction(trx => deleteOtherAnswer(trx, { id }).then(fromDb));
 };

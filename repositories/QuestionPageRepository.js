@@ -67,5 +67,7 @@ module.exports.remove = function remove(id) {
 };
 
 module.exports.undelete = function(id) {
-  return QuestionPage.update(id, { isDeleted: false }).then(head);
+  return QuestionPage.update(id, { isDeleted: false })
+    .then(head)
+    .then(fromDb);
 };
