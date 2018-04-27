@@ -128,14 +128,14 @@ const Resolvers = {
       ctx.repositories.Option.remove(args.input.id),
     undeleteOption: (_, args, ctx) =>
       ctx.repositories.Option.undelete(args.input.id),
-    createOtherAnswer: async (root, args, ctx) => {
+    createOther: async (root, args, ctx) => {
       const parentAnswer = await ctx.repositories.Answer.get(
         args.input.parentAnswerId
       );
       assertMultipleChoiceAnswer(parentAnswer);
       return ctx.repositories.Answer.createOtherAnswer(parentAnswer);
     },
-    deleteOtherAnswer: async (_, args, ctx) => {
+    deleteOther: async (_, args, ctx) => {
       const parentAnswer = await ctx.repositories.Answer.get(
         args.input.parentAnswerId
       );
@@ -196,8 +196,24 @@ const Resolvers = {
       ctx.repositories.QuestionPage.get(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
-    otherAnswer: async (answer, args, ctx) =>
-      ctx.repositories.Answer.getOtherAnswer(answer.id)
+    other: async ({ id }, args, ctx) => {
+      const answer = await ctx.repositories.Answer.getOtherAnswer(id);
+
+      if (isNil(answer)) {
+        return null;
+      }
+
+      const option = await ctx.repositories.Option.getOtherOption(answer.id);
+
+      if (isNil(option)) {
+        return null;
+      }
+
+      return {
+        answer,
+        option
+      };
+    }
   },
 
   Option: {

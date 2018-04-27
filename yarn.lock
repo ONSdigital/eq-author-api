@@ -1203,9 +1203,9 @@ end-of-stream@^1.1.0:
   dependencies:
     once "^1.4.0"
 
-eq-author-graphql-schema@^0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/eq-author-graphql-schema/-/eq-author-graphql-schema-0.9.0.tgz#09908b0e4007ea58f98e969c1186462849fde935"
+eq-author-graphql-schema@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/eq-author-graphql-schema/-/eq-author-graphql-schema-0.12.0.tgz#1013b6efbe13856f15bb30328c2e07a0561200a8"
 
 error-ex@^1.2.0, error-ex@^1.3.1:
   version "1.3.1"

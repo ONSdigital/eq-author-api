@@ -1,9 +1,49 @@
 const { head, isNil } = require("lodash/fp");
 
-const createOtherAnswer = async (trx, { id }) => {
-  const existingOtherAnswer = await trx("Answers")
-    .where({ parentAnswerId: id })
+const findOtherAnswer = async (trx, parentAnswerId) =>
+  trx("Answers")
+    .where({ parentAnswerId, isDeleted: false })
     .first();
+
+const createAnswer = async (trx, parentAnswerId, type) =>
+  trx("Answers")
+    .insert({
+      mandatory: false,
+      type,
+      parentAnswerId
+    })
+    .returning("*")
+    .then(head);
+
+const deleteAnswer = async (trx, { id }) =>
+  trx("Answers")
+    .where("id", id)
+    .update({
+      isDeleted: true
+    })
+    .returning("*")
+    .then(head);
+
+const createOption = async (trx, { id, parentAnswerId }) =>
+  trx("Options")
+    .insert({
+      AnswerId: parentAnswerId,
+      otherAnswerId: id
+    })
+    .returning("*")
+    .then(head);
+
+const deleteOption = async (trx, { id }) =>
+  trx("Options")
+    .where("otherAnswerId", id)
+    .update({
+      isDeleted: true
+    })
+    .returning("*")
+    .then(head);
+
+const createOtherAnswer = async (trx, { id }) => {
+  const existingOtherAnswer = await findOtherAnswer(trx, id);
 
   if (!isNil(existingOtherAnswer)) {
     throw new Error(
@@ -11,32 +51,27 @@ const createOtherAnswer = async (trx, { id }) => {
     );
   }
 
-  return trx("Answers")
-    .insert({
-      mandatory: false,
-      type: "TextField",
-      parentAnswerId: id
-    })
-    .returning("*")
-    .then(head);
+  const answer = await createAnswer(trx, id, "TextField");
+  const option = await createOption(trx, answer);
+  return {
+    option,
+    answer
+  };
 };
 
 const deleteOtherAnswer = async (trx, { id }) => {
-  const existingOtherAnswer = await trx("Answers")
-    .where({ parentAnswerId: id })
-    .first();
+  const otherAnswer = await findOtherAnswer(trx, id);
 
-  if (isNil(existingOtherAnswer)) {
+  if (isNil(otherAnswer)) {
     throw new Error(`Answer with id ${id} does not have an "other" answer.`);
   }
 
-  return trx("Answers")
-    .where("id", existingOtherAnswer.id)
-    .update({
-      isDeleted: true,
-      parentAnswerId: null
-    })
-    .returning("*");
+  const option = await deleteOption(trx, otherAnswer);
+  const answer = await deleteAnswer(trx, otherAnswer);
+  return {
+    option,
+    answer
+  };
 };
 
 module.exports = {
