@@ -96,7 +96,7 @@ describe("PagesRepository", () => {
     await PageRepository.remove(page.id);
     const result = await PageRepository.get(page.id);
 
-    expect(result).toEqual({});
+    expect(result).toBeUndefined();
   });
 
   it("allows pages to be un-deleted", async () => {
