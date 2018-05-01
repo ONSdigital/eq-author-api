@@ -62,7 +62,7 @@ describe("QuestionnaireRepository", () => {
     await QuestionnaireRepository.remove(id);
     const result = await QuestionnaireRepository.get(id);
 
-    expect(result).toMatchObject({});
+    expect(result).toBeUndefined();
   });
 
   it("should update questionnaires", async () => {
