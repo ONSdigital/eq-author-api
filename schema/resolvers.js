@@ -1,5 +1,6 @@
 const { GraphQLDate } = require("graphql-iso-date");
 const { includes, isNil } = require("lodash");
+const formatRichText = require("../utils/formatRichText");
 
 const whereIn = (field, values) => {
   return function() {
@@ -26,7 +27,9 @@ const Resolvers = {
     answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id),
     answers: (root, { ids }, ctx) =>
       ctx.repositories.Answer.findAll(whereIn("id", ids)),
-    option: (root, { id }, ctx) => ctx.repositories.Option.get(id)
+    option: (root, { id }, ctx) => ctx.repositories.Option.get(id),
+    availableRoutingDestinations: (root, { pageId }, ctx) =>
+      ctx.repositories.Routing.getRoutingDestinations(pageId)
   },
 
   Mutation: {
@@ -59,7 +62,7 @@ const Resolvers = {
         sectionId: section.id
       };
 
-      await ctx.repositories.Page.insert(page);
+      await Resolvers.Mutation.createPage(root, { input: page }, ctx);
       return section;
     },
     updateSection: (_, args, ctx) =>
@@ -70,6 +73,7 @@ const Resolvers = {
       ctx.repositories.Section.undelete(args.input.id),
 
     createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
+
     updatePage: (_, args, ctx) => ctx.repositories.Page.update(args.input),
     deletePage: (_, args, ctx) => ctx.repositories.Page.remove(args.input.id),
     undeletePage: (_, args, ctx) =>
@@ -141,7 +145,32 @@ const Resolvers = {
       );
       assertMultipleChoiceAnswer(parentAnswer);
       return ctx.repositories.Answer.deleteOtherAnswer(parentAnswer);
-    }
+    },
+    createRoutingRuleSet: async (root, args, ctx) =>
+      ctx.repositories.Routing.createRoutingRuleSet(args.input),
+    updateRoutingRuleSet: (_, args, ctx) =>
+      ctx.repositories.Routing.updateRoutingRuleSet(args.input),
+    deleteRoutingRuleSet: (_, args, ctx) =>
+      ctx.repositories.Routing.deleteRoutingRuleSet(args.input),
+    resetRoutingRuleSetElse: (_, args, ctx) => {
+      return ctx.repositories.Routing.updateRoutingRuleSet(args.input);
+    },
+    createRoutingRule: async (_, args, ctx) =>
+      ctx.repositories.Routing.createRoutingRule(args.input),
+    updateRoutingRule: (_, args, ctx) =>
+      ctx.repositories.Routing.updateRoutingRule(args.input),
+    deleteRoutingRule: (_, args, ctx) =>
+      ctx.repositories.Routing.removeRoutingRule(args.input),
+    undeleteRoutingRule: (_, args, ctx) =>
+      ctx.repositories.Routing.undeleteRoutingRule(args.input),
+    createRoutingCondition: (_, args, ctx) =>
+      ctx.repositories.Routing.createRoutingCondition(args.input),
+    updateRoutingCondition: (_, args, ctx) =>
+      ctx.repositories.Routing.updateRoutingCondition(args.input),
+    deleteRoutingCondition: (_, args, ctx) =>
+      ctx.repositories.Routing.removeRoutingCondition(args.input),
+    updateRoutingConditionValue: async (_, args, ctx) =>
+      ctx.repositories.Routing.updateRoutingConditionValue(args.input)
   },
 
   Questionnaire: {
@@ -154,7 +183,8 @@ const Resolvers = {
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ SectionId: section.id }),
     questionnaire: (section, args, ctx) =>
-      ctx.repositories.Questionnaire.get(section.questionnaireId)
+      ctx.repositories.Questionnaire.get(section.questionnaireId),
+    title: (page, args) => formatRichText(page.title, args.format)
   },
 
   Page: {
@@ -176,7 +206,82 @@ const Resolvers = {
     section: ({ sectionId }, args, ctx) => {
       return ctx.repositories.Section.get(sectionId);
     },
-    position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx)
+    position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx),
+    routingRuleSet: ({ id: QuestionPageId }, args, ctx) =>
+      ctx.repositories.Routing.findRoutingRuleSetByQuestionPageId({
+        QuestionPageId
+      }),
+    title: (page, args) => formatRichText(page.title, args.format)
+  },
+
+  RoutingRuleSet: {
+    routingRules: ({ id }, args, ctx) => {
+      return ctx.repositories.Routing.findAllRoutingRules({
+        RoutingRuleSetId: id
+      });
+    },
+    questionPage: ({ questionPageId }, args, ctx) => {
+      return ctx.repositories.Page.get(questionPageId);
+    },
+    else: ({ routingDestinationId }, args, ctx) =>
+      ctx.repositories.Routing.getRoutingDestination(routingDestinationId)
+  },
+
+  RoutingRule: {
+    conditions: ({ id }, args, ctx) => {
+      return ctx.repositories.Routing.findAllRoutingConditions({
+        RoutingRuleId: id
+      });
+    },
+    goto: (routingRule, args, ctx) =>
+      ctx.repositories.Routing.getRoutingDestination(
+        routingRule.routingDestinationId
+      )
+  },
+
+  RoutingCondition: {
+    routingValue: ({ id }) => {
+      return { conditionId: id };
+    },
+    questionPage: ({ questionPageId }, args, ctx) => {
+      return isNil(questionPageId)
+        ? null
+        : ctx.repositories.Page.get(questionPageId);
+    },
+    answer: ({ answerId }, args, ctx) => {
+      return isNil(answerId) ? null : ctx.repositories.Answer.get(answerId);
+    }
+  },
+
+  RoutingConditionValue: {
+    __resolveType: () => "IDValue"
+  },
+
+  IDValue: {
+    value: ({ conditionId }, args, ctx) =>
+      ctx.repositories.Routing.getRoutingConditionValue({ conditionId })
+  },
+
+  RoutingDestination: {
+    __resolveType: ({ logicalDestination }) => {
+      return isNil(logicalDestination)
+        ? "AbsoluteDestination"
+        : "LogicalDestination";
+    }
+  },
+
+  AbsoluteDestinations: {
+    __resolveType: ({ pageType }) => {
+      if (pageType) {
+        return "QuestionPage";
+      } else {
+        return "Section";
+      }
+    }
+  },
+
+  LogicalDestination: {
+    id: destination => destination.logicalDestination
   },
 
   Answer: {
@@ -222,5 +327,4 @@ const Resolvers = {
 
   Date: GraphQLDate
 };
-
 module.exports = Resolvers;

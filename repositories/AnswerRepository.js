@@ -10,6 +10,8 @@ const {
   deleteOtherAnswer
 } = require("./strategies/multipleChoiceOtherAnswerStrategy");
 
+const { handleAnswerDeleted } = require("./strategies/routingStrategy");
+
 module.exports.findAll = function findAll(
   where = {},
   orderBy = "created_at",
@@ -81,10 +83,23 @@ module.exports.update = function update({
     .then(fromDb);
 };
 
-module.exports.remove = function remove(id) {
-  return Answer.update(id, { isDeleted: true })
+const deleteAnswer = async (trx, id) => {
+  const deletedAnswer = await trx("Answers")
+    .where({
+      id: parseInt(id)
+    })
+    .update({ isDeleted: true })
+    .returning("*")
     .then(head)
     .then(fromDb);
+
+  await handleAnswerDeleted(trx, id);
+
+  return deletedAnswer;
+};
+
+module.exports.remove = function remove(id) {
+  return db.transaction(trx => deleteAnswer(trx, id));
 };
 
 module.exports.undelete = function(id) {

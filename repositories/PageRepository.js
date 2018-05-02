@@ -7,6 +7,11 @@ const {
   getOrUpdateOrderForInsert
 } = require("./strategies/spacedOrderStrategy");
 
+const {
+  getAvailableRoutingDestinations,
+  handlePageDeleted
+} = require("./strategies/routingStrategy");
+
 const mapping = { SectionId: "sectionId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
@@ -51,11 +56,20 @@ function update(args) {
   return repository.update(args);
 }
 
-function remove(id) {
-  return Page.update(id, { isDeleted: true })
+const deletePage = async (trx, id) => {
+  const deletedPage = await trx("Pages")
+    .where({ id: parseInt(id, 10) })
+    .update({ isDeleted: true })
+    .returning("*")
     .then(head)
     .then(fromDb);
-}
+
+  await handlePageDeleted(trx, id);
+
+  return deletedPage;
+};
+
+const remove = id => db.transaction(trx => deletePage(trx, id));
 
 function undelete(id) {
   return Page.update(id, { isDeleted: false })
@@ -77,6 +91,10 @@ function getPosition({ id }) {
   return getById(id).then(get("position"));
 }
 
+function getRoutingDestinations(pageId) {
+  return db.transaction(trx => getAvailableRoutingDestinations(trx, pageId));
+}
+
 Object.assign(module.exports, {
   findAll,
   get: getById,
@@ -85,5 +103,6 @@ Object.assign(module.exports, {
   remove,
   undelete,
   move,
-  getPosition
+  getPosition,
+  getRoutingDestinations
 });
