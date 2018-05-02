@@ -4,5 +4,6 @@ module.exports = {
   Page: require("./PageRepository"),
   QuestionPage: require("./QuestionPageRepository"),
   Answer: require("./AnswerRepository"),
-  Option: require("./OptionRepository")
+  Option: require("./OptionRepository"),
+  Routing: require("./RoutingRepository")
 };

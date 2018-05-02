@@ -176,7 +176,38 @@ const Resolvers = {
     section: ({ sectionId }, args, ctx) => {
       return ctx.repositories.Section.get(sectionId);
     },
-    position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx)
+    position: (page, args, ctx) => {
+      Resolvers.Page.position(page, args, ctx);
+    },
+    routingRuleSet: ({ id }, args, ctx) => {
+      ctx.repositories.Routing.findAllRoutingRuleSets({
+        QuestionPageId: id
+      });
+    }
+  },
+
+  RoutingRuleSet: {
+    routingRules: ({ id }, args, ctx) => {
+      ctx.repositories.Routing.findAllRoutingRules({
+        ParentRoutingRuleSet: id
+      });
+    }
+  },
+
+  RoutingRule: {
+    conditions: ({ id }, args, ctx) => {
+      ctx.repositories.Routing.findAllRoutingConditions({
+        ParentRoutingRule: id
+      });
+    }
+  },
+
+  RoutingCondition: {
+    routingValue: ({ id }, args, ctx) => {
+      ctx.repositories.Routing.findAllRoutingConditionValues({
+        ParentCondition: id
+      });
+    }
   },
 
   Answer: {
