@@ -53,6 +53,7 @@ const createOtherMutation = `
       answer {
         id
         type
+        description
       }
     }
   }
@@ -67,6 +68,7 @@ const deleteOtherMutation = `
       answer {
         id
         type
+        description
       }
     }
   }
@@ -90,6 +92,7 @@ const getAnswerQuery = `
           answer {
             id
             type
+            description
           }
           option {
             id

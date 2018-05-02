@@ -9,6 +9,7 @@ const createAnswer = async (trx, parentAnswerId, type) =>
   trx("Answers")
     .insert({
       mandatory: false,
+      description: "",
       type,
       parentAnswerId
     })
