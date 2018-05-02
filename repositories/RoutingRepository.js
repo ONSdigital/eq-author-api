@@ -17,13 +17,14 @@ const toDb = mapFields(invert(mapping));
 
 const Routing = require("../db/Routing");
 
-module.exports.findAllRoutingRuleSets = function findAllRoutingRuleSets(
+module.exports.findRoutingRuleSetByQuestionPageId = function findRoutingRuleSetByQuestionPageId(
   where = {}
 ) {
   return Routing.findAllRoutingRuleSets()
     .where({ isDeleted: false })
     .where(where)
-    .then(map(fromDb));
+    .first()
+    .then(fromDb);
 };
 
 module.exports.findAllRoutingRules = function findAllRoutingRules(where = {}) {
@@ -93,13 +94,13 @@ module.exports.insertRoutingRuleSet = function insertRoutingRuleSet({
 
 module.exports.insertRoutingRule = function insertRoutingRule({
   ruleOperation,
-  arentRoutingRuleSet,
+  parentRoutingRuleSet,
   ruleDestination
 }) {
   return Answer.createRoutingRule(
     toDb({
       ruleOperation,
-      arentRoutingRuleSet,
+      parentRoutingRuleSet,
       ruleDestination
     })
   )

@@ -177,10 +177,10 @@ const Resolvers = {
       return ctx.repositories.Section.get(sectionId);
     },
     position: (page, args, ctx) => {
-      Resolvers.Page.position(page, args, ctx);
+      return Resolvers.Page.position(page, args, ctx);
     },
     routingRuleSet: ({ id }, args, ctx) => {
-      ctx.repositories.Routing.findAllRoutingRuleSets({
+      return ctx.repositories.Routing.findRoutingRuleSetByQuestionPageId({
         QuestionPageId: id
       });
     }
@@ -188,25 +188,40 @@ const Resolvers = {
 
   RoutingRuleSet: {
     routingRules: ({ id }, args, ctx) => {
-      ctx.repositories.Routing.findAllRoutingRules({
+      return ctx.repositories.Routing.findAllRoutingRules({
         ParentRoutingRuleSet: id
       });
+    },
+    else: ({ elseDestination }, args, ctx) => {
+      return { pageId: elseDestination };
     }
   },
 
   RoutingRule: {
     conditions: ({ id }, args, ctx) => {
-      ctx.repositories.Routing.findAllRoutingConditions({
+      return ctx.repositories.Routing.findAllRoutingConditions({
         ParentRoutingRule: id
       });
+    },
+    goto: ({ ruleDestination }, args, ctx) => {
+      return { pageId: ruleDestination };
     }
   },
 
   RoutingCondition: {
     routingValue: ({ id }, args, ctx) => {
-      ctx.repositories.Routing.findAllRoutingConditionValues({
+      return ctx.repositories.Routing.findAllRoutingConditionValues({
         ParentCondition: id
       });
+    },
+    answer: ({ answerId }, args, ctx) => {
+      return ctx.repositories.Answer.get(answerId);
+    }
+  },
+
+  RoutingDestination: {
+    page: ({ pageId }, args, ctx) => {
+      return ctx.repositories.QuestionPage.get(pageId);
     }
   },
 

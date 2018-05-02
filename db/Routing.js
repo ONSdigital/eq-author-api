@@ -16,20 +16,52 @@ function RoutingConditionValue() {
   return db("Routing_ConditionValues");
 }
 
+function Comparator() {
+  return db("Routing_Comparators");
+}
+
+function Operations() {
+  return db("Routing_Operations");
+}
+
 module.exports.findAllRoutingRuleSets = function findAllRoutingRuleSets() {
   return RoutingRuleSet().select();
 };
 
 module.exports.findAllRoutingRules = function findAllRoutingRules() {
-  return RoutingRule().select();
+  return RoutingRule()
+    .select(
+      "Routing_Rules.id",
+      "Routing_Operations.operation",
+      "Routing_Rules.ParentRoutingRuleSet",
+      "Routing_Rules.RuleDestination",
+      "Routing_Rules.isDeleted"
+    )
+    .innerJoin(
+      "Routing_Operations",
+      "Routing_Rules.RuleOperation",
+      "Routing_Operations.id"
+    );
 };
 
 module.exports.findAllRoutingConditions = function findAllRoutingConditions() {
-  return RoutingRuleSet().select();
+  return RoutingCondition()
+    .select(
+      "Routing_Conditions.id",
+      "Routing_Comparators.comparator",
+      "Routing_Conditions.ParentRoutingRule",
+      "Routing_Conditions.AnswerId",
+      "Routing_Conditions.isDeleted"
+    )
+    .innerJoin(
+      "Routing_Comparators",
+      "Routing_Conditions.Comparator",
+      "Routing_Comparators.id"
+    );
 };
 
 module.exports.findAllRoutingConditionValues = function indAllRoutingConditionValues() {
-  return RoutingRuleSet().select();
+  return RoutingConditionValue().select();
 };
 
 module.exports.findRoutingRuleSetsById = function findRoutingRuleSetsById(id) {
@@ -40,14 +72,18 @@ module.exports.findRoutingRuleSetsById = function findRoutingRuleSetsById(id) {
 
 module.exports.findRoutingRulesById = function findRoutingRulesById(id) {
   return RoutingRule()
-    .where("id", parseInt(id, 10))
-    .first();
-};
-
-module.exports.findRoutingConditionsById = function findRoutingConditionsById(
-  id
-) {
-  return RoutingCondition()
+    .select(
+      "Routing_Rules.id",
+      "Routing_Operations.operation",
+      "Routing_Rules.ParentRoutingRuleSet",
+      "Routing_Rules.RuleDestination",
+      "Routing_Rules.isDeleted"
+    )
+    .innerJoin(
+      "Routing_Operations",
+      "Routing_Rules.RuleOperation",
+      "Routing_Operations.id"
+    )
     .where("id", parseInt(id, 10))
     .first();
 };
