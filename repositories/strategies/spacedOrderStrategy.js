@@ -1,4 +1,4 @@
-const { map, get } = require("lodash/fp");
+const { map } = require("lodash/fp");
 
 const SPACING = 1000;
 
@@ -9,9 +9,9 @@ const valuesHaveConverged = (orderBefore, orderAfter) =>
   Math.abs(orderAfter - orderBefore) < 2;
 
 const getNextOrderValue = (trx, SectionId) => {
-  return trx("Pages")
+  return trx("PagesView")
     .column(trx.raw(`COALESCE(max("order"), 0) + ${SPACING} as "order"`))
-    .where({ SectionId, isDeleted: false });
+    .where({ SectionId });
 };
 
 const setOrder = (trx, id, SectionId, order) => {
@@ -21,13 +21,10 @@ const setOrder = (trx, id, SectionId, order) => {
     .returning("*");
 };
 
-const getAdjacentRows = (trx, id, sectionId, position) => {
-  return trx("Pages")
+const getAdjacentRows = (trx, id, SectionId, position) => {
+  return trx("PagesView")
     .columns("id", "order")
-    .where({
-      SectionId: sectionId,
-      isDeleted: false
-    })
+    .where({ SectionId })
     .where("id", "!=", id)
     .orderBy("order")
     .offset(Math.max(0, position - 1))
@@ -75,30 +72,7 @@ const movePage = async (trx, { id, sectionId, position }) => {
   return Object.assign(page, { position });
 };
 
-// convert arbitrary "order" values to 0-indexed position values
-const calculatedPositionCol = db =>
-  db.raw(`ROW_NUMBER () OVER (ORDER BY "order") - 1 as "position"`);
-
-const orderedPagesBySection = sectionId => db => {
-  return db
-    .columns("id", calculatedPositionCol(db.client))
-    .from("Pages")
-    .where({ SectionId: sectionId, isDeleted: false })
-    .orderBy("order", "asc")
-    .as("sub");
-};
-
-const getPosition = (db, sectionId, id) => {
-  return db
-    .select("position")
-    .from(orderedPagesBySection(sectionId))
-    .where({ id })
-    .then(get("[0].position"));
-};
-
 module.exports = {
   getNextOrderValue,
-  movePage,
-  calculatedPositionCol,
-  getPosition
+  movePage
 };

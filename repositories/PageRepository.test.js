@@ -6,6 +6,8 @@ const { last, head, map, times } = require("lodash");
 
 const reverse = array => array.slice().reverse();
 
+jest.setTimeout(1000 * 60 * 10); // 10 minute
+
 const buildQuestionnaire = questionnaire => ({
   title: "Test questionnaire",
   surveyId: "1",
@@ -110,7 +112,7 @@ describe("PagesRepository", () => {
     await PageRepository.undelete(page.id);
 
     const result = await PageRepository.get(page.id);
-    expect(result).toEqual(page);
+    expect(result).toMatchObject(page);
   });
 
   describe("re-ordering", () => {
