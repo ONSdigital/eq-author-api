@@ -210,12 +210,22 @@ const Resolvers = {
 
   RoutingCondition: {
     routingValue: ({ id }, args, ctx) => {
-      return ctx.repositories.Routing.findAllRoutingConditionValues({
-        ParentCondition: id
-      });
+      return { parentCondition: id };
     },
     answer: ({ answerId }, args, ctx) => {
       return ctx.repositories.Answer.get(answerId);
+    }
+  },
+
+  RoutingConditionValue: {
+    __resolveType: () => "IDArrayValue"
+  },
+
+  IDArrayValue: {
+    value: ({ parentCondition }, args, ctx) => {
+      return ctx.repositories.Routing.findAllRoutingConditionValues({
+        ParentCondition: parentCondition
+      });
     }
   },
 

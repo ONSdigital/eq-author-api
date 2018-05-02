@@ -1,4 +1,4 @@
-const { head, invert, map } = require("lodash/fp");
+const { head, invert, map, values } = require("lodash/fp");
 const mapping = {
   QuestionPageId: "questionPageId",
   ElseDestination: "elseDestination",
@@ -49,7 +49,7 @@ module.exports.findAllRoutingConditionValues = function findAllRoutingConditionV
   return Routing.findAllRoutingConditionValues()
     .where({ isDeleted: false })
     .where(where)
-    .then(map(fromDb));
+    .map(result => result.OptionId);
 };
 
 module.exports.getRoutingRuleSet = function getRoutingRuleSet(id) {
