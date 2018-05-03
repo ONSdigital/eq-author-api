@@ -29,38 +29,14 @@ module.exports.findAllRoutingRuleSets = function findAllRoutingRuleSets() {
 };
 
 module.exports.findAllRoutingRules = function findAllRoutingRules() {
-  return RoutingRule()
-    .select(
-      "Routing_Rules.id",
-      "Routing_Operations.operation",
-      "Routing_Rules.ParentRoutingRuleSet",
-      "Routing_Rules.RuleDestination",
-      "Routing_Rules.isDeleted"
-    )
-    .innerJoin(
-      "Routing_Operations",
-      "Routing_Rules.RuleOperation",
-      "Routing_Operations.id"
-    );
+  return RoutingRule().select();
 };
 
 module.exports.findAllRoutingConditions = function findAllRoutingConditions() {
-  return RoutingCondition()
-    .select(
-      "Routing_Conditions.id",
-      "Routing_Comparators.comparator",
-      "Routing_Conditions.ParentRoutingRule",
-      "Routing_Conditions.AnswerId",
-      "Routing_Conditions.isDeleted"
-    )
-    .innerJoin(
-      "Routing_Comparators",
-      "Routing_Conditions.Comparator",
-      "Routing_Comparators.id"
-    );
+  return RoutingCondition().select();
 };
 
-module.exports.findAllRoutingConditionValues = function indAllRoutingConditionValues() {
+module.exports.findAllRoutingConditionValues = function findAllRoutingConditionValues() {
   return RoutingConditionValue().select();
 };
 
@@ -72,18 +48,7 @@ module.exports.findRoutingRuleSetsById = function findRoutingRuleSetsById(id) {
 
 module.exports.findRoutingRulesById = function findRoutingRulesById(id) {
   return RoutingRule()
-    .select(
-      "Routing_Rules.id",
-      "Routing_Operations.operation",
-      "Routing_Rules.ParentRoutingRuleSet",
-      "Routing_Rules.RuleDestination",
-      "Routing_Rules.isDeleted"
-    )
-    .innerJoin(
-      "Routing_Operations",
-      "Routing_Rules.RuleOperation",
-      "Routing_Operations.id"
-    )
+    .select()
     .where("id", parseInt(id, 10))
     .first();
 };
@@ -99,22 +64,19 @@ module.exports.findRoutingConditionValuesById = function findRoutingConditionVal
 module.exports.createRoutingRuleSet = function createRoutingRuleSet(rule) {
   return RoutingRuleSet()
     .insert(rule)
-    .returning("*")
-    .then(head);
+    .returning("*");
 };
 
 module.exports.createRoutingRule = function createRoutingRule(rule) {
   return RoutingRule()
     .insert(rule)
-    .returning("*")
-    .then(head);
+    .returning("*");
 };
 
 module.exports.createRoutingCondition = function createRoutingCondition(rule) {
   return RoutingCondition()
     .insert(rule)
-    .returning("*")
-    .then(head);
+    .returning("*");
 };
 
 module.exports.createRoutingConditionValue = function createRoutingConditionValue(
@@ -122,8 +84,7 @@ module.exports.createRoutingConditionValue = function createRoutingConditionValu
 ) {
   return createRoutingConditionValue()
     .insert(rule)
-    .returning("*")
-    .then(head);
+    .returning("*");
 };
 
 module.exports.updateRoutingRuleSet = function updateRoutingRuleSet(
@@ -161,4 +122,11 @@ module.exports.updateRoutingConditionValue = function updateRoutingConditionValu
     .where("id", id)
     .update(updates)
     .returning("*");
+};
+
+module.exports.deleteRoutingCondition = function deleteRoutingCondition(id) {
+  return RoutingCondition()
+    .where({ id })
+    .returning("*")
+    .del();
 };

@@ -141,6 +141,36 @@ const Resolvers = {
       );
       assertMultipleChoiceAnswer(parentAnswer);
       return ctx.repositories.Answer.deleteOtherAnswer(parentAnswer);
+    },
+    createRoutingRuleSet: (_, args, ctx) => {
+      return ctx.repositories.Routing.insertRoutingRuleSet(args.input);
+    },
+    updateRoutingRuleSet: (_, args, ctx) => {
+      return ctx.repositories.Routing.updateRoutingRuleSet(args.input);
+    },
+    createRoutingRule: (_, args, ctx) => {
+      return ctx.repositories.Routing.insertRoutingRule(args.input);
+    },
+    updateRoutingRule: (_, args, ctx) => {
+      return ctx.repositories.Routing.updateRoutingRule(args.input);
+    },
+    deleteRoutingRule: (_, args, ctx) => {
+      return ctx.repositories.Routing.removeRoutingRule(args.input.id);
+    },
+    undeleteRoutingRule: (_, args, ctx) => {
+      return ctx.repositories.Routing.undeleteRoutingRule(args.input.id);
+    },
+    createRoutingCondition: (_, args, ctx) => {
+      return ctx.repositories.Routing.insertRoutingCondition(args.input);
+    },
+    updateRoutingConditionAnswerInput: (_, args, ctx) => {
+      return ctx.repositories.Routing.updateRoutingConditionAnswer(args.input);
+    },
+    deleteRoutingCondition: (_, args, ctx) => {
+      return ctx.repositories.Routing.removeRoutingCondition(args.input.id);
+    },
+    toggleConditionOption: (_, args, ctx) => {
+      return ctx.repositories.Routing.toggleConditionValue(args.input);
     }
   },
 
@@ -189,7 +219,7 @@ const Resolvers = {
   RoutingRuleSet: {
     routingRules: ({ id }, args, ctx) => {
       return ctx.repositories.Routing.findAllRoutingRules({
-        ParentRoutingRuleSet: id
+        RoutingRuleSetId: id
       });
     },
     else: ({ elseDestination }, args, ctx) => {
@@ -200,7 +230,7 @@ const Resolvers = {
   RoutingRule: {
     conditions: ({ id }, args, ctx) => {
       return ctx.repositories.Routing.findAllRoutingConditions({
-        ParentRoutingRule: id
+        RoutingRuleId: id
       });
     },
     goto: ({ ruleDestination }, args, ctx) => {
@@ -210,7 +240,7 @@ const Resolvers = {
 
   RoutingCondition: {
     routingValue: ({ id }, args, ctx) => {
-      return { parentCondition: id };
+      return { ConditionId: id };
     },
     answer: ({ answerId }, args, ctx) => {
       return ctx.repositories.Answer.get(answerId);
@@ -222,9 +252,9 @@ const Resolvers = {
   },
 
   IDArrayValue: {
-    value: ({ parentCondition }, args, ctx) => {
+    value: ({ conditionId }, args, ctx) => {
       return ctx.repositories.Routing.findAllRoutingConditionValues({
-        ParentCondition: parentCondition
+        ConditionId: conditionId
       });
     }
   },

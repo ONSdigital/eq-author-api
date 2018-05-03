@@ -1,8 +1,6 @@
 exports.up = async function(knex, Promise) {
   await createRoutingRuleSetTable(knex);
-  await createOperationsTable(knex);
   await createRoutingRuleTable(knex);
-  await createComparatorTable(knex);
   await createRoutingConditionTable(knex);
   await createRoutingConditionValuesTable(knex);
 };
@@ -10,9 +8,7 @@ exports.up = async function(knex, Promise) {
 exports.down = async function(knex, Promise) {
   await knex.schema.dropTable("Routing_ConditionValues");
   await knex.schema.dropTable("Routing_Conditions");
-  await knex.schema.dropTable("Routing_Comparators");
   await knex.schema.dropTable("Routing_Rules");
-  await knex.schema.dropTable("Routing_Operations");
   await knex.schema.dropTable("Routing_RuleSets");
 };
 
@@ -40,32 +36,14 @@ const createRoutingRuleSetTable = async knex => {
   });
 };
 
-const createOperationsTable = async knex => {
-  return knex.schema
-    .createTable("Routing_Operations", function(table) {
-      table.increments();
-      table.enum("operation", ["And", "Or"]).notNullable();
-    })
-    .then(() => {
-      return knex("Routing_Operations").insert([
-        { operation: "And" },
-        { operation: "Or" }
-      ]);
-    });
-};
-
 const createRoutingRuleTable = async knex => {
   return knex.schema.createTable("Routing_Rules", function(table) {
     table.increments();
 
-    table
-      .integer("RuleOperation")
-      .unsigned()
-      .references("id")
-      .inTable("Routing_Operations");
+    table.enum("operation", ["And", "Or"]).notNullable();
 
     table
-      .integer("ParentRoutingRuleSet")
+      .integer("RoutingRuleSetId")
       .unsigned()
       .references("id")
       .inTable("Routing_RuleSets")
@@ -85,33 +63,14 @@ const createRoutingRuleTable = async knex => {
   });
 };
 
-const createComparatorTable = async knex => {
-  return knex.schema
-    .createTable("Routing_Comparators", function(table) {
-      table.increments();
-
-      table.enum("comparator", ["Equal", "NotEqual"]).notNullable();
-    })
-    .then(() => {
-      return knex("Routing_Comparators").insert([
-        { comparator: "Equal" },
-        { comparator: "NotEqual" }
-      ]);
-    });
-};
-
 const createRoutingConditionTable = async knex => {
   return knex.schema.createTable("Routing_Conditions", function(table) {
     table.increments();
 
-    table
-      .integer("Comparator")
-      .unsigned()
-      .references("id")
-      .inTable("Routing_Comparators");
+    table.enum("comparator", ["Equal", "NotEqual"]).notNullable();
 
     table
-      .integer("ParentRoutingRule")
+      .integer("RoutingRuleId")
       .unsigned()
       .references("id")
       .inTable("Routing_Rules")
@@ -143,7 +102,7 @@ const createRoutingConditionValuesTable = async knex => {
       .onDelete("CASCADE");
 
     table
-      .integer("ParentCondition")
+      .integer("ConditionId")
       .unsigned()
       .references("id")
       .inTable("Routing_Conditions")
