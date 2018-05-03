@@ -106,7 +106,7 @@ describe("resolvers", () => {
     expect(checkboxAnswer.other).toBeNull();
 
     const other = await createOther(checkboxAnswer);
-    expect(other.answer).toMatchObject({ type: "TextField" });
+    expect(other.answer).toMatchObject({ type: "TextField", description: "" });
 
     const updatedCheckboxAnswer = await refreshAnswerDetails(checkboxAnswer);
     expect(updatedCheckboxAnswer.other).not.toBeNull();
