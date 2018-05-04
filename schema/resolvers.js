@@ -163,7 +163,7 @@ const Resolvers = {
     createRoutingCondition: (_, args, ctx) => {
       return ctx.repositories.Routing.insertRoutingCondition(args.input);
     },
-    updateRoutingConditionAnswerInput: (_, args, ctx) => {
+    updateRoutingConditionAnswer: (_, args, ctx) => {
       return ctx.repositories.Routing.updateRoutingConditionAnswer(args.input);
     },
     deleteRoutingCondition: (_, args, ctx) => {

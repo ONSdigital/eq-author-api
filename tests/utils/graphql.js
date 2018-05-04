@@ -116,11 +116,109 @@ const getAnswersQuery = `
   }
 `;
 
+const createRoutingRuleSetMutation = `
+  mutation CreateRoutingRuleSet($input: CreateRoutingRuleSetInput!){
+    createRoutingRuleSet(input: $input)
+    {
+      id
+      questionPage{
+        id
+      }
+      routingRules{
+        id
+      }  
+    }
+  }
+`;
+
+const createRoutingRule = `
+  mutation{
+    createRoutingRule($input: CreateRoutingRuleInput!) 
+    {
+      id
+      operation
+      goto {
+        page{
+          id
+        }
+      }
+    }
+  }
+`;
+
+const createRoutingCondition = `
+  mutation{
+    createRoutingCondition($input: CreateRoutingConditionInput!) 
+    {
+      id
+      comparator
+      answer{
+        id
+      }
+    }
+  }
+`;
+
+const toggleConditionOption = `
+  mutation{
+    toggleConditionOption(ToggleConditionOptionInput!)  
+    {
+      ...on IDArrayValue{
+        value
+      }
+    }
+  }
+`;
+
+const getEntireRoutingStructure = `
+  query QuestionPage($id: ID!) {
+    questionPage(id: $id){
+      routingRuleSet{
+        id
+        questionPage{
+          id
+        }
+        else{
+          page{
+            id
+          }
+        }
+        routingRules{
+          id
+          operation
+          goto{
+            page{
+              id
+            }
+          }
+          conditions{
+            id
+            comparator
+            answer{
+              id
+            }
+            routingValue{
+              ...on IDArrayValue {
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 module.exports = {
   createQuestionnaireMutation,
   createAnswerMutation,
   createOtherMutation,
   deleteOtherMutation,
   getAnswerQuery,
-  getAnswersQuery
+  getAnswersQuery,
+  createRoutingRuleSetMutation,
+  createRoutingRule,
+  createRoutingCondition,
+  toggleConditionOption,
+  getEntireRoutingStructure
 };
