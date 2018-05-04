@@ -183,6 +183,15 @@ const createRoutingCondition = `
   }
 `;
 
+const updateConditionAnswerId = `
+mutation($input: UpdateRoutingConditionAnswerInput!){
+  createRoutingCondition (input: $input)
+  {
+    id
+  }
+}
+`;
+
 const toggleConditionOption = `
   mutation($input: ToggleConditionOptionInput!) {
     toggleConditionOption (input: $input)

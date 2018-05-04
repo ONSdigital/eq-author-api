@@ -303,10 +303,10 @@ describe("resolvers", () => {
       { id: firstPage.id },
       ctx
     );
-    expect(result.data.questionPage.routingRuleSet.id).not.toBeNull();
+    expect(result.data.questionPage.routingRuleSet.id).toEqual(firstPage.id);
   });
 
-  it("can create a RoutingRule, RoutingCondtion and can toggle a optionValue on", async () => {
+  it("should create a RoutingRule, RoutingCondtion and can toggle a optionValue on", async () => {
     const result = await executeQuery(
       getBasicRoutingQuery,
       { id: firstPage.id },
@@ -325,5 +325,27 @@ describe("resolvers", () => {
     expect(routingRule.createRoutingRule.id).toHaveLength(1);
     expect(routingCondition.result.createRoutingCondition.id).toHaveLength(1);
     expect(routingConditionValue.toggleConditionOption.value).toHaveLength(1);
+  });
+
+  it("should delete all optionValues when the RoutingCondition Answeris is updated", async () => {
+    const result = await executeQuery(
+      getBasicRoutingQuery,
+      { id: firstPage.id },
+      ctx
+    );
+    const routingRule = await createNewRoutingRule(result.data.page);
+
+    const routingCondition = await createNewRoutingCondition(
+      routingRule.createRoutingRule,
+      firstPage
+    );
+    await toggleNewConditionValue(routingCondition);
+    await toggleNewConditionValue(routingCondition);
+    const routingConditionValue = await toggleNewConditionValue(
+      routingCondition
+    );
+    expect(routingConditionValue.toggleConditionOption.value).toHaveLength(3);
+
+    //TODO update answer ID here check test passes.
   });
 });
