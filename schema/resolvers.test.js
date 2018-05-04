@@ -8,7 +8,13 @@ const {
   createOtherMutation,
   deleteOtherMutation,
   getAnswerQuery,
-  getAnswersQuery
+  getAnswersQuery,
+  createRoutingRuleSetMutation,
+  createRoutingRule,
+  createRoutingCondition,
+  toggleConditionOption,
+  getEntireRoutingStructure,
+  getBasicRoutingQuery
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -78,6 +84,71 @@ const createThenDeleteOther = async (page, type) => {
 
   return answer;
 };
+
+const createNewRoutingRuleMutation = async ({ routingRuleSet, id }) =>
+  executeQuery(
+    createRoutingRule,
+    {
+      input: {
+        operation: "And",
+        routingRuleSetId: routingRuleSet.id,
+        goto: {
+          pageId: id
+        }
+      }
+    },
+    ctx
+  );
+
+const createNewRoutingRule = async page => {
+  const result = await createNewRoutingRuleMutation(page);
+  return result.data;
+};
+
+const createNewRoutingConditionMutation = async (routingRuleId, answerId) =>
+  executeQuery(
+    createRoutingCondition,
+    {
+      input: {
+        comparator: "Equal",
+        routingRuleId,
+        answerId
+      }
+    },
+    ctx
+  );
+
+const createNewRoutingCondition = async (routingRuleId, pageId) => {
+  const answer = await createNewAnswer(pageId, "Checkbox");
+  let result = await createNewRoutingConditionMutation(
+    routingRuleId.id,
+    answer.id
+  );
+
+  result = result.data;
+  return { result, answer };
+};
+
+const toggleNewConditionValue = async ({ result, answer }) => {
+  const conditionValue = await toggleNewConditionValueMutation(
+    result.createRoutingCondition.id,
+    first(answer.options).id
+  );
+  return conditionValue.data;
+};
+
+const toggleNewConditionValueMutation = async (conditionId, optionId) =>
+  executeQuery(
+    toggleConditionOption,
+    {
+      input: {
+        conditionId,
+        optionId,
+        checked: true
+      }
+    },
+    ctx
+  );
 
 const refreshAnswerDetails = async ({ id }) => {
   const result = await executeQuery(getAnswerQuery, { id }, ctx);
@@ -224,5 +295,35 @@ describe("resolvers", () => {
 
     expect(secondAttempt).toHaveProperty("errors");
     expect(secondAttempt.errors).toHaveLength(1);
+  });
+
+  it("should create a RoutingRule set on questionPage creation", async () => {
+    const result = await executeQuery(
+      getEntireRoutingStructure,
+      { id: firstPage.id },
+      ctx
+    );
+    expect(result.data.questionPage.routingRuleSet.id).not.toBeNull();
+  });
+
+  it("can create a RoutingRule, RoutingCondtion and can toggle a optionValue on", async () => {
+    const result = await executeQuery(
+      getBasicRoutingQuery,
+      { id: firstPage.id },
+      ctx
+    );
+    const routingRule = await createNewRoutingRule(result.data.page);
+
+    const routingCondition = await createNewRoutingCondition(
+      routingRule.createRoutingRule,
+      firstPage
+    );
+    const routingConditionValue = await toggleNewConditionValue(
+      routingCondition
+    );
+
+    expect(routingRule.createRoutingRule.id).toHaveLength(1);
+    expect(routingCondition.result.createRoutingCondition.id).toHaveLength(1);
+    expect(routingConditionValue.toggleConditionOption.value).toHaveLength(1);
   });
 });

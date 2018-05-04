@@ -116,6 +116,30 @@ const getAnswersQuery = `
   }
 `;
 
+const getBasicRoutingQuery = `
+query GetPage($id: ID!){
+  page(id: $id){
+    ...on QuestionPage{
+      id
+      routingRuleSet{
+        id
+        routingRules{
+          id
+          conditions{
+            id
+            routingValue{
+              ...on IDArrayValue{
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
 const createRoutingRuleSetMutation = `
   mutation CreateRoutingRuleSet($input: CreateRoutingRuleSetInput!){
     createRoutingRuleSet(input: $input)
@@ -132,8 +156,8 @@ const createRoutingRuleSetMutation = `
 `;
 
 const createRoutingRule = `
-  mutation{
-    createRoutingRule($input: CreateRoutingRuleInput!) 
+  mutation($input: CreateRoutingRuleInput!){
+    createRoutingRule (input: $input)
     {
       id
       operation
@@ -147,8 +171,8 @@ const createRoutingRule = `
 `;
 
 const createRoutingCondition = `
-  mutation{
-    createRoutingCondition($input: CreateRoutingConditionInput!) 
+  mutation($input: CreateRoutingConditionInput!){
+    createRoutingCondition (input: $input)
     {
       id
       comparator
@@ -160,8 +184,8 @@ const createRoutingCondition = `
 `;
 
 const toggleConditionOption = `
-  mutation{
-    toggleConditionOption(ToggleConditionOptionInput!)  
+  mutation($input: ToggleConditionOptionInput!) {
+    toggleConditionOption (input: $input)
     {
       ...on IDArrayValue{
         value
@@ -171,42 +195,42 @@ const toggleConditionOption = `
 `;
 
 const getEntireRoutingStructure = `
-  query QuestionPage($id: ID!) {
-    questionPage(id: $id){
-      routingRuleSet{
+query QuestionPage($id: ID!) {
+  questionPage(id: $id) {
+    routingRuleSet {
+      id
+      questionPage {
         id
-        questionPage{
+      }
+      else {
+        page {
           id
         }
-        else{
+      }
+      routingRules{
+        id
+        operation
+        goto{
           page{
             id
           }
         }
-        routingRules{
+        conditions{
           id
-          operation
-          goto{
-            page{
-              id
-            }
-          }
-          conditions{
+          comparator
+          answer{
             id
-            comparator
-            answer{
-              id
-            }
-            routingValue{
-              ...on IDArrayValue {
-                value
-              }
+          }
+          routingValue{
+            ...on IDArrayValue{
+              value
             }
           }
         }
       }
     }
   }
+}
 `;
 
 module.exports = {
@@ -220,5 +244,6 @@ module.exports = {
   createRoutingRule,
   createRoutingCondition,
   toggleConditionOption,
-  getEntireRoutingStructure
+  getEntireRoutingStructure,
+  getBasicRoutingQuery
 };

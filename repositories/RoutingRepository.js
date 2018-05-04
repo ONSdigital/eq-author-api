@@ -52,7 +52,6 @@ module.exports.findAllRoutingConditionValues = function findAllRoutingConditionV
   where = {}
 ) {
   return Routing.findAllRoutingConditionValues()
-    .where({ isDeleted: false })
     .where(where)
     .map(result => result.OptionId);
 };

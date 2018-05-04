@@ -59,7 +59,7 @@ const Resolvers = {
         sectionId: section.id
       };
 
-      await ctx.repositories.Page.insert(page);
+      await Resolvers.Mutation.createPage(root, { input: page }, ctx);
       return section;
     },
     updateSection: (_, args, ctx) =>
@@ -69,17 +69,28 @@ const Resolvers = {
     undeleteSection: (_, args, ctx) =>
       ctx.repositories.Section.undelete(args.input.id),
 
-    createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
+    createPage: async (root, args, ctx) => {
+      const page = await ctx.repositories.Page.insert(args.input);
+      await ctx.repositories.Routing.insertRoutingRuleSet({
+        questionPageId: page.id
+      });
+      return page;
+    },
     updatePage: (_, args, ctx) => ctx.repositories.Page.update(args.input),
     deletePage: (_, args, ctx) => ctx.repositories.Page.remove(args.input.id),
     undeletePage: (_, args, ctx) =>
       ctx.repositories.Page.undelete(args.input.id),
     movePage: (_, args, ctx) => ctx.repositories.Page.move(args.input),
 
-    createQuestionPage: (root, args, ctx) =>
-      ctx.repositories.Page.insert(
+    createQuestionPage: async (root, args, ctx) => {
+      const questionPage = await ctx.repositories.Page.insert(
         Object.assign({}, args.input, { pageType: "QuestionPage" })
-      ),
+      );
+      await ctx.repositories.Routing.insertRoutingRuleSet({
+        questionPageId: questionPage.id
+      });
+      return questionPage;
+    },
     updateQuestionPage: (_, args, ctx) =>
       ctx.repositories.QuestionPage.update(args.input),
     deleteQuestionPage: (_, args, ctx) =>
@@ -240,7 +251,7 @@ const Resolvers = {
 
   RoutingCondition: {
     routingValue: ({ id }, args, ctx) => {
-      return { ConditionId: id };
+      return { conditionId: id };
     },
     answer: ({ answerId }, args, ctx) => {
       return ctx.repositories.Answer.get(answerId);
