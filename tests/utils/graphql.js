@@ -123,6 +123,9 @@ query GetPage($id: ID!){
       id
       routingRuleSet{
         id
+        questionPage{
+          id
+        }
         routingRules{
           id
           conditions{
@@ -140,7 +143,7 @@ query GetPage($id: ID!){
 }
 `;
 
-const createRoutingRuleSetMutation = `
+const createRoutingRuleSet = `
   mutation CreateRoutingRuleSet($input: CreateRoutingRuleSetInput!){
     createRoutingRuleSet(input: $input)
     {
@@ -183,9 +186,9 @@ const createRoutingCondition = `
   }
 `;
 
-const updateConditionAnswerId = `
+const updateConditionAnswer = `
 mutation($input: UpdateRoutingConditionAnswerInput!){
-  createRoutingCondition (input: $input)
+  updateRoutingConditionAnswer (input: $input)
   {
     id
   }
@@ -249,10 +252,11 @@ module.exports = {
   deleteOtherMutation,
   getAnswerQuery,
   getAnswersQuery,
-  createRoutingRuleSetMutation,
+  createRoutingRuleSet,
   createRoutingRule,
   createRoutingCondition,
   toggleConditionOption,
   getEntireRoutingStructure,
-  getBasicRoutingQuery
+  getBasicRoutingQuery,
+  updateConditionAnswer
 };

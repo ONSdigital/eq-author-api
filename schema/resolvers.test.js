@@ -1,5 +1,6 @@
-const { first } = require("lodash");
+const { first, get } = require("lodash");
 const repositories = require("../repositories");
+const util = require("util");
 const db = require("../db");
 const executeQuery = require("../tests/utils/executeQuery");
 const {
@@ -9,12 +10,13 @@ const {
   deleteOtherMutation,
   getAnswerQuery,
   getAnswersQuery,
-  createRoutingRuleSetMutation,
+  createRoutingRuleSet,
   createRoutingRule,
   createRoutingCondition,
   toggleConditionOption,
   getEntireRoutingStructure,
-  getBasicRoutingQuery
+  getBasicRoutingQuery,
+  updateConditionAnswer
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -85,6 +87,18 @@ const createThenDeleteOther = async (page, type) => {
   return answer;
 };
 
+const createNewRoutingRuleSet = async questionPageId => {
+  return executeQuery(
+    createRoutingRuleSet,
+    {
+      input: {
+        questionPageId
+      }
+    },
+    ctx
+  );
+};
+
 const createNewRoutingRuleMutation = async ({ routingRuleSet, id }) =>
   executeQuery(
     createRoutingRule,
@@ -105,14 +119,14 @@ const createNewRoutingRule = async page => {
   return result.data;
 };
 
-const createNewRoutingConditionMutation = async (routingRuleId, answerId) =>
+const createNewRoutingConditionMutation = async (routingRuleId, { id }) =>
   executeQuery(
     createRoutingCondition,
     {
       input: {
         comparator: "Equal",
         routingRuleId,
-        answerId
+        answerId: id
       }
     },
     ctx
@@ -120,35 +134,77 @@ const createNewRoutingConditionMutation = async (routingRuleId, answerId) =>
 
 const createNewRoutingCondition = async (routingRuleId, pageId) => {
   const answer = await createNewAnswer(pageId, "Checkbox");
-  let result = await createNewRoutingConditionMutation(
-    routingRuleId.id,
-    answer.id
-  );
-
-  result = result.data;
+  const result = await createNewRoutingConditionMutation(routingRuleId, answer);
   return { result, answer };
 };
 
-const toggleNewConditionValue = async ({ result, answer }) => {
+const toggleNewConditionValue = async ({ result, answer }, toggle = true) => {
   const conditionValue = await toggleNewConditionValueMutation(
-    result.createRoutingCondition.id,
-    first(answer.options).id
+    result.data.createRoutingCondition.id,
+    first(answer.options).id,
+    toggle
   );
   return conditionValue.data;
 };
 
-const toggleNewConditionValueMutation = async (conditionId, optionId) =>
+const toggleNewConditionValueMutation = async (conditionId, optionId, toggle) =>
   executeQuery(
     toggleConditionOption,
     {
       input: {
         conditionId,
         optionId,
-        checked: true
+        checked: toggle
       }
     },
     ctx
   );
+
+const changeRoutingCondition = async ({ answer, result }) => {
+  const RoutingCondition = await changeRoutingConditionMutation(
+    answer,
+    result.data
+  );
+  return RoutingCondition.data;
+};
+
+const changeRoutingConditionMutation = async (
+  answer,
+  { createRoutingCondition }
+) =>
+  executeQuery(
+    updateConditionAnswer,
+    {
+      input: {
+        id: createRoutingCondition.id,
+        answerId: answer.id
+      }
+    },
+    ctx
+  );
+
+const createFullRoutingTree = async firstPage => {
+  const routingRuleSet = await createNewRoutingRuleSet(firstPage.id);
+  const result = await executeQuery(
+    getBasicRoutingQuery,
+    { id: firstPage.id },
+    ctx
+  );
+  const routingRuleId = get(
+    result,
+    "data.page.routingRuleSet.routingRules[0].id"
+  );
+  const routingCondition = await createNewRoutingCondition(
+    routingRuleId,
+    firstPage
+  );
+  const routingConditionValue = await toggleNewConditionValue(routingCondition);
+
+  return { routingRuleId, routingCondition, routingConditionValue };
+};
+
+const getFullRoutingTree = async firstPage =>
+  executeQuery(getEntireRoutingStructure, { id: firstPage.id }, ctx);
 
 const refreshAnswerDetails = async ({ id }) => {
   const result = await executeQuery(getAnswerQuery, { id }, ctx);
@@ -297,55 +353,83 @@ describe("resolvers", () => {
     expect(secondAttempt.errors).toHaveLength(1);
   });
 
-  it("should create a RoutingRule set on questionPage creation", async () => {
-    const result = await executeQuery(
-      getEntireRoutingStructure,
-      { id: firstPage.id },
-      ctx
-    );
-    expect(result.data.questionPage.routingRuleSet.id).toEqual(firstPage.id);
-  });
-
-  it("should create a RoutingRule, RoutingCondtion and can toggle a optionValue on", async () => {
+  it("should create a RoutingRule on RoutingRuleSet creation", async () => {
+    const routingRuleSet = await createNewRoutingRuleSet(firstPage.id);
     const result = await executeQuery(
       getBasicRoutingQuery,
       { id: firstPage.id },
       ctx
     );
-    const routingRule = await createNewRoutingRule(result.data.page);
 
-    const routingCondition = await createNewRoutingCondition(
-      routingRule.createRoutingRule,
-      firstPage
+    expect(routingRuleSet).toMatchSnapshot();
+    expect(get(result, "data.page.routingRuleSet.routingRules")).toHaveLength(
+      1
     );
-    const routingConditionValue = await toggleNewConditionValue(
-      routingCondition
-    );
+  });
 
-    expect(routingRule.createRoutingRule.id).toHaveLength(1);
-    expect(routingCondition.result.createRoutingCondition.id).toHaveLength(1);
-    expect(routingConditionValue.toggleConditionOption.value).toHaveLength(1);
+  it("can create a RoutingCondtion and can toggle a optionValue on and off", async () => {
+    const routingTree = await createFullRoutingTree(firstPage);
+    let routingStructure = await getFullRoutingTree(firstPage);
+
+    expect(
+      get(
+        routingStructure,
+        "data.questionPage.routingRuleSet.routingRules[0].conditions"
+      )
+    ).toHaveLength(1);
+    expect(
+      get(
+        routingStructure,
+        "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
+      )
+    ).toHaveLength(1);
+
+    await toggleNewConditionValue(routingTree.routingCondition, false);
+
+    routingStructure = await getFullRoutingTree(firstPage);
+    expect(
+      get(
+        routingStructure,
+        "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
+      )
+    ).toHaveLength(0);
   });
 
   it("should delete all optionValues when the RoutingCondition Answeris is updated", async () => {
-    const result = await executeQuery(
-      getBasicRoutingQuery,
-      { id: firstPage.id },
-      ctx
-    );
-    const routingRule = await createNewRoutingRule(result.data.page);
+    const routingTree = await createFullRoutingTree(firstPage);
+    await toggleNewConditionValue(routingTree.routingCondition);
+    await toggleNewConditionValue(routingTree.routingCondition);
 
-    const routingCondition = await createNewRoutingCondition(
-      routingRule.createRoutingRule,
-      firstPage
-    );
-    await toggleNewConditionValue(routingCondition);
-    await toggleNewConditionValue(routingCondition);
-    const routingConditionValue = await toggleNewConditionValue(
-      routingCondition
-    );
-    expect(routingConditionValue.toggleConditionOption.value).toHaveLength(3);
+    let routingStructure = await getFullRoutingTree(firstPage);
+    expect(
+      get(
+        routingStructure,
+        "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
+      )
+    ).toHaveLength(3);
 
-    //TODO update answer ID here check test passes.
+    await changeRoutingCondition(routingTree.routingCondition);
+
+    routingStructure = await getFullRoutingTree(firstPage);
+    expect(
+      get(
+        routingStructure,
+        "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
+      )
+    ).toHaveLength(3);
+
+    const answer = await createNewAnswer(firstPage, "Checkbox");
+    const result = get(routingTree, "routingCondition.result");
+    await changeRoutingCondition({ answer, result });
+
+    routingStructure = await getFullRoutingTree(firstPage);
+    expect(
+      get(
+        routingStructure,
+        "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
+      )
+    ).toHaveLength(0);
   });
+
+  it("can get all suitable routing destinations", () => {});
 });

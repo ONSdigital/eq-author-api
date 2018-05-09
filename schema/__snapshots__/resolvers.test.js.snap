@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolvers should create a RoutingRule on RoutingRuleSet creation 1`] = `
+Object {
+  "data": Object {
+    "createRoutingRuleSet": Object {
+      "id": "1",
+      "questionPage": null,
+      "routingRules": Array [
+        Object {
+          "id": "1",
+        },
+      ],
+    },
+  },
+}
+`;

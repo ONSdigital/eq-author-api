@@ -10,6 +10,10 @@ const {
   getPosition
 } = require("./strategies/spacedOrderStrategy");
 
+const {
+  getAvailableRoutingDestinations
+} = require("./strategies/routingStrategy");
+
 const mapping = { SectionId: "sectionId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
@@ -97,4 +101,8 @@ module.exports.getPosition = ({ id }) => {
   return Page.findById(id).then(({ SectionId }) =>
     getPosition(db, SectionId, id)
   );
+};
+
+module.exports.getRoutingDestinations = function(id) {
+  return db.transaction(trx => getAvailableRoutingDestinations(trx, id));
 };

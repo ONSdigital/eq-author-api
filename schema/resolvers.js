@@ -26,7 +26,13 @@ const Resolvers = {
     answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id),
     answers: (root, { ids }, ctx) =>
       ctx.repositories.Answer.findAll(whereIn("id", ids)),
-    option: (root, { id }, ctx) => ctx.repositories.Option.get(id)
+    option: (root, { id }, ctx) => ctx.repositories.Option.get(id),
+    availableRoutingDestinations: async (root, { pageId }, ctx) => {
+      const destinations = ctx.repositories.Page.getRoutingDestinations(pageId);
+      return destinations.map(destination => {
+        return { pageId: destination };
+      });
+    }
   },
 
   Mutation: {
@@ -69,28 +75,18 @@ const Resolvers = {
     undeleteSection: (_, args, ctx) =>
       ctx.repositories.Section.undelete(args.input.id),
 
-    createPage: async (root, args, ctx) => {
-      const page = await ctx.repositories.Page.insert(args.input);
-      await ctx.repositories.Routing.insertRoutingRuleSet({
-        questionPageId: page.id
-      });
-      return page;
-    },
+    createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
+
     updatePage: (_, args, ctx) => ctx.repositories.Page.update(args.input),
     deletePage: (_, args, ctx) => ctx.repositories.Page.remove(args.input.id),
     undeletePage: (_, args, ctx) =>
       ctx.repositories.Page.undelete(args.input.id),
     movePage: (_, args, ctx) => ctx.repositories.Page.move(args.input),
 
-    createQuestionPage: async (root, args, ctx) => {
-      const questionPage = await ctx.repositories.Page.insert(
+    createQuestionPage: (root, args, ctx) =>
+      ctx.repositories.Page.insert(
         Object.assign({}, args.input, { pageType: "QuestionPage" })
-      );
-      await ctx.repositories.Routing.insertRoutingRuleSet({
-        questionPageId: questionPage.id
-      });
-      return questionPage;
-    },
+      ),
     updateQuestionPage: (_, args, ctx) =>
       ctx.repositories.QuestionPage.update(args.input),
     deleteQuestionPage: (_, args, ctx) =>
@@ -153,8 +149,15 @@ const Resolvers = {
       assertMultipleChoiceAnswer(parentAnswer);
       return ctx.repositories.Answer.deleteOtherAnswer(parentAnswer);
     },
-    createRoutingRuleSet: (_, args, ctx) => {
-      return ctx.repositories.Routing.insertRoutingRuleSet(args.input);
+    createRoutingRuleSet: async (_, args, ctx) => {
+      const routingRuleSet = await ctx.repositories.Routing.insertRoutingRuleSet(
+        args.input
+      );
+      await ctx.repositories.Routing.insertRoutingRule({
+        operation: "And",
+        routingRuleSetId: routingRuleSet.id
+      });
+      return routingRuleSet;
     },
     updateRoutingRuleSet: (_, args, ctx) => {
       return ctx.repositories.Routing.updateRoutingRuleSet(args.input);
@@ -234,7 +237,7 @@ const Resolvers = {
       });
     },
     else: ({ elseDestination }, args, ctx) => {
-      return { pageId: elseDestination };
+      return !isNil(elseDestination) ? { pageId: elseDestination } : null;
     }
   },
 
@@ -245,7 +248,7 @@ const Resolvers = {
       });
     },
     goto: ({ ruleDestination }, args, ctx) => {
-      return { pageId: ruleDestination };
+      return !isNil(ruleDestination) ? { pageId: ruleDestination } : null;
     }
   },
 
