@@ -16,7 +16,11 @@ const {
   toggleConditionOption,
   getEntireRoutingStructure,
   getBasicRoutingQuery,
-  updateConditionAnswer
+  updateConditionAnswer,
+  createSectionMutation,
+  createQuestionPageMutation,
+  getAvalableRoutingDestinations,
+  getQuestionnaire
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -205,6 +209,13 @@ const createFullRoutingTree = async firstPage => {
 
 const getFullRoutingTree = async firstPage =>
   executeQuery(getEntireRoutingStructure, { id: firstPage.id }, ctx);
+
+const createQuestionPage = async id =>
+  executeQuery(
+    createQuestionPageMutation,
+    { input: { title: "Bar", sectionId: id } },
+    ctx
+  );
 
 const refreshAnswerDetails = async ({ id }) => {
   const result = await executeQuery(getAnswerQuery, { id }, ctx);
@@ -431,5 +442,30 @@ describe("resolvers", () => {
     ).toHaveLength(0);
   });
 
-  it("can get all suitable routing destinations", () => {});
+  it("can get all suitable routing destinations", async () => {
+    const secondSection = await executeQuery(
+      createSectionMutation,
+      {
+        input: {
+          title: "Foo",
+          questionnaireId: questionnaire.id
+        }
+      },
+      ctx
+    );
+
+    await createQuestionPage(get(sections, "[0].id"));
+    await createQuestionPage(get(sections, "[0].id"));
+    await createQuestionPage(secondSection.data.createSection.id);
+
+    const result = await executeQuery(
+      getAvalableRoutingDestinations,
+      {
+        id: questionnaire.id
+      },
+      ctx
+    );
+    expect(result).toMatchSnapshot();
+    expect(result.data.availableRoutingDestinations).toHaveLength(3);
+  });
 });

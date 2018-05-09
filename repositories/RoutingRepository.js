@@ -56,32 +56,6 @@ module.exports.findAllRoutingConditionValues = function findAllRoutingConditionV
     .map(result => result.OptionId);
 };
 
-// module.exports.getRoutingRuleSet = function getRoutingRuleSet(id) {
-//   return Routing.findRoutingRuleSetsById(id)
-//     .where({ isDeleted: false })
-//     .then(fromDb);
-// };
-
-// module.exports.getRoutingRule = function getRoutingRule(id) {
-//   return Routing.findRoutingRulesById(id)
-//     .where({ isDeleted: false })
-//     .then(fromDb);
-// };
-
-// module.exports.getRoutingCondition = function getRoutingCondition(id) {
-//   return Routing.findRoutingConditionsById(id)
-//     .where({ isDeleted: false })
-//     .then(fromDb);
-// };
-
-// module.exports.getRoutingConditionValue = function getRoutingRoutingConditionValue(
-//   id
-// ) {
-//   return Routing.findRoutingRoutingConditionValuesById(id)
-//     .where({ isDeleted: false })
-//     .then(fromDb);
-// };
-
 module.exports.insertRoutingRuleSet = function insertRoutingRuleSet({
   elseDestination,
   questionPageId
@@ -142,20 +116,6 @@ module.exports.toggleConditionValue = function toggleConditionValue({
   );
 };
 
-// module.exports.insertRoutingConditionValue = function insertRoutingConditionValue({
-//   optionId,
-//   parentCondition
-// }) {
-//   return Routing.createRoutingConditionValue(
-//     toDb({
-//       optionId,
-//       parentCondition
-//     })
-//   )
-//     .then(head)
-//     .then(fromDb);
-// };
-
 module.exports.updateRoutingRuleSet = function updateRoutingRuleSet({
   id,
   else: { pageId: elseDestination }
@@ -195,27 +155,6 @@ module.exports.updateRoutingConditionAnswer = function updateRoutingConditionAns
   );
 };
 
-// module.exports.updateRoutingConditionValue = function updateRoutingConditionValue({
-//   id,
-//   optionId,
-//   parentCondition
-// }) {
-//   return Routing.updateRoutingConditionValue(
-//     toDb(id, {
-//       optionId,
-//       parentCondition
-//     })
-//   )
-//     .then(head)
-//     .then(fromDb);
-// };
-
-// module.exports.removeRoutingRuleSet = function removeRoutingRuleSet(id) {
-//   return Routing.updateRoutingRuleSet(id, { isDeleted: true })
-//     .then(head)
-//     .then(fromDb);
-// };
-
 module.exports.removeRoutingRule = function removeRoutingRule(id) {
   return Routing.updateRoutingRule(id, { isDeleted: true })
     .then(head)
@@ -231,38 +170,8 @@ module.exports.removeRoutingCondition = function removeRoutingCondition(id) {
   return Routing.deleteRoutingCondition(id).then(head);
 };
 
-// module.exports.removeRoutingConditionValue = function removeRoutingConditionValue(
-//   id
-// ) {
-//   return Routing.updateRoutingConditionValue(id, { isDeleted: true })
-//     .then(head)
-//     .then(fromDb);
-// };
-
-// module.exports.undeleteRoutingRuleSet = function undeleteRoutingRuleSet(id) {
-//   return Routing.updateRoutingRuleSet(id, { isDeleted: false })
-//     .then(head)
-//     .then(fromDb);
-// };
-
 module.exports.undeleteRoutingRule = function undeleteRoutingRule(id) {
   return Routing.updateRoutingRule(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
 };
-
-// module.exports.undeleteRoutingCondition = function undeleteRoutingCondition(
-//   id
-// ) {
-//   return Routing.updateRoutingCondition(id, { isDeleted: false })
-//     .then(head)
-//     .then(fromDb);
-// };
-
-// module.exports.undeleteRoutingConditionValue = function undeleteRoutingConditionValue(
-//   id
-// ) {
-//   return Routing.updateRoutingConditionValue(id, { isDeleted: false })
-//     .then(head)
-//     .then(fromDb);
-// };

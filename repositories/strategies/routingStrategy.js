@@ -88,9 +88,10 @@ const getQuestionnaireId = async (trx, { SectionId }) =>
     .where({ id: SectionId })
     .then(head);
 
-const getDestinationsInSection = async (trx, { order }) =>
+const getDestinationsInSection = async (trx, { SectionId, order }) =>
   trx("Pages")
     .select("id")
+    .where({ SectionId })
     .where("order", ">", order);
 
 const getSectionsAheadOfPage = async (

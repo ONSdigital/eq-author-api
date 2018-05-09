@@ -16,6 +16,22 @@ const createQuestionnaireMutation = `mutation CreateQuestionnaire($input: Create
   }
 `;
 
+const createSectionMutation = `
+  mutation CreateSection($input: CreateSectionInput!){
+    createSection(input: $input){
+      id
+    }
+  }
+`;
+
+const createQuestionPageMutation = `
+  mutation CreateQuestionPage($input: CreateQuestionPageInput!){
+    createQuestionPage(input: $input){
+      id
+    }
+  }
+`;
+
 const createAnswerMutation = `
   mutation CreateAnswer($input: CreateAnswerInput!) {
     createAnswer(input: $input) {
@@ -245,6 +261,30 @@ query QuestionPage($id: ID!) {
 }
 `;
 
+const getAvalableRoutingDestinations = `
+query AvalableRoutingDestinations($id: ID!) {
+  availableRoutingDestinations(pageId: $id) {
+    page{
+      id
+    }
+  }
+}
+`;
+
+const getQuestionnaire = `
+query QuestionPage($id: ID!) {
+  questionnaire(id: $id) {
+  	id
+    sections{
+      id
+      pages{
+        id
+      }
+    }
+  }
+}
+`;
+
 module.exports = {
   createQuestionnaireMutation,
   createAnswerMutation,
@@ -258,5 +298,9 @@ module.exports = {
   toggleConditionOption,
   getEntireRoutingStructure,
   getBasicRoutingQuery,
-  updateConditionAnswer
+  updateConditionAnswer,
+  createSectionMutation,
+  createQuestionPageMutation,
+  getAvalableRoutingDestinations,
+  getQuestionnaire
 };

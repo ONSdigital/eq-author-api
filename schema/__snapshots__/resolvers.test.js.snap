@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`resolvers can get all suitable routing destinations 1`] = `
+Object {
+  "data": Object {
+    "availableRoutingDestinations": Array [
+      Object {
+        "page": Object {
+          "id": "19",
+        },
+      },
+      Object {
+        "page": Object {
+          "id": "20",
+        },
+      },
+      Object {
+        "page": Object {
+          "id": "18",
+        },
+      },
+    ],
+  },
+}
+`;
+
 exports[`resolvers should create a RoutingRule on RoutingRuleSet creation 1`] = `
 Object {
   "data": Object {

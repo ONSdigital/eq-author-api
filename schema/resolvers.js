@@ -28,7 +28,9 @@ const Resolvers = {
       ctx.repositories.Answer.findAll(whereIn("id", ids)),
     option: (root, { id }, ctx) => ctx.repositories.Option.get(id),
     availableRoutingDestinations: async (root, { pageId }, ctx) => {
-      const destinations = ctx.repositories.Page.getRoutingDestinations(pageId);
+      const destinations = await ctx.repositories.Page.getRoutingDestinations(
+        pageId
+      );
       return destinations.map(destination => {
         return { pageId: destination };
       });
