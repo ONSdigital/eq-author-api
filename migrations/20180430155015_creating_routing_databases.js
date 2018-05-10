@@ -68,11 +68,6 @@ const createRoutingConditionTable = async knex => {
       .references("id")
       .inTable("Answers")
       .onDelete("CASCADE");
-
-    table
-      .boolean("isDeleted")
-      .notNull()
-      .defaultTo(false);
   });
 };
 
