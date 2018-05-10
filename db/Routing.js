@@ -16,14 +16,6 @@ function RoutingConditionValue() {
   return db("Routing_ConditionValues");
 }
 
-function Comparator() {
-  return db("Routing_Comparators");
-}
-
-function Operations() {
-  return db("Routing_Operations");
-}
-
 module.exports.findAllRoutingRuleSets = function findAllRoutingRuleSets() {
   return RoutingRuleSet().select();
 };

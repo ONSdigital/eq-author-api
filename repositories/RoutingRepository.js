@@ -1,4 +1,4 @@
-const { head, invert, map, values } = require("lodash/fp");
+const { head, invert, map } = require("lodash/fp");
 const mapping = {
   QuestionPageId: "questionPageId",
   ElseDestination: "elseDestination",
@@ -159,11 +159,6 @@ module.exports.removeRoutingRule = function removeRoutingRule(id) {
   return Routing.updateRoutingRule(id, { isDeleted: true })
     .then(head)
     .then(fromDb);
-};
-
-const debug = x => {
-  debugger;
-  return x;
 };
 
 module.exports.removeRoutingCondition = function removeRoutingCondition(id) {

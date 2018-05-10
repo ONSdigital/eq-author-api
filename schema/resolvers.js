@@ -238,7 +238,7 @@ const Resolvers = {
         RoutingRuleSetId: id
       });
     },
-    else: ({ elseDestination }, args, ctx) => {
+    else: ({ elseDestination }) => {
       return !isNil(elseDestination) ? { pageId: elseDestination } : null;
     }
   },
@@ -249,13 +249,13 @@ const Resolvers = {
         RoutingRuleId: id
       });
     },
-    goto: ({ ruleDestination }, args, ctx) => {
+    goto: ({ ruleDestination }) => {
       return !isNil(ruleDestination) ? { pageId: ruleDestination } : null;
     }
   },
 
   RoutingCondition: {
-    routingValue: ({ id }, args, ctx) => {
+    routingValue: ({ id }) => {
       return { conditionId: id };
     },
     answer: ({ answerId }, args, ctx) => {

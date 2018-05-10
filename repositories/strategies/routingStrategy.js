@@ -1,58 +1,5 @@
 const { head } = require("lodash/fp");
-const { concat } = require("lodash");
-
-module.exports.updateConditions = async function updateConditions(
-  trx,
-  { id, answerId }
-) {
-  const prevAnswerId = await getConditionAnswerId(trx, { id });
-  if (answerId == prevAnswerId.AnswerId) {
-    return;
-  } else {
-    await updateValuesTable(trx, { id });
-    return await updateConditionsTable(trx, { id, answerId });
-  }
-};
-
-module.exports.createOrRemoveValue = async function createOrRemoveValue(
-  trx,
-  { optionId, conditionId, checked }
-) {
-  if (checked) {
-    return trx("Routing_ConditionValues")
-      .insert({ OptionId: optionId, ConditionId: conditionId })
-      .returning("*")
-      .then(head);
-  } else
-    return trx("Routing_ConditionValues")
-      .where({ OptionId: optionId })
-      .del()
-      .returning("*")
-      .then(head);
-};
-
-module.exports.getAvailableRoutingDestinations = async function getAvailableRoutingDestinations(
-  trx,
-  id
-) {
-  const sectionId = await getSectionId(trx, id);
-  const questionnaireId = await getQuestionnaireId(trx, sectionId);
-  const destinationsInSection = await getDestinationsInSection(trx, sectionId);
-  const sectionsAheadOfPage = await getSectionsAheadOfPage(
-    trx,
-    questionnaireId,
-    sectionId
-  );
-  const destinationsOutsideSection = await getDestinationsOutsideSection(
-    trx,
-    sectionsAheadOfPage
-  );
-  const destinations = concat(
-    destinationsInSection,
-    destinationsOutsideSection
-  );
-  return destinations.map(destination => destination.id);
-};
+const { concat, parseInt } = require("lodash");
 
 const updateConditionsTable = async (trx, { id, answerId }) =>
   trx("Routing_Conditions")
@@ -123,4 +70,58 @@ const getDestinationsOutsideSection = async (trx, sectionIds) => {
         "Pages.order"
       );
     });
+};
+
+module.exports.updateConditions = async function updateConditions(
+  trx,
+  { id, answerId }
+) {
+  const prevAnswerId = await getConditionAnswerId(trx, { id });
+  if (parseInt(answerId) === prevAnswerId.AnswerId) {
+    return;
+  } else {
+    await updateValuesTable(trx, { id });
+    return updateConditionsTable(trx, { id, answerId });
+  }
+};
+
+module.exports.createOrRemoveValue = async function createOrRemoveValue(
+  trx,
+  { optionId, conditionId, checked }
+) {
+  if (checked) {
+    return trx("Routing_ConditionValues")
+      .insert({ OptionId: optionId, ConditionId: conditionId })
+      .returning("*")
+      .then(head);
+  } else {
+    return trx("Routing_ConditionValues")
+      .where({ OptionId: optionId })
+      .del()
+      .returning("*")
+      .then(head);
+  }
+};
+
+module.exports.getAvailableRoutingDestinations = async function getAvailableRoutingDestinations(
+  trx,
+  id
+) {
+  const sectionId = await getSectionId(trx, id);
+  const questionnaireId = await getQuestionnaireId(trx, sectionId);
+  const destinationsInSection = await getDestinationsInSection(trx, sectionId);
+  const sectionsAheadOfPage = await getSectionsAheadOfPage(
+    trx,
+    questionnaireId,
+    sectionId
+  );
+  const destinationsOutsideSection = await getDestinationsOutsideSection(
+    trx,
+    sectionsAheadOfPage
+  );
+  const destinations = concat(
+    destinationsInSection,
+    destinationsOutsideSection
+  );
+  return destinations.map(destination => destination.id);
 };

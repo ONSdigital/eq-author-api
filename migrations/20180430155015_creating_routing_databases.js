@@ -1,17 +1,3 @@
-exports.up = async function(knex, Promise) {
-  await createRoutingRuleSetTable(knex);
-  await createRoutingRuleTable(knex);
-  await createRoutingConditionTable(knex);
-  await createRoutingConditionValuesTable(knex);
-};
-
-exports.down = async function(knex, Promise) {
-  await knex.schema.dropTable("Routing_ConditionValues");
-  await knex.schema.dropTable("Routing_Conditions");
-  await knex.schema.dropTable("Routing_Rules");
-  await knex.schema.dropTable("Routing_RuleSets");
-};
-
 const createRoutingRuleSetTable = async knex => {
   return knex.schema.createTable("Routing_RuleSets", function(table) {
     table.increments();
@@ -108,4 +94,18 @@ const createRoutingConditionValuesTable = async knex => {
       .inTable("Routing_Conditions")
       .onDelete("CASCADE");
   });
+};
+
+exports.up = async function(knex) {
+  await createRoutingRuleSetTable(knex);
+  await createRoutingRuleTable(knex);
+  await createRoutingConditionTable(knex);
+  await createRoutingConditionValuesTable(knex);
+};
+
+exports.down = async function(knex) {
+  await knex.schema.dropTable("Routing_ConditionValues");
+  await knex.schema.dropTable("Routing_Conditions");
+  await knex.schema.dropTable("Routing_Rules");
+  await knex.schema.dropTable("Routing_RuleSets");
 };

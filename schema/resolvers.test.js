@@ -1,6 +1,5 @@
 const { first, get } = require("lodash");
 const repositories = require("../repositories");
-const util = require("util");
 const db = require("../db");
 const executeQuery = require("../tests/utils/executeQuery");
 const {
@@ -11,7 +10,6 @@ const {
   getAnswerQuery,
   getAnswersQuery,
   createRoutingRuleSet,
-  createRoutingRule,
   createRoutingCondition,
   toggleConditionOption,
   getEntireRoutingStructure,
@@ -19,8 +17,7 @@ const {
   updateConditionAnswer,
   createSectionMutation,
   createQuestionPageMutation,
-  getAvalableRoutingDestinations,
-  getQuestionnaire
+  getAvalableRoutingDestinations
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -103,26 +100,6 @@ const createNewRoutingRuleSet = async questionPageId => {
   );
 };
 
-const createNewRoutingRuleMutation = async ({ routingRuleSet, id }) =>
-  executeQuery(
-    createRoutingRule,
-    {
-      input: {
-        operation: "And",
-        routingRuleSetId: routingRuleSet.id,
-        goto: {
-          pageId: id
-        }
-      }
-    },
-    ctx
-  );
-
-const createNewRoutingRule = async page => {
-  const result = await createNewRoutingRuleMutation(page);
-  return result.data;
-};
-
 const createNewRoutingConditionMutation = async (routingRuleId, { id }) =>
   executeQuery(
     createRoutingCondition,
@@ -142,15 +119,6 @@ const createNewRoutingCondition = async (routingRuleId, pageId) => {
   return { result, answer };
 };
 
-const toggleNewConditionValue = async ({ result, answer }, toggle = true) => {
-  const conditionValue = await toggleNewConditionValueMutation(
-    result.data.createRoutingCondition.id,
-    first(answer.options).id,
-    toggle
-  );
-  return conditionValue.data;
-};
-
 const toggleNewConditionValueMutation = async (conditionId, optionId, toggle) =>
   executeQuery(
     toggleConditionOption,
@@ -164,12 +132,13 @@ const toggleNewConditionValueMutation = async (conditionId, optionId, toggle) =>
     ctx
   );
 
-const changeRoutingCondition = async ({ answer, result }) => {
-  const RoutingCondition = await changeRoutingConditionMutation(
-    answer,
-    result.data
+const toggleNewConditionValue = async ({ result, answer }, toggle = true) => {
+  const conditionValue = await toggleNewConditionValueMutation(
+    result.data.createRoutingCondition.id,
+    first(answer.options).id,
+    toggle
   );
-  return RoutingCondition.data;
+  return conditionValue.data;
 };
 
 const changeRoutingConditionMutation = async (
@@ -187,8 +156,16 @@ const changeRoutingConditionMutation = async (
     ctx
   );
 
+const changeRoutingCondition = async ({ answer, result }) => {
+  const RoutingCondition = await changeRoutingConditionMutation(
+    answer,
+    result.data
+  );
+  return RoutingCondition.data;
+};
+
 const createFullRoutingTree = async firstPage => {
-  const routingRuleSet = await createNewRoutingRuleSet(firstPage.id);
+  await createNewRoutingRuleSet(firstPage.id);
   const result = await executeQuery(
     getBasicRoutingQuery,
     { id: firstPage.id },
