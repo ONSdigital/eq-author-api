@@ -1,6 +1,6 @@
-const db = require("./");
+const knex = require("./");
 
-function Page() {
+function Page(db = knex) {
   return db("Pages");
 }
 
@@ -14,8 +14,8 @@ module.exports.findById = function findById(id) {
     .first();
 };
 
-module.exports.update = function update(id, updates) {
-  return Page()
+module.exports.update = function update(id, updates, db) {
+  return Page(db)
     .where({ id: parseInt(id, 10) })
     .update(updates)
     .returning("*");

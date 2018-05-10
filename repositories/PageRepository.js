@@ -4,8 +4,7 @@ const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
 const db = require("../db");
 const {
-  movePage,
-  getNextOrderValue
+  getOrUpdateOrderForInsert
 } = require("./strategies/spacedOrderStrategy");
 
 const mapping = { SectionId: "sectionId" };
@@ -38,29 +37,12 @@ function getById(id) {
 
 function insert(args) {
   const repository = getRepositoryForType(args);
+  const { sectionId, position } = args;
 
   return db.transaction(trx => {
-    // for some reason mutating causes app to hang
-    // so we have to immutably add in `order`
-    args = Object.assign({}, args, {
-      order: getNextOrderValue(trx, args.sectionId)
-    });
-
-    const result = repository.insert(args, trx);
-
-    if (args.position === undefined) {
-      return result;
-    }
-
-    return result
-      .then(({ id, sectionId }) =>
-        movePage(trx, {
-          id,
-          sectionId,
-          position: args.position
-        })
-      )
-      .then(fromDb);
+    return getOrUpdateOrderForInsert(trx, sectionId, null, position)
+      .then(order => Object.assign(args, { order }))
+      .then(page => repository.insert(page, trx));
   });
 }
 
@@ -82,9 +64,13 @@ function undelete(id) {
 }
 
 function move({ id, sectionId, position }) {
-  return db.transaction(trx =>
-    movePage(trx, { id, sectionId, position }).then(fromDb)
-  );
+  return db.transaction(trx => {
+    return getOrUpdateOrderForInsert(trx, sectionId, id, position)
+      .then(order => Page.update(id, toDb({ sectionId, order }), trx))
+      .then(head)
+      .then(fromDb)
+      .then(page => Object.assign(page, { position }));
+  });
 }
 
 function getPosition({ id }) {

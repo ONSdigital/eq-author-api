@@ -6,8 +6,6 @@ const { last, head, map, times } = require("lodash");
 
 const reverse = array => array.slice().reverse();
 
-jest.setTimeout(1000 * 60 * 10); // 10 minute
-
 const buildQuestionnaire = questionnaire => ({
   title: "Test questionnaire",
   surveyId: "1",
@@ -397,7 +395,7 @@ describe("PagesRepository", () => {
       expect(map(updatedResults, "id")).toEqual(map(reverse(pages), "id"));
     });
 
-    it("handles moving single page to it's own position", async () => {
+    it("handles moving single page to its own position", async () => {
       const { section } = await setup();
       const pages = await createPages(section.id, 3);
 
