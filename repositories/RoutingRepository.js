@@ -43,7 +43,6 @@ module.exports.findAllRoutingConditions = function findAllRoutingConditions(
   where = {}
 ) {
   return Routing.findAllRoutingConditions()
-    .where({ isDeleted: false })
     .where(where)
     .then(map(fromDb));
 };
