@@ -103,6 +103,6 @@ module.exports.getPosition = ({ id }) => {
   );
 };
 
-module.exports.getRoutingDestinations = function(id) {
-  return db.transaction(trx => getAvailableRoutingDestinations(trx, id));
+module.exports.getRoutingDestinations = function(pageId) {
+  return db.transaction(trx => getAvailableRoutingDestinations(trx, pageId));
 };

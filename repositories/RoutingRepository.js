@@ -50,9 +50,7 @@ module.exports.findAllRoutingConditions = function findAllRoutingConditions(
 module.exports.findAllRoutingConditionValues = function findAllRoutingConditionValues(
   where = {}
 ) {
-  return Routing.findAllRoutingConditionValues()
-    .where(where)
-    .map(result => result.OptionId);
+  return Routing.findAllRoutingConditionValues().where(where);
 };
 
 module.exports.insertRoutingRuleSet = function insertRoutingRuleSet({

@@ -10,7 +10,7 @@ const updateConditionsTable = async (trx, { id, answerId }) =>
     .returning("*")
     .then(head);
 
-const updateValuesTable = async (trx, { id }) =>
+const deleteRoutingConditionValues = async (trx, { id }) =>
   trx("Routing_ConditionValues")
     .where({ ConditionId: id })
     .del()
@@ -38,7 +38,7 @@ const getQuestionnaireId = async (trx, { SectionId }) =>
 const getDestinationsInSection = async (trx, { SectionId, order }) =>
   trx("Pages")
     .select("id")
-    .where({ SectionId })
+    .where({ SectionId, isDeleted: false })
     .where("order", ">", order);
 
 const getSectionsAheadOfPage = async (
@@ -48,18 +48,19 @@ const getSectionsAheadOfPage = async (
 ) =>
   trx("Sections")
     .select("id")
-    .where({ QuestionnaireId })
+    .where({ QuestionnaireId, isDeleted: false })
     .where("id", ">", SectionId);
 
-const getDestinationsOutsideSection = async (trx, sectionIds) => {
-  const idArray = sectionIds.map(sectionId => sectionId.id);
+const getDestinationsOutsideSection = async (trx, sections) => {
+  const sectionIds = sections.map(section => section.id);
   return trx("Pages")
     .select("id")
     .from(function() {
       this.select("SectionId")
         .from("Pages")
         .min("order as min")
-        .whereIn("SectionId", idArray)
+        .where({ isDeleted: false })
+        .whereIn("SectionId", sectionIds)
         .groupBy("SectionId")
         .as("firstPages");
     })
@@ -80,7 +81,7 @@ module.exports.updateConditions = async function updateConditions(
   if (parseInt(answerId) === prevAnswerId.AnswerId) {
     return;
   } else {
-    await updateValuesTable(trx, { id });
+    await deleteRoutingConditionValues(trx, { id });
     return updateConditionsTable(trx, { id, answerId });
   }
 };
@@ -105,9 +106,9 @@ module.exports.createOrRemoveValue = async function createOrRemoveValue(
 
 module.exports.getAvailableRoutingDestinations = async function getAvailableRoutingDestinations(
   trx,
-  id
+  pageId
 ) {
-  const sectionId = await getSectionId(trx, id);
+  const sectionId = await getSectionId(trx, pageId);
   const questionnaireId = await getQuestionnaireId(trx, sectionId);
   const destinationsInSection = await getDestinationsInSection(trx, sectionId);
   const sectionsAheadOfPage = await getSectionsAheadOfPage(
@@ -119,9 +120,5 @@ module.exports.getAvailableRoutingDestinations = async function getAvailableRout
     trx,
     sectionsAheadOfPage
   );
-  const destinations = concat(
-    destinationsInSection,
-    destinationsOutsideSection
-  );
-  return destinations.map(destination => destination.id);
+  return concat(destinationsInSection, destinationsOutsideSection);
 };

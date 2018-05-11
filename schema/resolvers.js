@@ -32,7 +32,7 @@ const Resolvers = {
         pageId
       );
       return destinations.map(destination => {
-        return { pageId: destination };
+        return { pageId: destination.id };
       });
     }
   },
@@ -269,9 +269,11 @@ const Resolvers = {
 
   IDArrayValue: {
     value: ({ conditionId }, args, ctx) => {
-      return ctx.repositories.Routing.findAllRoutingConditionValues({
-        ConditionId: conditionId
-      });
+      return ctx.repositories.Routing
+        .findAllRoutingConditionValues({
+          ConditionId: conditionId
+        })
+        .map(result => result.OptionId);
     }
   },
 
