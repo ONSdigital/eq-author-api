@@ -12,7 +12,6 @@ const mapping = {
   ConditionId: "conditionId"
 };
 const mapFields = require("../../utils/mapFields");
-const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
 const updateConditionsTable = async (trx, id, answerId) =>
