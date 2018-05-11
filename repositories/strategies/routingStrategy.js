@@ -10,9 +10,9 @@ const updateConditionsTable = async (trx, { id, answerId }) =>
     .returning("*")
     .then(head);
 
-const deleteRoutingConditionValues = async (trx, { id }) =>
+const deleteRoutingConditionValues = async (trx, { id: ConditionId }) =>
   trx("Routing_ConditionValues")
-    .where({ ConditionId: id })
+    .where({ ConditionId })
     .del()
     .returning("*")
     .then(head);
