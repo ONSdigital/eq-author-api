@@ -1,37 +1,53 @@
-const { head } = require("lodash/fp");
+const { head, invert } = require("lodash/fp");
 const { concat, parseInt } = require("lodash");
 
-const updateConditionsTable = async (trx, { id, answerId }) =>
+const mapping = {
+  QuestionPageId: "questionPageId",
+  ElseDestination: "elseDestination",
+  RoutingRuleSetId: "routingRuleSetId",
+  RuleDestination: "ruleDestination",
+  RoutingRuleId: "routingRuleId",
+  AnswerId: "answerId",
+  OptionId: "optionId",
+  ConditionId: "conditionId"
+};
+const mapFields = require("../../utils/mapFields");
+const fromDb = mapFields(mapping);
+const toDb = mapFields(invert(mapping));
+
+const updateConditionsTable = async (trx, id, answerId) =>
   trx("Routing_Conditions")
     .where({ id })
-    .update({
-      AnswerId: answerId
-    })
+    .update(
+      toDb({
+        answerId
+      })
+    )
     .returning("*")
     .then(head);
 
-const deleteRoutingConditionValues = async (trx, { id: ConditionId }) =>
+const deleteRoutingConditionValues = async (trx, conditionId) =>
   trx("Routing_ConditionValues")
-    .where({ ConditionId })
+    .where(toDb({ conditionId }))
     .del()
     .returning("*")
     .then(head);
 
-const getConditionAnswerId = async (trx, { id }) =>
+const getConditionAnswerId = async (trx, id) =>
   trx("Routing_Conditions")
     .select("AnswerId")
     .where({ id })
     .then(head);
 
-const getSectionId = async (trx, id) =>
+const getPage = async (trx, id) =>
   trx("Pages")
-    .select("SectionId", "order")
+    .select("*")
     .where({ id })
     .then(head);
 
-const getQuestionnaireId = async (trx, { SectionId }) =>
+const getSection = async (trx, { SectionId }) =>
   trx("Sections")
-    .select("QuestionnaireId", "id")
+    .select("*")
     .where({ id: SectionId })
     .then(head);
 
@@ -43,8 +59,8 @@ const getDestinationsInSection = async (trx, { SectionId, order }) =>
 
 const getSectionsAheadOfPage = async (
   trx,
-  { QuestionnaireId },
-  { SectionId }
+  { SectionId },
+  { QuestionnaireId }
 ) =>
   trx("Sections")
     .select("id")
@@ -75,14 +91,14 @@ const getDestinationsOutsideSection = async (trx, sections) => {
 
 module.exports.updateConditions = async function updateConditions(
   trx,
-  { id, answerId }
+  { id: conditionId, answerId }
 ) {
-  const prevAnswerId = await getConditionAnswerId(trx, { id });
+  const prevAnswerId = await getConditionAnswerId(trx, conditionId);
   if (parseInt(answerId) === prevAnswerId.AnswerId) {
     return;
   } else {
-    await deleteRoutingConditionValues(trx, { id });
-    return updateConditionsTable(trx, { id, answerId });
+    await deleteRoutingConditionValues(trx, conditionId);
+    return updateConditionsTable(trx, conditionId, answerId);
   }
 };
 
@@ -92,12 +108,12 @@ module.exports.createOrRemoveValue = async function createOrRemoveValue(
 ) {
   if (checked) {
     return trx("Routing_ConditionValues")
-      .insert({ OptionId: optionId, ConditionId: conditionId })
+      .insert(toDb({ optionId, conditionId }))
       .returning("*")
       .then(head);
   } else {
     return trx("Routing_ConditionValues")
-      .where({ OptionId: optionId })
+      .where(toDb({ optionId }))
       .del()
       .returning("*")
       .then(head);
@@ -108,14 +124,10 @@ module.exports.getAvailableRoutingDestinations = async function getAvailableRout
   trx,
   pageId
 ) {
-  const sectionId = await getSectionId(trx, pageId);
-  const questionnaireId = await getQuestionnaireId(trx, sectionId);
-  const destinationsInSection = await getDestinationsInSection(trx, sectionId);
-  const sectionsAheadOfPage = await getSectionsAheadOfPage(
-    trx,
-    questionnaireId,
-    sectionId
-  );
+  const page = await getPage(trx, pageId);
+  const section = await getSection(trx, page);
+  const destinationsInSection = await getDestinationsInSection(trx, page);
+  const sectionsAheadOfPage = await getSectionsAheadOfPage(trx, page, section);
   const destinationsOutsideSection = await getDestinationsOutsideSection(
     trx,
     sectionsAheadOfPage
