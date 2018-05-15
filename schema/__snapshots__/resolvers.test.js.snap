@@ -5,19 +5,22 @@ Object {
   "data": Object {
     "availableRoutingDestinations": Array [
       Object {
-        "page": Object {
-          "id": "19",
+        "__typename": "QuestionPage",
+        "id": "19",
+        "section": Object {
+          "id": "17",
         },
       },
       Object {
-        "page": Object {
-          "id": "20",
+        "__typename": "QuestionPage",
+        "id": "20",
+        "section": Object {
+          "id": "17",
         },
       },
       Object {
-        "page": Object {
-          "id": "18",
-        },
+        "__typename": "Section",
+        "id": "18",
       },
     ],
   },

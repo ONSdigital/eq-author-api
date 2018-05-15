@@ -27,14 +27,8 @@ const Resolvers = {
     answers: (root, { ids }, ctx) =>
       ctx.repositories.Answer.findAll(whereIn("id", ids)),
     option: (root, { id }, ctx) => ctx.repositories.Option.get(id),
-    availableRoutingDestinations: async (root, { pageId }, ctx) => {
-      const destinations = await ctx.repositories.Page.getRoutingDestinations(
-        pageId
-      );
-      return destinations.map(destination => {
-        return { pageId: destination.id };
-      });
-    }
+    availableRoutingDestinations: (root, { pageId }, ctx) =>
+      ctx.repositories.Page.getRoutingDestinations(pageId)
   },
 
   Mutation: {
@@ -164,6 +158,9 @@ const Resolvers = {
     updateRoutingRuleSet: (_, args, ctx) => {
       return ctx.repositories.Routing.updateRoutingRuleSet(args.input);
     },
+    resetRoutingRuleSetElse: (_, args, ctx) => {
+      return ctx.repositories.Routing.updateRoutingRuleSet(args.input);
+    },
     createRoutingRule: (_, args, ctx) => {
       return ctx.repositories.Routing.insertRoutingRule(args.input);
     },
@@ -238,8 +235,14 @@ const Resolvers = {
         RoutingRuleSetId: id
       });
     },
-    else: ({ elseDestination }) => {
-      return !isNil(elseDestination) ? { pageId: elseDestination } : null;
+    else: ({ SectionDestination, PageDestination }) => {
+      if (isNil(SectionDestination)) {
+        return null;
+      } else if (isNil(PageDestination)) {
+        return { sectionId: SectionDestination };
+      } else {
+        return { sectionId: SectionDestination, pageId: PageDestination };
+      }
     }
   },
 
@@ -249,8 +252,14 @@ const Resolvers = {
         RoutingRuleId: id
       });
     },
-    goto: ({ ruleDestination }) => {
-      return !isNil(ruleDestination) ? { pageId: ruleDestination } : null;
+    goto: ({ SectionDestination, PageDestination }) => {
+      if (isNil(SectionDestination)) {
+        return null;
+      } else if (isNil(PageDestination)) {
+        return { sectionId: SectionDestination };
+      } else {
+        return { sectionId: SectionDestination, pageId: PageDestination };
+      }
     }
   },
 
@@ -278,9 +287,7 @@ const Resolvers = {
   },
 
   RoutingDestination: {
-    page: ({ pageId }, args, ctx) => {
-      return ctx.repositories.QuestionPage.get(pageId);
-    }
+    __resolveType: ({ pageType }) => (pageType ? "QuestionPage" : "Section")
   },
 
   Answer: {

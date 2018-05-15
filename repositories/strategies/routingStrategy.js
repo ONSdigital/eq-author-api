@@ -1,7 +1,8 @@
-const { head, invert } = require("lodash/fp");
+const { head, invert, map } = require("lodash/fp");
 const { concat, parseInt } = require("lodash");
 
 const mapping = {
+  SectionId: "sectionId",
   QuestionPageId: "questionPageId",
   ElseDestination: "elseDestination",
   RoutingRuleSetId: "routingRuleSetId",
@@ -13,6 +14,7 @@ const mapping = {
 };
 const mapFields = require("../../utils/mapFields");
 const toDb = mapFields(invert(mapping));
+const fromDb = mapFields(mapping);
 
 const updateConditionsTable = async (trx, id, answerId) =>
   trx("Routing_Conditions")
@@ -52,9 +54,10 @@ const getSection = async (trx, { SectionId }) =>
 
 const getDestinationsInSection = async (trx, { SectionId, order }) =>
   trx("Pages")
-    .select("id")
+    .select("*")
     .where({ SectionId, isDeleted: false })
-    .where("order", ">", order);
+    .where("order", ">", order)
+    .then(map(fromDb));
 
 const getSectionsAheadOfPage = async (
   trx,
@@ -62,31 +65,9 @@ const getSectionsAheadOfPage = async (
   { QuestionnaireId }
 ) =>
   trx("Sections")
-    .select("id")
+    .select("*")
     .where({ QuestionnaireId, isDeleted: false })
     .where("id", ">", SectionId);
-
-const getDestinationsOutsideSection = async (trx, sections) => {
-  const sectionIds = sections.map(section => section.id);
-  return trx("Pages")
-    .select("id")
-    .from(function() {
-      this.select("SectionId")
-        .from("Pages")
-        .min("order as min")
-        .where({ isDeleted: false })
-        .whereIn("SectionId", sectionIds)
-        .groupBy("SectionId")
-        .as("firstPages");
-    })
-    .innerJoin("Pages", function() {
-      this.on("firstPages.SectionId", "=", "Pages.SectionId").andOn(
-        "firstPages.min",
-        "=",
-        "Pages.order"
-      );
-    });
-};
 
 module.exports.updateConditions = async function updateConditions(
   trx,
@@ -127,9 +108,6 @@ module.exports.getAvailableRoutingDestinations = async function getAvailableRout
   const section = await getSection(trx, page);
   const destinationsInSection = await getDestinationsInSection(trx, page);
   const sectionsAheadOfPage = await getSectionsAheadOfPage(trx, page, section);
-  const destinationsOutsideSection = await getDestinationsOutsideSection(
-    trx,
-    sectionsAheadOfPage
-  );
-  return concat(destinationsInSection, destinationsOutsideSection);
+
+  return concat(destinationsInSection, sectionsAheadOfPage);
 };

@@ -1,13 +1,14 @@
 const { head, invert, map } = require("lodash/fp");
+const { get } = require("lodash");
 const mapping = {
   QuestionPageId: "questionPageId",
-  ElseDestination: "elseDestination",
   RoutingRuleSetId: "routingRuleSetId",
-  RuleDestination: "ruleDestination",
   RoutingRuleId: "routingRuleId",
   AnswerId: "answerId",
   OptionId: "optionId",
-  ConditionId: "conditionId"
+  ConditionId: "conditionId",
+  SectionDestination: "sectionDestination",
+  PageDestination: "pageDestination"
 };
 const mapFields = require("../utils/mapFields");
 const fromDb = mapFields(mapping);
@@ -22,72 +23,61 @@ const {
 
 const Routing = require("../db/Routing");
 
-module.exports.findRoutingRuleSetByQuestionPageId = function findRoutingRuleSetByQuestionPageId(
-  where = {}
-) {
+function findRoutingRuleSetByQuestionPageId(where = {}) {
   return Routing.findAllRoutingRuleSets()
     .where({ isDeleted: false })
     .where(where)
     .first()
     .then(fromDb);
-};
+}
 
-module.exports.findAllRoutingRules = function findAllRoutingRules(where = {}) {
+function findAllRoutingRules(where = {}) {
   return Routing.findAllRoutingRules()
     .where({ isDeleted: false })
     .where(where)
     .then(map(fromDb));
-};
+}
 
-module.exports.findAllRoutingConditions = function findAllRoutingConditions(
-  where = {}
-) {
+function findAllRoutingConditions(where = {}) {
   return Routing.findAllRoutingConditions()
     .where(where)
     .then(map(fromDb));
-};
+}
 
-module.exports.findAllRoutingConditionValues = function findAllRoutingConditionValues(
-  where = {}
-) {
+function findAllRoutingConditionValues(where = {}) {
   return Routing.findAllRoutingConditionValues().where(where);
-};
+}
 
-module.exports.insertRoutingRuleSet = function insertRoutingRuleSet({
-  elseDestination,
-  questionPageId
-}) {
+function insertRoutingRuleSet({ questionPageId, else: destination }) {
+  const sectionDestination = get(destination, "sectionId", null);
+  const pageDestination = get(destination, "pageId", null);
   return Routing.createRoutingRuleSet(
     toDb({
-      elseDestination,
-      questionPageId
+      questionPageId,
+      sectionDestination,
+      pageDestination
     })
   )
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.insertRoutingRule = function insertRoutingRule({
-  operation,
-  routingRuleSetId,
-  goto = {}
-}) {
+function insertRoutingRule({ operation, routingRuleSetId, goto }) {
+  const sectionDestination = get(goto, "sectionId", null);
+  const pageDestination = get(goto, "pageId", null);
   return Routing.createRoutingRule(
     toDb({
       operation,
       routingRuleSetId,
-      ruleDestination: goto.pageId
+      sectionDestination,
+      pageDestination
     })
   )
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.insertRoutingCondition = function insertRoutingCondition({
-  comparator,
-  routingRuleId,
-  answerId
-}) {
+function insertRoutingCondition({ comparator, routingRuleId, answerId }) {
   return Routing.createRoutingCondition(
     toDb({
       comparator,
@@ -97,13 +87,9 @@ module.exports.insertRoutingCondition = function insertRoutingCondition({
   )
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.toggleConditionValue = function toggleConditionValue({
-  optionId,
-  conditionId,
-  checked
-}) {
+function toggleConditionValue({ optionId, conditionId, checked }) {
   return db.transaction(trx =>
     createOrRemoveValue(trx, {
       optionId,
@@ -111,59 +97,72 @@ module.exports.toggleConditionValue = function toggleConditionValue({
       checked
     }).then(fromDb)
   );
-};
+}
 
-module.exports.updateRoutingRuleSet = function updateRoutingRuleSet({
-  id,
-  else: { pageId: elseDestination }
-}) {
+function updateRoutingRuleSet({ id, else: destination }) {
+  const sectionDestination = get(destination, "sectionId", null);
+  const pageDestination = get(destination, "pageId", null);
   return Routing.updateRoutingRuleSet(
     id,
     toDb({
-      elseDestination
+      sectionDestination,
+      pageDestination
     })
   )
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.updateRoutingRule = function updateRoutingRule({
-  id,
-  operation,
-  goto = {}
-}) {
+function updateRoutingRule({ id, operation, goto }) {
+  const sectionDestination = get(goto, "sectionId", null);
+  const pageDestination = get(goto, "pageId", null);
   return Routing.updateRoutingRule(
     id,
     toDb({
       operation,
-      ruleDestination: goto.pageId
+      sectionDestination,
+      pageDestination
     })
   )
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.updateRoutingConditionAnswer = function updateRoutingConditionAnswer({
-  id,
-  answerId
-}) {
+function updateRoutingConditionAnswer({ id, answerId }) {
   return db.transaction(trx =>
     updateConditions(trx, { id, answerId }).then(fromDb)
   );
-};
+}
 
-module.exports.removeRoutingRule = function removeRoutingRule(id) {
+function removeRoutingRule(id) {
   return Routing.updateRoutingRule(id, { isDeleted: true })
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.removeRoutingCondition = function removeRoutingCondition(id) {
+function removeRoutingCondition(id) {
   return Routing.deleteRoutingCondition(id).then(head);
-};
+}
 
-module.exports.undeleteRoutingRule = function undeleteRoutingRule(id) {
+function undeleteRoutingRule(id) {
   return Routing.updateRoutingRule(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
-};
+}
+
+Object.assign(module.exports, {
+  undeleteRoutingRule,
+  removeRoutingCondition,
+  removeRoutingRule,
+  updateRoutingConditionAnswer,
+  updateRoutingRule,
+  findRoutingRuleSetByQuestionPageId,
+  findAllRoutingRules,
+  findAllRoutingConditions,
+  findAllRoutingConditionValues,
+  insertRoutingRuleSet,
+  insertRoutingRule,
+  insertRoutingCondition,
+  toggleConditionValue,
+  updateRoutingRuleSet
+});

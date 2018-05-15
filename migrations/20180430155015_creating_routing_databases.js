@@ -10,10 +10,18 @@ const createRoutingRuleSetTable = async knex => {
       .onDelete("CASCADE");
 
     table
-      .integer("ElseDestination")
+      .integer("SectionDestination")
       .unsigned()
       .references("id")
-      .inTable("Pages");
+      .inTable("Sections")
+      .onDelete("CASCADE");
+
+    table
+      .integer("PageDestination")
+      .unsigned()
+      .references("id")
+      .inTable("Pages")
+      .onDelete("CASCADE");
 
     table
       .boolean("isDeleted")
@@ -36,7 +44,14 @@ const createRoutingRuleTable = async knex => {
       .onDelete("CASCADE");
 
     table
-      .integer("RuleDestination")
+      .integer("SectionDestination")
+      .unsigned()
+      .references("id")
+      .inTable("Sections")
+      .onDelete("CASCADE");
+
+    table
+      .integer("PageDestination")
       .unsigned()
       .references("id")
       .inTable("Pages")

@@ -231,7 +231,13 @@ query QuestionPage($id: ID!) {
         id
       }
       else {
-        page {
+        ...on QuestionPage{
+          id
+          section{
+            id
+          }
+        }
+        ...on Section{
           id
         }
       }
@@ -239,10 +245,16 @@ query QuestionPage($id: ID!) {
         id
         operation
         goto{
-          page{
+        ...on QuestionPage{
+          id
+          section{
             id
           }
         }
+        ...on Section{
+          id
+        }
+      }
         conditions{
           id
           comparator
@@ -262,13 +274,21 @@ query QuestionPage($id: ID!) {
 `;
 
 const getAvalableRoutingDestinations = `
-query AvalableRoutingDestinations($id: ID!) {
+query QuestionPage($id: ID!) {
   availableRoutingDestinations(pageId: $id) {
-    page{
+    __typename
+		...on QuestionPage {
+      id
+      section {
+        id
+      }
+    }
+    ...on Section{
       id
     }
   }
 }
+
 `;
 
 const getQuestionnaire = `
