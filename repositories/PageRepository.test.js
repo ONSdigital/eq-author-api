@@ -110,7 +110,7 @@ describe("PagesRepository", () => {
     await PageRepository.undelete(page.id);
 
     const result = await PageRepository.get(page.id);
-    expect(result).toEqual(page);
+    expect(result).toMatchObject(page);
   });
 
   describe("re-ordering", () => {
@@ -395,7 +395,7 @@ describe("PagesRepository", () => {
       expect(map(updatedResults, "id")).toEqual(map(reverse(pages), "id"));
     });
 
-    it("handles moving single page to it's own position", async () => {
+    it("handles moving single page to its own position", async () => {
       const { section } = await setup();
       const pages = await createPages(section.id, 3);
 

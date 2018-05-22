@@ -1,13 +1,10 @@
-const { map, head, invert } = require("lodash/fp");
+const { map, head, invert, get } = require("lodash/fp");
 const Page = require("../db/Page");
 const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
 const db = require("../db");
 const {
-  movePage,
-  getNextOrderValue,
-  calculatedPositionCol,
-  getPosition
+  getOrUpdateOrderForInsert
 } = require("./strategies/spacedOrderStrategy");
 
 const mapping = { SectionId: "sectionId" };
@@ -23,78 +20,70 @@ function getRepositoryForType({ pageType }) {
   }
 }
 
-module.exports.findAll = function findAll(
-  where = {},
-  orderBy = "position",
-  direction = "asc"
-) {
-  return Page.findAll()
-    .columns("*", calculatedPositionCol(db))
-    .where({ isDeleted: false })
+function findAll(where = {}, orderBy = "position", direction = "asc") {
+  return db("PagesView")
+    .select("*")
     .where(toDb(where))
     .orderBy(orderBy, direction)
     .then(map(fromDb));
-};
+}
 
-module.exports.get = function get(id) {
-  return Page.findById(id)
-    .where({ isDeleted: false })
+function getById(id) {
+  return db("PagesView")
+    .where("id", parseInt(id, 10))
+    .first()
     .then(fromDb);
-};
+}
 
-module.exports.insert = function insert(args) {
+function insert(args) {
   const repository = getRepositoryForType(args);
+  const { sectionId, position } = args;
 
   return db.transaction(trx => {
-    // for some reason mutating causes app to hang
-    // so we have to immutably add in `order`
-    args = Object.assign({}, args, {
-      order: getNextOrderValue(trx, args.sectionId)
-    });
-
-    const result = repository.insert(args, trx);
-
-    if (args.position === undefined) {
-      return result;
-    }
-
-    return result
-      .then(({ id, sectionId }) =>
-        movePage(trx, {
-          id,
-          sectionId,
-          position: args.position
-        })
-      )
-      .then(fromDb);
+    return getOrUpdateOrderForInsert(trx, sectionId, null, position)
+      .then(order => Object.assign(args, { order }))
+      .then(page => repository.insert(page, trx));
   });
-};
+}
 
-module.exports.update = function update(args) {
+function update(args) {
   const repository = getRepositoryForType(args);
   return repository.update(args);
-};
+}
 
-module.exports.remove = function remove(id) {
+function remove(id) {
   return Page.update(id, { isDeleted: true })
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.undelete = function(id) {
+function undelete(id) {
   return Page.update(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
-};
+}
 
-module.exports.move = ({ id, sectionId, position }) => {
-  return db.transaction(trx =>
-    movePage(trx, { id, sectionId, position }).then(fromDb)
-  );
-};
+function move({ id, sectionId, position }) {
+  return db.transaction(trx => {
+    return getOrUpdateOrderForInsert(trx, sectionId, id, position)
+      .then(order => Page.update(id, toDb({ sectionId, order }), trx))
+      .then(head)
+      .then(fromDb)
+      .then(page => Object.assign(page, { position }));
+  });
+}
 
-module.exports.getPosition = ({ id }) => {
-  return Page.findById(id).then(({ SectionId }) =>
-    getPosition(db, SectionId, id)
-  );
-};
+function getPosition({ id }) {
+  return getById(id).then(get("position"));
+}
+
+Object.assign(module.exports, {
+  findAll,
+  get: getById,
+  insert,
+  update,
+  remove,
+  undelete,
+  move,
+  getPosition
+});
