@@ -318,12 +318,6 @@ async function createRoutingRuleSetStrategy(trx, questionPageId) {
   return routingRuleSet;
 }
 
-async function resolveRoutingDestinationStrategy(trx, sectionId, pageId) {
-  return isNil(pageId)
-    ? getSectionById(trx, sectionId)
-    : getPageById(trx, pageId);
-}
-
 const handlePageDeleted = (trx, pageId) =>
   updateAllRoutingConditions(
     trx,
@@ -361,7 +355,6 @@ Object.assign(module.exports, {
   createRoutingRuleSetStrategy,
   createRoutingRuleStrategy,
   createRoutingConditionStrategy,
-  resolveRoutingDestinationStrategy,
   handlePageDeleted,
   handleAnswerDeleted,
   handleOptionDeleted

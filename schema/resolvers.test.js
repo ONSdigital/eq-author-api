@@ -1025,6 +1025,42 @@ describe("resolvers", () => {
         });
       });
 
+      it("should error if trying to update a condition with an invalid question/answer combo", async () => {
+        // Given page A with answer I
+        // And page B with answer J
+        // When I update a routing condition with question A answer J
+        // Then I should get an error
+
+        const section = first(sections);
+        const pageA = firstPage;
+        const pageB = await addPage(section.id);
+
+        const answerI = await createNewAnswer(pageA, "Checkbox");
+        const answerJ = await createNewAnswer(pageB, "Checkbox");
+
+        const routingInfo = await getRoutingDataForPage(pageA);
+        const routingCondition = get(
+          routingInfo,
+          "routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        const res1 = await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          questionPageId: pageA.id,
+          answerId: answerJ.id
+        });
+
+        expect(res1.errors).toHaveLength(1);
+
+        const res2 = await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          questionPageId: pageB.id,
+          answerId: answerI.id
+        });
+
+        expect(res2.errors).toHaveLength(1);
+      });
+
       describe("routing condition values", () => {
         it("should only be possible to select one option per condition", async () => {
           // Given a checkbox with two options 1 and 2
