@@ -178,21 +178,12 @@ const updateRoutingConditionValueStrategy = async (
   { conditionId, optionId }
 ) => {
   const table = trx("Routing_ConditionValues");
-  const where = toDb({ conditionId: parseInt(conditionId) });
-
-  const parsedOptionId = parseInt(optionId);
-  const optionNotSet = isNaN(parsedOptionId);
-
-  const update = toDb({
-    conditionId: parseInt(conditionId),
-    optionId: optionNotSet ? null : parsedOptionId
-  });
-
+  const where = toDb({ conditionId });
   const existing = await table.where(where);
 
   const query = isEmpty(existing)
-    ? table.insert(update)
-    : table.where(where).update(update);
+    ? table.insert(toDb({ conditionId, optionId }))
+    : table.where(where).update(toDb({ optionId }));
 
   return query
     .returning("*")

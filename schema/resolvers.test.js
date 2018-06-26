@@ -240,7 +240,10 @@ const deleteRoutingConditionMutation = async input =>
     ctx
   );
 
-const updateRoutingConditionValueMutation = async (conditionId, optionId) =>
+const updateRoutingConditionValueMutation = async (
+  conditionId,
+  optionId = null
+) =>
   executeQuery(
     updateRoutingConditionValue,
     {
