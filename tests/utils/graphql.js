@@ -16,6 +16,69 @@ const createQuestionnaireMutation = `mutation CreateQuestionnaire($input: Create
   }
 `;
 
+const createSectionMutation = `
+  mutation CreateSection($input: CreateSectionInput!){
+    createSection(input: $input){
+      id
+    }
+  }
+`;
+
+const deletePageMutation = `
+  mutation DeletePage($input: DeletePageInput!){
+    deletePage(input: $input){
+      id
+    }
+  }
+`;
+
+const deleteAnswerMutation = `
+mutation DeleteAnswer($input: DeleteAnswerInput!){
+  deleteAnswer(input: $input){
+    id
+  }
+}
+`;
+
+const deleteOptionMutation = `
+mutation DeleteOption($input: DeleteOptionInput!){
+  deleteOption(input: $input){
+    id
+  }
+}
+`;
+
+const createOptionMutation = `
+mutation CreateOption($input: CreateOptionInput!){
+  createOption(input: $input){
+    id
+  }
+}
+`;
+
+const createQuestionPageMutation = `
+  mutation CreateQuestionPage($input: CreateQuestionPageInput!){
+    createQuestionPage(input: $input){
+      id
+    }
+  }
+`;
+
+const getPageQuery = `
+  query GetQuestionPage($id: ID!){
+    questionPage(id:$id){
+      id
+      guidance
+      description
+      pageType
+      position
+      section{
+        id
+      }
+    }
+  }
+`;
+
 const createAnswerMutation = `
   mutation CreateAnswer($input: CreateAnswerInput!) {
     createAnswer(input: $input) {
@@ -116,11 +179,330 @@ const getAnswersQuery = `
   }
 `;
 
+const getBasicRoutingQuery = `
+query GetPage($id: ID!){
+  page(id: $id){
+    ...on QuestionPage{
+      id
+      routingRuleSet{
+        id
+        questionPage{
+          id
+        }
+        routingRules{
+          id
+          conditions{
+            id
+            routingValue{
+              ...on IDValue{
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const createRoutingRuleSet = `
+  mutation CreateRoutingRuleSet($input: CreateRoutingRuleSetInput!){
+    createRoutingRuleSet(input: $input)
+    {
+      id
+      questionPage{
+        id
+      }
+      routingRules{
+        id
+      }
+      else {
+        ... on LogicalDestination {
+          logicalDestination
+        }
+      }
+    }
+  }
+`;
+
+const createRoutingRule = `
+  mutation CreateRoutingRule($input: CreateRoutingRuleInput!){
+    createRoutingRule(input: $input)
+    {
+      id
+      operation
+      conditions {
+        id
+      }
+      goto {
+        ... on LogicalDestination {
+          logicalDestination
+        }
+        ... on AbsoluteDestination {
+          absoluteDestination {
+            ...on QuestionPage{
+              id
+              section{
+                id
+              }
+            }
+            ...on Section{
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const createRoutingCondition = `
+  mutation CreateRoutingCondition($input: CreateRoutingConditionInput!){
+    createRoutingCondition(input: $input)
+    {
+      id
+      comparator
+      questionPage {
+        id
+      }
+      answer {
+        id
+      }
+      routingValue {
+        ... on IDValue {
+          value
+        }
+      }
+    }
+  }
+`;
+
+const updateRoutingRuleSet = `
+mutation UpdateRoutingRuleSet($input: UpdateRoutingRuleSetInput!){
+  updateRoutingRuleSet (input: $input)
+  {
+    id
+    else {
+      ... on LogicalDestination {
+        logicalDestination
+      }
+      ... on AbsoluteDestination {
+        absoluteDestination {
+          ...on QuestionPage{
+            id
+            section{
+              id
+            }
+          }
+          ...on Section{
+            id
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const deleteRoutingRuleSet = `
+mutation DeleteRoutingRuleSet($input: DeleteRoutingRuleSetInput!) {
+  deleteRoutingRuleSet(input: $input) {
+    id
+  }
+}
+`;
+
+const updateRoutingRule = `
+mutation UpdateRoutingRule($input: UpdateRoutingRuleInput!){
+  updateRoutingRule (input: $input)
+  {
+    id
+    goto {
+      ... on LogicalDestination {
+        logicalDestination
+      }
+      ... on AbsoluteDestination {
+        absoluteDestination {
+          __typename
+          ...on QuestionPage{
+            id
+            section{
+              id
+            }
+          }
+          ...on Section{
+            id
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const updateCondition = `
+mutation($input: UpdateRoutingConditionInput!){
+  updateRoutingCondition (input: $input)
+  {
+    id
+  }
+}
+`;
+
+const deleteRoutingRule = `
+  mutation($input: DeleteRoutingRuleInput!) {
+    deleteRoutingRule(input: $input) {
+      id
+    }
+  }
+`;
+
+const deleteRoutingCondition = `
+  mutation($input: DeleteRoutingConditionInput!) {
+    deleteRoutingCondition(input: $input) {
+      id
+    }
+  }
+`;
+
+const updateRoutingConditionValue = `
+  mutation($input: UpdateRoutingConditionValueInput!) {
+    updateRoutingConditionValue (input: $input)
+    {
+      ...on IDValue{
+        value
+      }
+    }
+  }
+`;
+
+const getEntireRoutingStructure = `
+query QuestionPage($id: ID!) {
+  questionPage(id: $id) {
+    routingRuleSet {
+      id
+      questionPage {
+        id
+      }
+      else {
+        ... on LogicalDestination {
+          logicalDestination
+        }
+        ... on AbsoluteDestination {
+          absoluteDestination {
+            ...on QuestionPage{
+              id
+              section{
+                id
+              }
+            }
+            ...on Section{
+              id
+            }
+          }
+        }
+      }
+      routingRules {
+        id
+        operation
+        goto {
+          ... on LogicalDestination {
+            logicalDestination
+          }
+          ... on AbsoluteDestination {
+            absoluteDestination {
+              ...on QuestionPage{
+                id
+                section{
+                  id
+                }
+              }
+              ...on Section{
+                id
+              }
+            }
+          }
+        }
+        conditions {
+          id
+          comparator
+          questionPage {
+            id
+          }
+          answer {
+            id
+          }
+          routingValue {
+            ...on IDValue {
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const getAvailableRoutingDestinations = `
+query QuestionPage($id: ID!) {
+  availableRoutingDestinations(pageId: $id) {
+    ... on AvailableRoutingDestinations {
+      logicalDestinations {
+        logicalDestination
+      }
+      questionPages {
+        id
+      }
+      sections {
+        id
+      }
+    }
+  }
+}
+`;
+
+const getQuestionnaire = `
+query QuestionPage($id: ID!) {
+  questionnaire(id: $id) {
+  	id
+    sections{
+      id
+      pages{
+        id
+      }
+    }
+  }
+}
+`;
+
 module.exports = {
   createQuestionnaireMutation,
   createAnswerMutation,
   createOtherMutation,
   deleteOtherMutation,
   getAnswerQuery,
-  getAnswersQuery
+  getAnswersQuery,
+  createRoutingRuleSet,
+  updateRoutingConditionValue,
+  getEntireRoutingStructure,
+  getBasicRoutingQuery,
+  updateRoutingRule,
+  updateCondition,
+  createSectionMutation,
+  createQuestionPageMutation,
+  getAvailableRoutingDestinations,
+  getQuestionnaire,
+  getPageQuery,
+  updateRoutingRuleSet,
+  createRoutingRule,
+  deleteRoutingRule,
+  createRoutingCondition,
+  deleteRoutingCondition,
+  deleteRoutingRuleSet,
+  deletePageMutation,
+  deleteAnswerMutation,
+  deleteOptionMutation,
+  createOptionMutation
 };

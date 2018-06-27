@@ -1,6 +1,8 @@
 const { head, invert, map } = require("lodash/fp");
 const Option = require("../db/Option");
 const mapFields = require("../utils/mapFields");
+const db = require("../db");
+const { handleOptionDeleted } = require("./strategies/routingStrategy");
 const mapping = { AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
@@ -62,10 +64,25 @@ module.exports.update = function update({
     .then(fromDb);
 };
 
-module.exports.remove = function remove(id) {
-  return Option.update(id, { isDeleted: true })
+const deleteOption = async (trx, id) => {
+  const deletedOption = await trx("Options")
+    .where({
+      id: parseInt(id)
+    })
+    .update({
+      isDeleted: true
+    })
+    .returning("*")
     .then(head)
     .then(fromDb);
+
+  await handleOptionDeleted(trx, id);
+
+  return deletedOption;
+};
+
+module.exports.remove = function remove(id) {
+  return db.transaction(trx => deleteOption(trx, id));
 };
 
 module.exports.undelete = function(id) {
