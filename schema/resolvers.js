@@ -254,10 +254,10 @@ const Resolvers = {
   },
 
   RoutingConditionValue: {
-    __resolveType: () => "IDValue"
+    __resolveType: () => "IDArrayValue"
   },
 
-  IDValue: {
+  IDArrayValue: {
     value: ({ conditionId }, args, ctx) =>
       ctx.repositories.Routing.getRoutingConditionValue({ conditionId })
   },

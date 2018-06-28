@@ -104,9 +104,12 @@ function findAllRoutingConditions(where = {}) {
 function getRoutingConditionValue(where = {}) {
   return Routing.findAllRoutingConditionValues()
     .where(toDb(where))
-    .first()
     .then(fromDb)
-    .then(res => get(res, "optionId"));
+    .then(res => {
+      console.log(res);
+
+      return get(res, "optionId");
+    });
 }
 
 function createRoutingRuleSet({ questionPageId }) {

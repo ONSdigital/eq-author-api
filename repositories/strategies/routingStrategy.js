@@ -178,17 +178,14 @@ const updateRoutingConditionValueStrategy = async (
   { conditionId, optionId }
 ) => {
   const table = trx("Routing_ConditionValues");
-  const where = toDb({ conditionId });
+  const where = toDb({ optionId });
   const existing = await table.where(where);
 
   const query = isEmpty(existing)
     ? table.insert(toDb({ conditionId, optionId }))
     : table.where(where).update(toDb({ optionId }));
 
-  return query
-    .returning("*")
-    .then(head)
-    .then(fromDb);
+  return query.returning("*").then(fromDb);
 };
 
 async function getAvailableRoutingDestinations(trx, pageId) {
