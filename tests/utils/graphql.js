@@ -88,7 +88,6 @@ const createAnswerMutation = `
       qCode,
       label,
       type,
-      mandatory
       ... on MultipleChoiceAnswer {
         options {
           id
@@ -146,7 +145,7 @@ const getAnswerQuery = `
       qCode
       label
       type
-      mandatory
+      properties
       ... on MultipleChoiceAnswer {
         options {
           id

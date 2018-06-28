@@ -71,7 +71,6 @@ const createNewAnswer = async ({ id: pageId }, type) => {
     label: `${type} answer`,
     qCode: null,
     type: `${type}`,
-    mandatory: false,
     questionPageId: pageId
   };
 

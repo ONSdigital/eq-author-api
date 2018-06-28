@@ -28,7 +28,10 @@
       "description": "On a scale of 1-5",
       "guidance": "1 being liking cheese, 5 being loving cheese. There is no option for not liking cheese",
       "type": "Integer",
-      "mandatory": true,
+      "properties": {
+        "required": true,
+        "decimals": 1
+      },
       "questionPageId": 1
     },
 
@@ -37,7 +40,10 @@
       "description": "If you could only eat one cheese for the rest of your life, what would it be?",
       "guidance": "Think hard about this, it's a legally binding contract",
       "type": "Integer",
-      "mandatory": true,
+      "properties": {
+        "required": true,
+        "decimals": 0
+      },
       "questionPageId": 1
     }
   ]
