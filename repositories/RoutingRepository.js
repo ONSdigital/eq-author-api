@@ -5,7 +5,7 @@ const mapFields = require("../utils/mapFields");
 
 const {
   updateRoutingConditionStrategy,
-  updateRoutingConditionValueStrategy,
+  toggleConditionOptionStrategy,
   getAvailableRoutingDestinations,
   checkRoutingDestinations,
   createRoutingRuleSetStrategy,
@@ -101,12 +101,11 @@ function findAllRoutingConditions(where = {}) {
     .then(map(fromDb));
 }
 
-function getRoutingConditionValue(where = {}) {
+function findAllRoutingConditionValues(where = {}) {
   return Routing.findAllRoutingConditionValues()
     .where(toDb(where))
-    .first()
-    .then(fromDb)
-    .then(res => get(res, "optionId"));
+    .then(map(fromDb))
+    .then(map("optionId"));
 }
 
 function createRoutingRuleSet({ questionPageId }) {
@@ -137,11 +136,12 @@ function createRoutingCondition(routingCondition) {
   );
 }
 
-const updateRoutingConditionValue = async ({ conditionId, optionId }) =>
+const toggleConditionOption = async ({ conditionId, optionId, checked }) =>
   db.transaction(trx =>
-    updateRoutingConditionValueStrategy(trx, {
+    toggleConditionOptionStrategy(trx, {
       conditionId,
-      optionId
+      optionId,
+      checked
     })
   );
 
@@ -261,11 +261,11 @@ Object.assign(module.exports, {
   findRoutingRuleSetByQuestionPageId,
   findAllRoutingRules,
   findAllRoutingConditions,
-  getRoutingConditionValue,
+  findAllRoutingConditionValues,
   createRoutingRuleSet,
   createRoutingRule,
   createRoutingCondition,
-  updateRoutingConditionValue,
+  toggleConditionOption,
   updateRoutingRuleSet,
   getRoutingDestinations,
   resolveRoutingDestination,

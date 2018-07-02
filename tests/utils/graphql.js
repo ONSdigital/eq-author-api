@@ -194,7 +194,7 @@ query GetPage($id: ID!){
           conditions{
             id
             routingValue{
-              ...on IDValue{
+              ...on IDArrayValue{
                 value
               }
             }
@@ -270,7 +270,7 @@ const createRoutingCondition = `
         id
       }
       routingValue {
-        ... on IDValue {
+        ... on IDArrayValue {
           value
         }
       }
@@ -366,11 +366,11 @@ const deleteRoutingCondition = `
   }
 `;
 
-const updateRoutingConditionValue = `
-  mutation($input: UpdateRoutingConditionValueInput!) {
-    updateRoutingConditionValue (input: $input)
+const toggleConditionOption = `
+  mutation($input: ToggleConditionOptionInput!) {
+    toggleConditionOption (input: $input)
     {
-      ...on IDValue{
+      ...on IDArrayValue{
         value
       }
     }
@@ -434,7 +434,7 @@ query QuestionPage($id: ID!) {
             id
           }
           routingValue {
-            ...on IDValue {
+            ...on IDArrayValue {
               value
             }
           }
@@ -485,7 +485,7 @@ module.exports = {
   getAnswerQuery,
   getAnswersQuery,
   createRoutingRuleSet,
-  updateRoutingConditionValue,
+  toggleConditionOption,
   getEntireRoutingStructure,
   getBasicRoutingQuery,
   updateRoutingRule,

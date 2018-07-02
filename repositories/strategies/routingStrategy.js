@@ -173,17 +173,21 @@ const updateRoutingConditionStrategy = async (
   );
 };
 
-const updateRoutingConditionValueStrategy = async (
+const toggleConditionOptionStrategy = async (
   trx,
-  { conditionId, optionId }
+  { conditionId, optionId, checked }
 ) => {
   const table = trx("Routing_ConditionValues");
-  const where = toDb({ conditionId });
+  const where = toDb({ optionId });
   const existing = await table.where(where);
 
-  const query = isEmpty(existing)
+  if (!isEmpty(existing) && checked) {
+    throw new Error("A condition value already exists");
+  }
+
+  const query = checked
     ? table.insert(toDb({ conditionId, optionId }))
-    : table.where(where).update(toDb({ optionId }));
+    : table.where(toDb({ optionId })).del();
 
   return query
     .returning("*")
@@ -341,7 +345,7 @@ const handleOptionDeleted = (trx, optionId) =>
 Object.assign(module.exports, {
   checkRoutingDestinations,
   getAvailableRoutingDestinations,
-  updateRoutingConditionValueStrategy,
+  toggleConditionOptionStrategy,
   updateRoutingConditionStrategy,
   createRoutingRuleSetStrategy,
   createRoutingRuleStrategy,
