@@ -178,7 +178,7 @@ const toggleConditionOptionStrategy = async (
   { conditionId, optionId, checked }
 ) => {
   const table = trx("Routing_ConditionValues");
-  const where = toDb({ optionId });
+  const where = toDb({ optionId, conditionId });
   const existing = await table.where(where);
 
   if (!isEmpty(existing) && checked) {
