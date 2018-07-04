@@ -12,7 +12,7 @@ const {
   getAnswersQuery,
   createRoutingRuleSet,
   updateRoutingRule,
-  updateRoutingConditionValue,
+  toggleConditionOption,
   getEntireRoutingStructure,
   getBasicRoutingQuery,
   updateCondition,
@@ -27,8 +27,7 @@ const {
   deleteRoutingCondition,
   deletePageMutation,
   deleteAnswerMutation,
-  deleteOptionMutation,
-  createOptionMutation
+  deleteOptionMutation
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -79,17 +78,6 @@ const createNewAnswer = async ({ id: pageId }, type) => {
   const result = await executeQuery(createAnswerMutation, { input }, ctx);
   return result.data.createAnswer;
 };
-
-const createOption = async answerId =>
-  executeQuery(
-    createOptionMutation,
-    {
-      input: {
-        answerId
-      }
-    },
-    ctx
-  );
 
 const createNewOtherMutation = async answer =>
   executeQuery(
@@ -240,16 +228,18 @@ const deleteRoutingConditionMutation = async input =>
     ctx
   );
 
-const updateRoutingConditionValueMutation = async (
+const toggleConditionOptionMutation = async (
   conditionId,
+  checked,
   optionId = null
 ) =>
   executeQuery(
-    updateRoutingConditionValue,
+    toggleConditionOption,
     {
       input: {
         conditionId,
-        optionId
+        optionId,
+        checked
       }
     },
     ctx
@@ -287,8 +277,9 @@ const createFullRoutingTree = async firstPage => {
 
   const answer = await createNewAnswer(firstPage, "Checkbox");
 
-  const routingConditionValue = await updateRoutingConditionValueMutation(
+  const routingConditionValue = await toggleConditionOptionMutation(
     routingConditionId,
+    true,
     first(answer.options).id
   ).then(res => res.data);
 
@@ -546,11 +537,15 @@ describe("resolvers", () => {
     );
 
     expect(routingConditions).toHaveLength(1);
-    expect(get(first(routingConditions), "routingValue.value")).toEqual(
+    expect(get(first(routingConditions), "routingValue.value[0]")).toEqual(
       get(routingTree, "answer.options[0].id")
     );
 
-    await updateRoutingConditionValueMutation(routingTree.routingConditionId);
+    await toggleConditionOptionMutation(
+      routingTree.routingConditionId,
+      false,
+      get(routingTree, "answer.options[0].id")
+    );
 
     routingStructure = await getFullRoutingTree(firstPage);
 
@@ -559,14 +554,15 @@ describe("resolvers", () => {
       "data.questionPage.routingRuleSet.routingRules[0].conditions"
     );
 
-    expect(get(first(routingConditions), "routingValue.value")).toBeNull();
+    expect(get(first(routingConditions), "routingValue.value")).toHaveLength(0);
   });
 
   it("should delete routing condition value when answer is updated", async () => {
     const routingTree = await createFullRoutingTree(firstPage);
 
-    await updateRoutingConditionValueMutation(
+    await toggleConditionOptionMutation(
       routingTree.routingConditionId,
+      true,
       first(routingTree.answer.options).id
     );
 
@@ -577,7 +573,7 @@ describe("resolvers", () => {
       "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
     );
 
-    expect(get(routingCondition, "routingValue.value")).toEqual(
+    expect(get(routingCondition, "routingValue.value[0]")).toEqual(
       first(routingTree.answer.options).id
     );
 
@@ -593,7 +589,7 @@ describe("resolvers", () => {
       "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
     );
 
-    expect(get(routingCondition, "routingValue.value")).toBeNull();
+    expect(get(routingCondition, "routingValue.value")).toHaveLength(0);
   });
 
   it("should return available routing destinations", async () => {
@@ -937,15 +933,16 @@ describe("resolvers", () => {
           answerId: answer.id
         });
 
-        await updateRoutingConditionValueMutation(
+        await toggleConditionOptionMutation(
           routingCondition.id,
+          true,
           options[0].id
         );
 
         const beforeDeletion = await getFullRoutingTree(firstPage);
         let conditionValues = get(
           beforeDeletion,
-          "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value[0]"
         );
         expect(conditionValues).toEqual(options[0].id);
 
@@ -956,7 +953,7 @@ describe("resolvers", () => {
           afterDeletion,
           "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue.value"
         );
-        expect(conditionValues).toBeNull();
+        expect(conditionValues).toHaveLength(0);
       });
 
       it("should delete a routing condition for question page", async () => {
@@ -1062,63 +1059,6 @@ describe("resolvers", () => {
         });
 
         expect(res2.errors).toHaveLength(1);
-      });
-
-      describe("routing condition values", () => {
-        it("should only be possible to select one option per condition", async () => {
-          // Given a checkbox with two options 1 and 2
-          // When I toggle the first option
-          // Then the routing condition value should be equal to the first option Id
-          // When I toggle the second option
-          // Then the routing condition value should equal the second option Id
-
-          const routingTree = await createFullRoutingTree(firstPage);
-          const checkboxAnswer = get(routingTree, "answer");
-          const option1 = first(checkboxAnswer.options);
-          const option2 = await createOption(checkboxAnswer.id).then(
-            res => res.data.createOption
-          );
-          const { routingConditionId } = routingTree;
-
-          const res = await updateRoutingConditionValueMutation(
-            routingConditionId,
-            option1.id
-          );
-
-          expect(res).toMatchObject({
-            data: {
-              updateRoutingConditionValue: {
-                value: option1.id
-              }
-            }
-          });
-
-          const res2 = await updateRoutingConditionValueMutation(
-            routingConditionId,
-            option2.id
-          );
-
-          expect(res2).toMatchObject({
-            data: {
-              updateRoutingConditionValue: {
-                value: option2.id
-              }
-            }
-          });
-        });
-
-        it("should unset an routing condition answer by setting optionId to null", async () => {
-          const routingTree = await createFullRoutingTree(firstPage);
-          const { routingConditionId } = routingTree;
-          const result = await updateRoutingConditionValueMutation(
-            routingConditionId
-          );
-          expect(result.data).toMatchObject({
-            updateRoutingConditionValue: {
-              value: null
-            }
-          });
-        });
       });
     });
   });

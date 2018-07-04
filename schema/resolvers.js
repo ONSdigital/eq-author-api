@@ -169,8 +169,8 @@ const Resolvers = {
       ctx.repositories.Routing.updateRoutingCondition(args.input),
     deleteRoutingCondition: (_, args, ctx) =>
       ctx.repositories.Routing.removeRoutingCondition(args.input),
-    updateRoutingConditionValue: async (_, args, ctx) =>
-      ctx.repositories.Routing.updateRoutingConditionValue(args.input)
+    toggleConditionOption: async (_, args, ctx) =>
+      ctx.repositories.Routing.toggleConditionOption(args.input)
   },
 
   Questionnaire: {
@@ -254,12 +254,12 @@ const Resolvers = {
   },
 
   RoutingConditionValue: {
-    __resolveType: () => "IDValue"
+    __resolveType: () => "IDArrayValue"
   },
 
-  IDValue: {
+  IDArrayValue: {
     value: ({ conditionId }, args, ctx) =>
-      ctx.repositories.Routing.getRoutingConditionValue({ conditionId })
+      ctx.repositories.Routing.findAllRoutingConditionValues({ conditionId })
   },
 
   RoutingDestination: {
