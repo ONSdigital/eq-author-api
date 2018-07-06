@@ -83,6 +83,7 @@ const getSectionDestinations = (trx, { id, questionnaireId }) =>
     .select("*")
     .where(toDb({ questionnaireId, isDeleted: false }))
     .where("id", ">", id)
+    .orderBy("created_at", "asc")
     .then(map(fromDb));
 
 const findRoutingRuleSet = (trx, questionPageId) =>
