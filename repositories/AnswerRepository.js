@@ -1,10 +1,36 @@
-const { head, invert, map } = require("lodash/fp");
+const {
+  flow,
+  head,
+  isBoolean,
+  isObject,
+  invert,
+  map,
+  omit
+} = require("lodash/fp");
+const { get, merge } = require("lodash");
+const db = require("../db");
 const Answer = require("../db/Answer");
 const mapFields = require("../utils/mapFields");
 const mapping = { QuestionPageId: "questionPageId" };
-const fromDb = mapFields(mapping);
-const toDb = mapFields(invert(mapping));
-const db = require("../db");
+
+const handleDeprecatedMandatoryFieldFromDb = answer =>
+  isObject(answer)
+    ? merge({}, answer, { mandatory: get(answer, "properties.required") })
+    : answer;
+
+const handleDeprecatedMandatoryFieldToDb = answer =>
+  isBoolean(answer.mandatory)
+    ? merge({}, answer, { properties: { required: answer.mandatory } })
+    : answer;
+
+const fromDb = flow(mapFields(mapping), handleDeprecatedMandatoryFieldFromDb);
+
+const toDb = flow(
+  mapFields(invert(mapping)),
+  handleDeprecatedMandatoryFieldToDb,
+  omit("mandatory")
+);
+
 const {
   createOtherAnswer,
   deleteOtherAnswer
@@ -38,6 +64,7 @@ module.exports.insert = function insert({
   qCode,
   type,
   mandatory,
+  properties,
   questionPageId
 }) {
   return Answer.create(
@@ -49,6 +76,7 @@ module.exports.insert = function insert({
       qCode,
       type,
       mandatory,
+      properties,
       questionPageId
     })
   )
@@ -64,21 +92,26 @@ module.exports.update = function update({
   secondaryLabel,
   qCode,
   type,
-  mandatory,
   isDeleted,
-  parentAnswerId
+  parentAnswerId,
+  mandatory,
+  properties
 }) {
-  return Answer.update(id, {
-    description,
-    guidance,
-    label,
-    secondaryLabel,
-    qCode,
-    type,
-    mandatory,
-    isDeleted,
-    parentAnswerId
-  })
+  return Answer.update(
+    id,
+    toDb({
+      description,
+      guidance,
+      label,
+      secondaryLabel,
+      qCode,
+      type,
+      isDeleted,
+      parentAnswerId,
+      mandatory,
+      properties
+    })
+  )
     .then(head)
     .then(fromDb);
 };

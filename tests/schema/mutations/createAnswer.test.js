@@ -11,7 +11,6 @@ describe("createAnswer", () => {
         qCode,
         label,
         type,
-        mandatory
         ... on MultipleChoiceAnswer {
           options {
             id
@@ -42,8 +41,14 @@ describe("createAnswer", () => {
       description: "Test answer description",
       guidance: "Test answer guidance",
       type: "TextField",
-      mandatory: false,
       questionPageId: "1"
+    };
+
+    const repoInput = {
+      ...input,
+      properties: {
+        required: false
+      }
     };
 
     const result = await executeQuery(
@@ -53,10 +58,10 @@ describe("createAnswer", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.insert).toHaveBeenCalledWith(input);
+    expect(repositories.Answer.insert).toHaveBeenCalledWith(repoInput);
   });
 
-  describe("multiple choice answers", () => {
+  describe("answer types", () => {
     let repositories;
 
     beforeEach(() => {
@@ -82,32 +87,57 @@ describe("createAnswer", () => {
           description: "Test answer description",
           guidance: "Test answer guidance",
           type: answerType,
-          mandatory: false,
           questionPageId: "1"
         }
       };
     };
 
-    it("should add a single default option for checkbox answers", async () => {
-      const fixture = createFixture("Checkbox");
+    describe("number answers", () => {
+      it("should add default properties", async () => {
+        const fixture = createFixture("Number");
 
-      const result = await executeQuery(createAnswer, fixture, {
-        repositories
+        const result = await executeQuery(createAnswer, fixture, {
+          repositories
+        });
+
+        const expectedInput = {
+          description: "Test answer description",
+          guidance: "Test answer guidance",
+          type: "Number",
+          questionPageId: "1",
+          properties: {
+            required: false,
+            decimals: 0
+          }
+        };
+
+        expect(result.errors).toBeUndefined();
+        expect(repositories.Answer.insert).toHaveBeenCalledWith(expectedInput);
       });
-
-      expect(result.errors).toBeUndefined();
-      expect(repositories.Option.insert).toHaveBeenCalledTimes(1);
     });
 
-    it("should create two default options for radio answers", async () => {
-      const fixture = createFixture("Radio");
+    describe("multiple choice answers", () => {
+      it("should add a single default option for checkbox answers", async () => {
+        const fixture = createFixture("Checkbox");
 
-      const result = await executeQuery(createAnswer, fixture, {
-        repositories
+        const result = await executeQuery(createAnswer, fixture, {
+          repositories
+        });
+
+        expect(result.errors).toBeUndefined();
+        expect(repositories.Option.insert).toHaveBeenCalledTimes(1);
       });
 
-      expect(result.errors).toBeUndefined();
-      expect(repositories.Option.insert).toHaveBeenCalledTimes(2);
+      it("should create two default options for radio answers", async () => {
+        const fixture = createFixture("Radio");
+
+        const result = await executeQuery(createAnswer, fixture, {
+          repositories
+        });
+
+        expect(result.errors).toBeUndefined();
+        expect(repositories.Option.insert).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });

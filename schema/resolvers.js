@@ -1,5 +1,6 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes, isNil } = require("lodash");
+const { merge, includes, isNil } = require("lodash");
+const GraphQLJSON = require("graphql-type-json");
 const formatRichText = require("../utils/formatRichText");
 
 const whereIn = (field, values) => {
@@ -13,6 +14,17 @@ const assertMultipleChoiceAnswer = answer => {
     throw new Error(
       `Answer with id '${answer.id}' must be a Checkbox or Radio.`
     );
+  }
+};
+
+const getDefaultAnswerProperties = type => {
+  switch (type) {
+    case "Currency":
+      return { required: false, decimals: 0 };
+    case "Number":
+      return { required: false, decimals: 0 };
+    default:
+      return { required: false };
   }
 };
 
@@ -92,7 +104,9 @@ const Resolvers = {
       ctx.repositories.QuestionPage.undelete(args.input.id),
 
     createAnswer: async (root, args, ctx) => {
-      const answer = await ctx.repositories.Answer.insert(args.input);
+      const defaultProperties = getDefaultAnswerProperties(args.input.type);
+      const input = merge({}, args.input, { properties: defaultProperties });
+      const answer = await ctx.repositories.Answer.insert(input);
 
       if (answer.type === "Checkbox" || answer.type === "Radio") {
         const defaultOptions = [];
@@ -325,6 +339,8 @@ const Resolvers = {
     answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
   },
 
-  Date: GraphQLDate
+  Date: GraphQLDate,
+
+  JSON: GraphQLJSON
 };
 module.exports = Resolvers;

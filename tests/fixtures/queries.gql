@@ -176,7 +176,6 @@ mutation CreateAnswer(
   $qCode: String
   $label: String
   $type: AnswerType!
-  $mandatory: Boolean!
   $questionPageId: Int!
 ) {
   createAnswer(
@@ -185,7 +184,6 @@ mutation CreateAnswer(
     qCode: $qCode
     label: $label
     type: $type
-    mandatory: $mandatory
     questionPageId: $questionPageId
   ) {
     id
@@ -199,7 +197,7 @@ mutation UpdateAnswer(
   $qCode: String
   $label: String
   $type: AnswerType
-  $mandatory: Boolean
+  $properties: JSON
 ) {
   updateAnswer(
     id: $id
@@ -208,10 +206,10 @@ mutation UpdateAnswer(
     qCode: $qCode
     label: $label
     type: $type
-    mandatory: $mandatory
+    properties: $properties
   ) {
     id
-    mandatory
+    properties
   }
 }
 

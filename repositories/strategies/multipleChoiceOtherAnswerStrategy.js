@@ -8,7 +8,7 @@ const findOtherAnswer = async (trx, parentAnswerId) =>
 const createAnswer = async (trx, parentAnswerId, type) =>
   trx("Answers")
     .insert({
-      mandatory: false,
+      properties: { required: true },
       description: "",
       type,
       parentAnswerId
