@@ -1,4 +1,5 @@
 const { head, isNil } = require("lodash/fp");
+const getDefaultAnswerProperties = require("../../utils/defaultAnswerProperties");
 
 const findOtherAnswer = async (trx, parentAnswerId) =>
   trx("Answers")
@@ -8,7 +9,7 @@ const findOtherAnswer = async (trx, parentAnswerId) =>
 const createAnswer = async (trx, parentAnswerId, type) =>
   trx("Answers")
     .insert({
-      properties: { required: true },
+      properties: getDefaultAnswerProperties(type),
       description: "",
       type,
       parentAnswerId
