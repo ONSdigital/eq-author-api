@@ -2,6 +2,7 @@ const { GraphQLDate } = require("graphql-iso-date");
 const { merge, includes, isNil } = require("lodash");
 const GraphQLJSON = require("graphql-type-json");
 const formatRichText = require("../utils/formatRichText");
+const getDefaultAnswerProperties = require("../utils/defaultAnswerProperties");
 
 const whereIn = (field, values) => {
   return function() {
@@ -14,17 +15,6 @@ const assertMultipleChoiceAnswer = answer => {
     throw new Error(
       `Answer with id '${answer.id}' must be a Checkbox or Radio.`
     );
-  }
-};
-
-const getDefaultAnswerProperties = type => {
-  switch (type) {
-    case "Currency":
-      return { required: false, decimals: 0 };
-    case "Number":
-      return { required: false, decimals: 0 };
-    default:
-      return { required: false };
   }
 };
 
