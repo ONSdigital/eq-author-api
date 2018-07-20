@@ -4,12 +4,14 @@ const db = require("../db");
 const executeQuery = require("../tests/utils/executeQuery");
 const {
   createQuestionnaireMutation,
+  getPipableAnswersQuery,
   createAnswerMutation,
   createOtherMutation,
   deleteOtherMutation,
   getAnswerQuery,
   getPageQuery,
   getAnswersQuery,
+  updateAnswerMutation,
   createRoutingRuleSet,
   updateRoutingRule,
   toggleConditionOption,
@@ -106,6 +108,15 @@ const deleteQuestionPage = async input =>
     deletePageMutation,
     {
       input
+    },
+    ctx
+  );
+
+const updateAnswer = async args =>
+  executeQuery(
+    updateAnswerMutation,
+    {
+      input: args
     },
     ctx
   );
@@ -315,6 +326,66 @@ describe("resolvers", () => {
     sections = questionnaire.sections;
     pages = first(sections).pages;
     firstPage = first(pages);
+  });
+
+  it("should split a date range answer into child answers on retrieval", async () => {
+    const dateRangeAnswer = await createNewAnswer(firstPage, "DateRange");
+
+    const result = await executeQuery(
+      getAnswerQuery,
+      { id: dateRangeAnswer.id },
+      ctx
+    );
+
+    const childAnswers = get(result, "data.answer.childAnswers");
+
+    expect(childAnswers).toEqual([
+      { id: `${dateRangeAnswer.id}from`, label: "DateRange answer" },
+      { id: `${dateRangeAnswer.id}to`, label: null }
+    ]);
+  });
+
+  it("should return a composite and basic answer in the correct shapes", async () => {
+    const dateRange = await createNewAnswer(firstPage, "DateRange");
+    const textField = await createNewAnswer(firstPage, "TextField");
+
+    const result = await executeQuery(
+      getPipableAnswersQuery,
+      { ids: [dateRange.id, textField.id] },
+      ctx
+    );
+
+    const answers = get(result, "data.answers");
+
+    expect(answers).toHaveLength(2);
+    expect(answers[0]).toHaveProperty("childAnswers");
+    expect(answers[1].childAnswers).toBeUndefined();
+  });
+
+  it("should re-combine a composite answer in the db", async () => {
+    const dateRangeAnswer = await createNewAnswer(firstPage, "DateRange");
+
+    await updateAnswer({
+      id: `${dateRangeAnswer.id}from`,
+      label: "This is the from"
+    });
+    await updateAnswer({
+      id: `${dateRangeAnswer.id}to`,
+      label: "This is the to"
+    });
+
+    const result = await executeQuery(
+      getAnswerQuery,
+      { id: dateRangeAnswer.id },
+      ctx
+    );
+
+    const childAnswers = get(result, "data.answer.childAnswers");
+
+    expect(childAnswers).toEqual([
+      { id: `${dateRangeAnswer.id}from`, label: "This is the from" },
+      { id: `${dateRangeAnswer.id}to`, label: "This is the to" }
+    ]);
   });
 
   it("should create other answer for Checkbox answers", async () => {

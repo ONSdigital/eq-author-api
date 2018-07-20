@@ -54,6 +54,6 @@ describe("option query", () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Option.get).toHaveBeenCalledWith(id);
-    expect(repositories.Answer.get).toHaveBeenCalledWith(answerId);
+    expect(repositories.Answer.getById).toHaveBeenCalledWith(answerId);
   });
 });

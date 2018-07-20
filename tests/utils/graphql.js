@@ -146,6 +146,12 @@ const getAnswerQuery = `
       label
       type
       properties
+      ...on CompositeAnswer{
+            childAnswers{
+              id
+              label
+            }
+          }
       ... on MultipleChoiceAnswer {
         options {
           id
@@ -172,10 +178,36 @@ const getAnswersQuery = `
         answers {
           id
           type
+          ...on CompositeAnswer{
+            childAnswers{
+              id
+              label
+            }
+          }
         }
       }
     }
   }
+`;
+
+const getPipableAnswersQuery = `
+  query GetAnswers($ids: [ID]!) {
+    answers(ids: $ids) {
+      id
+      description
+      guidance
+      label
+      type
+      properties
+          ...on CompositeAnswer{
+            childAnswers{
+              id
+              label
+            }
+          }
+        }
+      }
+
 `;
 
 const getBasicRoutingQuery = `
@@ -476,7 +508,28 @@ query QuestionPage($id: ID!) {
 }
 `;
 
+const updateAnswerMutation = `
+mutation UpdateAnswer($input: UpdateAnswerInput!) {
+  updateAnswer(input: $input) {
+    id,
+    description,
+    guidance,
+    qCode,
+    label,
+    type,
+    mandatory
+    ...on CompositeAnswer{
+      childAnswers{
+        id 
+        label
+      }
+    }
+  }
+}
+`;
+
 module.exports = {
+  getPipableAnswersQuery,
   createQuestionnaireMutation,
   createAnswerMutation,
   createOtherMutation,
@@ -486,6 +539,7 @@ module.exports = {
   createRoutingRuleSet,
   toggleConditionOption,
   getEntireRoutingStructure,
+  updateAnswerMutation,
   getBasicRoutingQuery,
   updateRoutingRule,
   updateCondition,
