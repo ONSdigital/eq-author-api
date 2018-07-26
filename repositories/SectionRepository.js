@@ -17,7 +17,7 @@ module.exports.findAll = function findAll(
     .then(map(fromDb));
 };
 
-module.exports.get = function get(id) {
+module.exports.getById = function getById(id) {
   return Section.findById(id)
     .where({ isDeleted: false })
     .then(fromDb);

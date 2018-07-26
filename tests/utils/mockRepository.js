@@ -1,6 +1,5 @@
 module.exports = function mockRepository(returnValues = {}) {
   return {
-    get: jest.fn(() => returnValues.get),
     getById: jest.fn(() => returnValues.getById),
     getAnswers: jest.fn(() => returnValues.getAnswers),
     findAll: jest.fn(() => returnValues.findAll),

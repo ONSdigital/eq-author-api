@@ -16,14 +16,14 @@ const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
     questionnaire: (root, { id }, ctx) =>
-      ctx.repositories.Questionnaire.get(id),
-    section: (parent, { id }, ctx) => ctx.repositories.Section.get(id),
-    page: (parent, { id }, ctx) => ctx.repositories.Page.get(id),
-    questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.get(id),
+      ctx.repositories.Questionnaire.getById(id),
+    section: (parent, { id }, ctx) => ctx.repositories.Section.getById(id),
+    page: (parent, { id }, ctx) => ctx.repositories.Page.getById(id),
+    questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.getById(id),
     answer: (root, { id }, ctx) => ctx.repositories.Answer.getById(id),
     answers: async (root, { ids }, ctx) =>
       ctx.repositories.Answer.getAnswers(ids),
-    option: (root, { id }, ctx) => ctx.repositories.Option.get(id),
+    option: (root, { id }, ctx) => ctx.repositories.Option.getById(id),
     availableRoutingDestinations: (root, { pageId }, ctx) =>
       ctx.repositories.Routing.getRoutingDestinations(pageId)
   },
@@ -181,7 +181,7 @@ const Resolvers = {
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ SectionId: section.id }),
     questionnaire: (section, args, ctx) =>
-      ctx.repositories.Questionnaire.get(section.questionnaireId),
+      ctx.repositories.Questionnaire.getById(section.questionnaireId),
     title: (page, args) => formatRichText(page.title, args.format)
   },
 
@@ -202,7 +202,7 @@ const Resolvers = {
         QuestionPageId: id
       }),
     section: ({ sectionId }, args, ctx) => {
-      return ctx.repositories.Section.get(sectionId);
+      return ctx.repositories.Section.getById(sectionId);
     },
     position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx),
     routingRuleSet: ({ id: QuestionPageId }, args, ctx) =>
@@ -219,7 +219,7 @@ const Resolvers = {
       });
     },
     questionPage: ({ questionPageId }, args, ctx) => {
-      return ctx.repositories.Page.get(questionPageId);
+      return ctx.repositories.Page.getById(questionPageId);
     },
     else: ({ routingDestinationId }, args, ctx) =>
       ctx.repositories.Routing.getRoutingDestination(routingDestinationId)
@@ -244,7 +244,7 @@ const Resolvers = {
     questionPage: ({ questionPageId }, args, ctx) => {
       return isNil(questionPageId)
         ? null
-        : ctx.repositories.Page.get(questionPageId);
+        : ctx.repositories.Page.getById(questionPageId);
     },
     answer: ({ answerId }, args, ctx) => {
       return isNil(answerId) ? null : ctx.repositories.Answer.getById(answerId);
@@ -296,19 +296,19 @@ const Resolvers = {
 
   BasicAnswer: {
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.get(answer.questionPageId)
+      ctx.repositories.QuestionPage.getById(answer.questionPageId)
   },
 
   CompositeAnswer: {
     childAnswers: (answer, args, ctx) =>
       ctx.repositories.Answer.splitComposites(answer),
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.get(answer.questionPageId)
+      ctx.repositories.QuestionPage.getById(answer.questionPageId)
   },
 
   MultipleChoiceAnswer: {
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.get(answer.questionPageId),
+      ctx.repositories.QuestionPage.getById(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
     other: async ({ id }, args, ctx) => {

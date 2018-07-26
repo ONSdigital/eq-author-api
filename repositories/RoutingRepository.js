@@ -238,12 +238,12 @@ const getRoutingDestination = async routingDestinationId => {
   }
 
   if (destination.sectionId) {
-    const section = await SectionRepository.get(destination.sectionId);
+    const section = await SectionRepository.getById(destination.sectionId);
     return section ? { absoluteDestination: section } : null;
   }
 
   if (destination.pageId) {
-    const page = await PageRepository.get(destination.pageId);
+    const page = await PageRepository.getById(destination.pageId);
     return page ? { absoluteDestination: page } : null;
   }
 

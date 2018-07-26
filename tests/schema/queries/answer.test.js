@@ -76,6 +76,8 @@ describe("answer query", () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Answer.getById).toHaveBeenCalledWith(id);
-    expect(repositories.QuestionPage.get).toHaveBeenCalledWith(questionPageId);
+    expect(repositories.QuestionPage.getById).toHaveBeenCalledWith(
+      questionPageId
+    );
   });
 });

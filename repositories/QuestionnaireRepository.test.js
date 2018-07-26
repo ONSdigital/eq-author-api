@@ -34,7 +34,7 @@ describe("QuestionnaireRepository", () => {
 
     const { id } = await QuestionnaireRepository.insert(questionnaire);
 
-    const result = await QuestionnaireRepository.get(id);
+    const result = await QuestionnaireRepository.getById(id);
 
     expect(result.id).toBe(id);
     expect(result).toMatchObject(questionnaire);
@@ -60,7 +60,7 @@ describe("QuestionnaireRepository", () => {
     const { id } = await QuestionnaireRepository.insert(buildQuestionnaire());
 
     await QuestionnaireRepository.remove(id);
-    const result = await QuestionnaireRepository.get(id);
+    const result = await QuestionnaireRepository.getById(id);
 
     expect(result).toBeUndefined();
   });

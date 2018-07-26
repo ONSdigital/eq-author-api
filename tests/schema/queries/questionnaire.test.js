@@ -38,7 +38,7 @@ describe("questionnaire query", () => {
   beforeEach(() => {
     repositories = {
       Questionnaire: mockRepository({
-        get: { id, createdBy: "foo" }
+        getById: { id, createdBy: "foo" }
       }),
       Section: mockRepository()
     };
@@ -48,7 +48,7 @@ describe("questionnaire query", () => {
     const result = await executeQuery(questionnaire, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
+    expect(repositories.Questionnaire.getById).toHaveBeenCalledWith(id);
     expect(repositories.Section.findAll).not.toHaveBeenCalled();
   });
 
@@ -60,7 +60,7 @@ describe("questionnaire query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Questionnaire.get).toHaveBeenCalledWith(id);
+    expect(repositories.Questionnaire.getById).toHaveBeenCalledWith(id);
     expect(repositories.Section.findAll).toHaveBeenCalledWith({
       QuestionnaireId: id
     });
