@@ -82,7 +82,7 @@ describe("PagesRepository", () => {
       title: "updated title",
       pageType: "QuestionPage"
     });
-    const updated = await PageRepository.get(result.id);
+    const updated = await PageRepository.getById(result.id);
 
     expect(updated.title).not.toEqual(result.title);
   });
@@ -94,7 +94,7 @@ describe("PagesRepository", () => {
     );
 
     await PageRepository.remove(page.id);
-    const result = await PageRepository.get(page.id);
+    const result = await PageRepository.getById(page.id);
 
     expect(result).toBeUndefined();
   });
@@ -109,7 +109,7 @@ describe("PagesRepository", () => {
     await PageRepository.remove(page.id);
     await PageRepository.undelete(page.id);
 
-    const result = await PageRepository.get(page.id);
+    const result = await PageRepository.getById(page.id);
     expect(result).toMatchObject(page);
   });
 

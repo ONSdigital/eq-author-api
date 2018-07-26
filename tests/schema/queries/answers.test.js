@@ -25,23 +25,17 @@ describe("answers query", () => {
   beforeEach(() => {
     repositories = {
       Answer: mockRepository({
-        findAll: answers
+        getAnswers: answers
       })
     };
   });
 
   it("should fetch answers by id", async () => {
     const result = await executeQuery(answer, { ids }, { repositories });
-    const { findAll } = repositories.Answer;
+    const { getAnswers } = repositories.Answer;
 
     expect(result.errors).toBeUndefined();
     expect(result.data.answers).toEqual(answers);
-    expect(findAll).toHaveBeenCalledWith(expect.any(Function));
-
-    // ensure correct knex methods are called
-    const fn = findAll.mock.calls[0][0];
-    const where = jest.fn();
-    fn.call({ where });
-    expect(where).toHaveBeenCalledWith("id", "in", ids);
+    expect(getAnswers).toHaveBeenCalledWith(["1", "2", "3"]);
   });
 });

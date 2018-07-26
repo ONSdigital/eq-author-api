@@ -44,7 +44,7 @@ const deleteOption = async (trx, { id }) =>
     .returning("*")
     .then(head);
 
-const createOtherAnswer = async (trx, { id }) => {
+const createOtherAnswerStrategy = async (trx, { id }) => {
   const existingOtherAnswer = await findOtherAnswer(trx, id);
 
   if (!isNil(existingOtherAnswer)) {
@@ -61,7 +61,7 @@ const createOtherAnswer = async (trx, { id }) => {
   };
 };
 
-const deleteOtherAnswer = async (trx, { id }) => {
+const deleteOtherAnswerStrategy = async (trx, { id }) => {
   const otherAnswer = await findOtherAnswer(trx, id);
 
   if (isNil(otherAnswer)) {
@@ -77,6 +77,6 @@ const deleteOtherAnswer = async (trx, { id }) => {
 };
 
 module.exports = {
-  createOtherAnswer,
-  deleteOtherAnswer
+  createOtherAnswerStrategy,
+  deleteOtherAnswerStrategy
 };

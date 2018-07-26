@@ -5,13 +5,15 @@ const {
   isObject,
   invert,
   map,
-  omit
+  omit,
+  assign
 } = require("lodash/fp");
 const { get, merge } = require("lodash");
 const db = require("../db");
 const Answer = require("../db/Answer");
 const mapFields = require("../utils/mapFields");
 const mapping = { QuestionPageId: "questionPageId" };
+const childAnswerParser = require("../utils/childAnswerParser");
 
 const handleDeprecatedMandatoryFieldFromDb = answer =>
   isObject(answer)
@@ -23,7 +25,10 @@ const handleDeprecatedMandatoryFieldToDb = answer =>
     ? merge({}, answer, { properties: { required: answer.mandatory } })
     : answer;
 
-const fromDb = flow(mapFields(mapping), handleDeprecatedMandatoryFieldFromDb);
+const fromDb = flow(
+  mapFields(mapping),
+  handleDeprecatedMandatoryFieldFromDb
+);
 
 const toDb = flow(
   mapFields(invert(mapping)),
@@ -32,31 +37,25 @@ const toDb = flow(
 );
 
 const {
-  createOtherAnswer,
-  deleteOtherAnswer
+  createOtherAnswerStrategy,
+  deleteOtherAnswerStrategy
 } = require("./strategies/multipleChoiceOtherAnswerStrategy");
 
 const { handleAnswerDeleted } = require("./strategies/routingStrategy");
 
-module.exports.findAll = function findAll(
-  where = {},
-  orderBy = "created_at",
-  direction = "asc"
-) {
-  return Answer.findAll()
+const findAll = (where = {}, orderBy = "created_at", direction = "asc") =>
+  Answer.findAll()
     .where({ isDeleted: false, parentAnswerId: null })
     .where(where)
     .orderBy(orderBy, direction)
     .then(map(fromDb));
-};
 
-module.exports.get = function get(id) {
-  return Answer.findById(id)
+const getById = id =>
+  Answer.findById(id)
     .where({ isDeleted: false })
     .then(fromDb);
-};
 
-module.exports.insert = function insert({
+const insert = ({
   description,
   guidance,
   label,
@@ -66,8 +65,8 @@ module.exports.insert = function insert({
   mandatory,
   properties,
   questionPageId
-}) {
-  return Answer.create(
+}) =>
+  Answer.create(
     toDb({
       description,
       guidance,
@@ -82,9 +81,8 @@ module.exports.insert = function insert({
   )
     .then(head)
     .then(fromDb);
-};
 
-module.exports.update = function update({
+const update = ({
   id,
   description,
   guidance,
@@ -96,7 +94,11 @@ module.exports.update = function update({
   parentAnswerId,
   mandatory,
   properties
-}) {
+}) => {
+  if (childAnswerParser(id) === "secondary") {
+    secondaryLabel = label;
+    label = undefined;
+  }
   return Answer.update(
     id,
     toDb({
@@ -131,34 +133,83 @@ const deleteAnswer = async (trx, id) => {
   return deletedAnswer;
 };
 
-module.exports.remove = function remove(id) {
-  return db.transaction(trx => deleteAnswer(trx, id));
-};
+const remove = id => db.transaction(trx => deleteAnswer(trx, id));
 
-module.exports.undelete = function(id) {
-  return Answer.update(id, { isDeleted: false })
+const undelete = id =>
+  Answer.update(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
-};
 
-module.exports.getOtherAnswer = function(
+const getOtherAnswer = (
   id,
   where = {},
   orderBy = "created_at",
   direction = "asc"
-) {
-  return Answer.findAll()
+) =>
+  Answer.findAll()
     .where({ isDeleted: false, parentAnswerId: id })
     .where(where)
     .orderBy(orderBy, direction)
     .first()
     .then(fromDb);
+
+const createOtherAnswer = ({ id }) => {
+  return db.transaction(trx =>
+    createOtherAnswerStrategy(trx, { id }).then(fromDb)
+  );
 };
 
-module.exports.createOtherAnswer = ({ id }) => {
-  return db.transaction(trx => createOtherAnswer(trx, { id }).then(fromDb));
+const deleteOtherAnswer = ({ id }) => {
+  return db.transaction(trx =>
+    deleteOtherAnswerStrategy(trx, { id }).then(fromDb)
+  );
 };
 
-module.exports.deleteOtherAnswer = ({ id }) => {
-  return db.transaction(trx => deleteOtherAnswer(trx, { id }).then(fromDb));
+const splitComposites = answer => {
+  const firstAnswer = omit("secondaryLabel", answer);
+  const secondAnswer = omit("label", answer);
+  return [
+    assign(firstAnswer, {
+      id: `${answer.id}from`
+    }),
+    assign(secondAnswer, {
+      id: `${answer.id}to`,
+      label: secondAnswer.secondaryLabel
+    })
+  ];
 };
+
+const lookupComposite = async (where = {}) => {
+  return db("CompositeAnswerView")
+    .select("*")
+    .where({ isDeleted: false, parentAnswerId: null })
+    .where(where)
+    .then(head)
+    .then(fromDb);
+};
+
+const getAnswers = async ids => {
+  return Promise.all(
+    ids.map(id => {
+      if (childAnswerParser(id)) {
+        return lookupComposite({ id });
+      } else {
+        return getById(id);
+      }
+    })
+  );
+};
+
+Object.assign(module.exports, {
+  findAll,
+  getById,
+  insert,
+  update,
+  remove,
+  undelete,
+  getOtherAnswer,
+  createOtherAnswer,
+  deleteOtherAnswer,
+  splitComposites,
+  getAnswers
+});

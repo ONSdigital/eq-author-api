@@ -4,7 +4,7 @@ const mapFields = require("../utils/mapFields");
 const mapping = { created_at: "createdAt" }; // eslint-disable-line camelcase
 const fromDb = mapFields(mapping);
 
-module.exports.get = function(id) {
+module.exports.getById = function(id) {
   return Questionnaire.findById(id)
     .where({ isDeleted: false })
     .then(fromDb);

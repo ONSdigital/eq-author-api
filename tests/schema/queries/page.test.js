@@ -28,7 +28,7 @@ describe("Page query", () => {
   beforeEach(() => {
     repositories = {
       Page: mockRepository({
-        get: {
+        getById: {
           id,
           sectionId,
           pageType: "QuestionPage"
@@ -43,7 +43,7 @@ describe("Page query", () => {
     const result = await executeQuery(page, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Page.get).toHaveBeenCalledWith(id);
+    expect(repositories.Page.getById).toHaveBeenCalledWith(id);
     expect(repositories.QuestionPage.findAll).not.toHaveBeenCalled();
   });
 
@@ -55,7 +55,7 @@ describe("Page query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Page.get).toHaveBeenCalledWith(id);
-    expect(repositories.Section.get).toHaveBeenCalledWith(sectionId);
+    expect(repositories.Page.getById).toHaveBeenCalledWith(id);
+    expect(repositories.Section.getById).toHaveBeenCalledWith(sectionId);
   });
 });

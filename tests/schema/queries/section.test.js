@@ -41,7 +41,7 @@ describe("Section query", () => {
   beforeEach(() => {
     repositories = {
       Section: mockRepository({
-        get: {
+        getById: {
           id,
           questionnaireId
         }
@@ -55,7 +55,7 @@ describe("Section query", () => {
     const result = await executeQuery(section, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Section.get).toHaveBeenCalledWith(id);
+    expect(repositories.Section.getById).toHaveBeenCalledWith(id);
     expect(repositories.Page.findAll).not.toHaveBeenCalled();
   });
 
@@ -67,7 +67,7 @@ describe("Section query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Section.get).toHaveBeenCalledWith(id);
+    expect(repositories.Section.getById).toHaveBeenCalledWith(id);
     expect(repositories.Page.findAll).toHaveBeenCalledWith({ SectionId: id });
   });
 
@@ -79,8 +79,8 @@ describe("Section query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Section.get).toHaveBeenCalledWith(id);
-    expect(repositories.Questionnaire.get).toHaveBeenCalledWith(
+    expect(repositories.Section.getById).toHaveBeenCalledWith(id);
+    expect(repositories.Questionnaire.getById).toHaveBeenCalledWith(
       questionnaireId
     );
   });

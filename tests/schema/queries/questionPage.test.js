@@ -42,7 +42,7 @@ describe("QuestionPage query", () => {
   beforeEach(() => {
     repositories = {
       QuestionPage: mockRepository({
-        get: {
+        getById: {
           id,
           sectionId
         }
@@ -56,7 +56,7 @@ describe("QuestionPage query", () => {
     const result = await executeQuery(questionPage, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.QuestionPage.get).toHaveBeenCalledWith(id);
+    expect(repositories.QuestionPage.getById).toHaveBeenCalledWith(id);
   });
 
   it("should have an association with Answer", async () => {
@@ -67,7 +67,7 @@ describe("QuestionPage query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.QuestionPage.get).toHaveBeenCalledWith(id);
+    expect(repositories.QuestionPage.getById).toHaveBeenCalledWith(id);
     expect(repositories.Answer.findAll).toHaveBeenCalledWith({
       QuestionPageId: id
     });
@@ -81,7 +81,7 @@ describe("QuestionPage query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.QuestionPage.get).toHaveBeenCalledWith(id);
-    expect(repositories.Section.get).toHaveBeenCalledWith(sectionId);
+    expect(repositories.QuestionPage.getById).toHaveBeenCalledWith(id);
+    expect(repositories.Section.getById).toHaveBeenCalledWith(sectionId);
   });
 });

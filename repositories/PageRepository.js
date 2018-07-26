@@ -97,7 +97,7 @@ function getRoutingDestinations(pageId) {
 
 Object.assign(module.exports, {
   findAll,
-  get: getById,
+  getById,
   insert,
   update,
   remove,

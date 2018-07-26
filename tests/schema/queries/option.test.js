@@ -29,7 +29,7 @@ describe("option query", () => {
   beforeEach(() => {
     repositories = {
       Option: mockRepository({
-        get: {
+        getById: {
           id,
           answerId
         }
@@ -42,7 +42,7 @@ describe("option query", () => {
     const result = await executeQuery(option, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Option.get).toHaveBeenCalledWith(id);
+    expect(repositories.Option.getById).toHaveBeenCalledWith(id);
   });
 
   it("should have an association with Answer", async () => {
@@ -53,7 +53,7 @@ describe("option query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Option.get).toHaveBeenCalledWith(id);
-    expect(repositories.Answer.get).toHaveBeenCalledWith(answerId);
+    expect(repositories.Option.getById).toHaveBeenCalledWith(id);
+    expect(repositories.Answer.getById).toHaveBeenCalledWith(answerId);
   });
 });

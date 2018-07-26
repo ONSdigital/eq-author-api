@@ -41,7 +41,7 @@ describe("answer query", () => {
   beforeEach(() => {
     repositories = {
       Answer: mockRepository({
-        get: {
+        getById: {
           id,
           questionPageId,
           type: "Checkbox"
@@ -56,7 +56,7 @@ describe("answer query", () => {
     const result = await executeQuery(answer, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.get).toHaveBeenCalledWith(id);
+    expect(repositories.Answer.getById).toHaveBeenCalledWith(id);
   });
 
   it("should have an association with Option", async () => {
@@ -67,7 +67,7 @@ describe("answer query", () => {
     );
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.get).toHaveBeenCalledWith(id);
+    expect(repositories.Answer.getById).toHaveBeenCalledWith(id);
     expect(repositories.Option.findAll).toHaveBeenCalledWith({ AnswerId: id });
   });
 
@@ -75,7 +75,9 @@ describe("answer query", () => {
     const result = await executeQuery(answerWithPage, { id }, { repositories });
 
     expect(result.errors).toBeUndefined();
-    expect(repositories.Answer.get).toHaveBeenCalledWith(id);
-    expect(repositories.QuestionPage.get).toHaveBeenCalledWith(questionPageId);
+    expect(repositories.Answer.getById).toHaveBeenCalledWith(id);
+    expect(repositories.QuestionPage.getById).toHaveBeenCalledWith(
+      questionPageId
+    );
   });
 });

@@ -4,12 +4,6 @@ const GraphQLJSON = require("graphql-type-json");
 const formatRichText = require("../utils/formatRichText");
 const getDefaultAnswerProperties = require("../utils/defaultAnswerProperties");
 
-const whereIn = (field, values) => {
-  return function() {
-    this.where("id", "in", values);
-  };
-};
-
 const assertMultipleChoiceAnswer = answer => {
   if (isNil(answer) || !includes(["Checkbox", "Radio"], answer.type)) {
     throw new Error(
@@ -22,14 +16,14 @@ const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
     questionnaire: (root, { id }, ctx) =>
-      ctx.repositories.Questionnaire.get(id),
-    section: (parent, { id }, ctx) => ctx.repositories.Section.get(id),
-    page: (parent, { id }, ctx) => ctx.repositories.Page.get(id),
-    questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.get(id),
-    answer: (root, { id }, ctx) => ctx.repositories.Answer.get(id),
-    answers: (root, { ids }, ctx) =>
-      ctx.repositories.Answer.findAll(whereIn("id", ids)),
-    option: (root, { id }, ctx) => ctx.repositories.Option.get(id),
+      ctx.repositories.Questionnaire.getById(id),
+    section: (parent, { id }, ctx) => ctx.repositories.Section.getById(id),
+    page: (parent, { id }, ctx) => ctx.repositories.Page.getById(id),
+    questionPage: (_, { id }, ctx) => ctx.repositories.QuestionPage.getById(id),
+    answer: (root, { id }, ctx) => ctx.repositories.Answer.getById(id),
+    answers: async (root, { ids }, ctx) =>
+      ctx.repositories.Answer.getAnswers(ids),
+    option: (root, { id }, ctx) => ctx.repositories.Option.getById(id),
     availableRoutingDestinations: (root, { pageId }, ctx) =>
       ctx.repositories.Routing.getRoutingDestinations(pageId)
   },
@@ -137,14 +131,14 @@ const Resolvers = {
     undeleteOption: (_, args, ctx) =>
       ctx.repositories.Option.undelete(args.input.id),
     createOther: async (root, args, ctx) => {
-      const parentAnswer = await ctx.repositories.Answer.get(
+      const parentAnswer = await ctx.repositories.Answer.getById(
         args.input.parentAnswerId
       );
       assertMultipleChoiceAnswer(parentAnswer);
       return ctx.repositories.Answer.createOtherAnswer(parentAnswer);
     },
     deleteOther: async (_, args, ctx) => {
-      const parentAnswer = await ctx.repositories.Answer.get(
+      const parentAnswer = await ctx.repositories.Answer.getById(
         args.input.parentAnswerId
       );
       assertMultipleChoiceAnswer(parentAnswer);
@@ -187,7 +181,7 @@ const Resolvers = {
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ SectionId: section.id }),
     questionnaire: (section, args, ctx) =>
-      ctx.repositories.Questionnaire.get(section.questionnaireId),
+      ctx.repositories.Questionnaire.getById(section.questionnaireId),
     title: (page, args) => formatRichText(page.title, args.format)
   },
 
@@ -208,7 +202,7 @@ const Resolvers = {
         QuestionPageId: id
       }),
     section: ({ sectionId }, args, ctx) => {
-      return ctx.repositories.Section.get(sectionId);
+      return ctx.repositories.Section.getById(sectionId);
     },
     position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx),
     routingRuleSet: ({ id: QuestionPageId }, args, ctx) =>
@@ -225,7 +219,7 @@ const Resolvers = {
       });
     },
     questionPage: ({ questionPageId }, args, ctx) => {
-      return ctx.repositories.Page.get(questionPageId);
+      return ctx.repositories.Page.getById(questionPageId);
     },
     else: ({ routingDestinationId }, args, ctx) =>
       ctx.repositories.Routing.getRoutingDestination(routingDestinationId)
@@ -250,10 +244,10 @@ const Resolvers = {
     questionPage: ({ questionPageId }, args, ctx) => {
       return isNil(questionPageId)
         ? null
-        : ctx.repositories.Page.get(questionPageId);
+        : ctx.repositories.Page.getById(questionPageId);
     },
     answer: ({ answerId }, args, ctx) => {
-      return isNil(answerId) ? null : ctx.repositories.Answer.get(answerId);
+      return isNil(answerId) ? null : ctx.repositories.Answer.getById(answerId);
     }
   },
 
@@ -289,20 +283,32 @@ const Resolvers = {
   },
 
   Answer: {
-    __resolveType: ({ type }) =>
-      includes(["Checkbox", "Radio"], type)
-        ? "MultipleChoiceAnswer"
-        : "BasicAnswer"
+    __resolveType: ({ type }) => {
+      if (includes(["Checkbox", "Radio"], type)) {
+        return "MultipleChoiceAnswer";
+      } else if (includes(["DateRange"], type)) {
+        return "CompositeAnswer";
+      } else {
+        return "BasicAnswer";
+      }
+    }
   },
 
   BasicAnswer: {
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.get(answer.questionPageId)
+      ctx.repositories.QuestionPage.getById(answer.questionPageId)
+  },
+
+  CompositeAnswer: {
+    childAnswers: (answer, args, ctx) =>
+      ctx.repositories.Answer.splitComposites(answer),
+    page: (answer, args, ctx) =>
+      ctx.repositories.QuestionPage.getById(answer.questionPageId)
   },
 
   MultipleChoiceAnswer: {
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.get(answer.questionPageId),
+      ctx.repositories.QuestionPage.getById(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({ AnswerId: answer.id }),
     other: async ({ id }, args, ctx) => {
@@ -326,7 +332,8 @@ const Resolvers = {
   },
 
   Option: {
-    answer: ({ answerId }, args, ctx) => ctx.repositories.Answer.get(answerId)
+    answer: ({ answerId }, args, ctx) =>
+      ctx.repositories.Answer.getById(answerId)
   },
 
   Date: GraphQLDate,
