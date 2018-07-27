@@ -67,6 +67,7 @@ const Resolvers = {
       ctx.repositories.Section.remove(args.input.id),
     undeleteSection: (_, args, ctx) =>
       ctx.repositories.Section.undelete(args.input.id),
+    moveSection: (_, args, ctx) => ctx.repositories.Section.move(args.input),
 
     createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
 
@@ -182,7 +183,13 @@ const Resolvers = {
       ctx.repositories.Page.findAll({ SectionId: section.id }),
     questionnaire: (section, args, ctx) =>
       ctx.repositories.Questionnaire.getById(section.questionnaireId),
-    title: (page, args) => formatRichText(page.title, args.format)
+    title: (page, args) => formatRichText(page.title, args.format),
+    position: ({ position, id }, args, ctx) => {
+      if (position !== undefined) {
+        return position;
+      }
+      return ctx.repositories.Section.getPosition({ id });
+    }
   },
 
   Page: {

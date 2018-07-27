@@ -528,6 +528,16 @@ mutation UpdateAnswer($input: UpdateAnswerInput!) {
 }
 `;
 
+const moveSectionMutation = `
+mutation MoveSection($input: MoveSectionInput!) {
+  moveSection(input: $input) {
+    id
+    position
+    __typename
+  }
+}
+`;
+
 module.exports = {
   getPipableAnswersQuery,
   createQuestionnaireMutation,
@@ -557,5 +567,6 @@ module.exports = {
   deletePageMutation,
   deleteAnswerMutation,
   deleteOptionMutation,
-  createOptionMutation
+  createOptionMutation,
+  moveSectionMutation
 };
