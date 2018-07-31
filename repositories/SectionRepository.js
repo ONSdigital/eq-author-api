@@ -1,42 +1,49 @@
-const { head, invert, map } = require("lodash/fp");
+const { get, head, invert, map, pick } = require("lodash/fp");
 const Section = require("../db/Section");
 const mapFields = require("../utils/mapFields");
 const mapping = { QuestionnaireId: "questionnaireId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
+const db = require("../db");
+const {
+  getOrUpdateOrderForSectionInsert
+} = require("./strategies/spacedOrderStrategy");
 
 module.exports.findAll = function findAll(
   where = {},
-  orderBy = "created_at",
+  orderBy = "position",
   direction = "asc"
 ) {
-  return Section.findAll()
-    .where({ isDeleted: false })
-    .where(where)
+  return db("SectionsView")
+    .select("*")
+    .where(toDb(where))
     .orderBy(orderBy, direction)
     .then(map(fromDb));
 };
 
 module.exports.getById = function getById(id) {
-  return Section.findById(id)
-    .where({ isDeleted: false })
+  return db("SectionsView")
+    .where("id", parseInt(id, 10))
+    .first()
     .then(fromDb);
 };
 
-module.exports.insert = function insert({
-  title,
-  description,
-  questionnaireId
-}) {
-  return Section.create(
-    toDb({
-      title,
-      description,
-      questionnaireId
-    })
-  )
-    .then(head)
-    .then(fromDb);
+module.exports.insert = function insert(args) {
+  const { questionnaireId, position } = args;
+  return db.transaction(trx => {
+    return getOrUpdateOrderForSectionInsert(
+      trx,
+      questionnaireId,
+      null,
+      position
+    )
+      .then(order => Object.assign(args, { order }))
+      .then(pick(["title", "description", "questionnaireId", "order"]))
+      .then(toDb)
+      .then(section => Section.create(section, trx))
+      .then(head)
+      .then(fromDb);
+  });
 };
 
 module.exports.update = function update({ id, title, description, isDeleted }) {
@@ -59,4 +66,18 @@ module.exports.undelete = function(id) {
   return Section.update(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
+};
+
+module.exports.move = function({ id, questionnaireId, position }) {
+  return db.transaction(trx => {
+    return getOrUpdateOrderForSectionInsert(trx, questionnaireId, id, position)
+      .then(order => Section.update(id, toDb({ questionnaireId, order }), trx))
+      .then(head)
+      .then(fromDb)
+      .then(section => Object.assign(section, { position }));
+  });
+};
+
+module.exports.getPosition = function({ id }) {
+  return this.getById(id).then(get("position"));
 };

@@ -4,7 +4,7 @@ const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
 const db = require("../db");
 const {
-  getOrUpdateOrderForInsert
+  getOrUpdateOrderForPageInsert
 } = require("./strategies/spacedOrderStrategy");
 
 const {
@@ -45,7 +45,7 @@ function insert(args) {
   const { sectionId, position } = args;
 
   return db.transaction(trx => {
-    return getOrUpdateOrderForInsert(trx, sectionId, null, position)
+    return getOrUpdateOrderForPageInsert(trx, sectionId, null, position)
       .then(order => Object.assign(args, { order }))
       .then(page => repository.insert(page, trx));
   });
@@ -79,7 +79,7 @@ function undelete(id) {
 
 function move({ id, sectionId, position }) {
   return db.transaction(trx => {
-    return getOrUpdateOrderForInsert(trx, sectionId, id, position)
+    return getOrUpdateOrderForPageInsert(trx, sectionId, id, position)
       .then(order => Page.update(id, toDb({ sectionId, order }), trx))
       .then(head)
       .then(fromDb)

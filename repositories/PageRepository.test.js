@@ -194,9 +194,10 @@ describe("PagesRepository", () => {
     });
 
     it("can move pages between sections", async () => {
-      const { section } = await setup();
+      const { section, questionnaire: { id: questionnaireId } } = await setup();
+
       const section2 = await SectionRepository.insert(
-        buildSection({ title: "Section 2" })
+        buildSection({ title: "Section 2", questionnaireId })
       );
       const results = await createPages(section.id, 3);
 
@@ -214,9 +215,10 @@ describe("PagesRepository", () => {
     });
 
     it("correctly re-orders pages as they're moved between sections", async () => {
-      const { section } = await setup();
+      const { section, questionnaire: { id: questionnaireId } } = await setup();
+
       const section2 = await SectionRepository.insert(
-        buildSection({ title: "Section 2" })
+        buildSection({ title: "Section 2", questionnaireId })
       );
       const results = await createPages(section.id, 3);
 

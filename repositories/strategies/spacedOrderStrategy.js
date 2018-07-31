@@ -15,11 +15,10 @@ const calculateMidPoint = (a, b) => Math.round((a + b) / 2);
 const valuesHaveConverged = (orderBefore, orderAfter) =>
   Math.abs(orderAfter - orderBefore) < 2;
 
-const makeSpaceForInsert = (trx, SectionId, order) =>
-  trx("Pages")
-    .where({ SectionId })
-    .andWhere("order", ">", order)
-    .increment("order", SPACING);
+const getMaxOrder = flow(
+  last,
+  getOr(0, "order")
+);
 
 const getPagesBySection = (trx, SectionId) =>
   trx("PagesView")
@@ -27,32 +26,78 @@ const getPagesBySection = (trx, SectionId) =>
     .where({ SectionId })
     .orderBy("order");
 
-const getMaxOrder = flow(last, getOr(0, "order"));
+const getSectionsByQuestionnaire = (trx, QuestionnaireId) =>
+  trx("SectionsView")
+    .columns("id", "order")
+    .where({ QuestionnaireId })
+    .orderBy("order");
 
-const getOrUpdateOrderForInsert = async (trx, sectionId, id, position) => {
-  const pages = reject({ id }, await getPagesBySection(trx, sectionId));
-  const maxOrder = getMaxOrder(pages) + SPACING;
+const makeSpaceForInsert = (trx, tableName, parentId, order) => {
+  const key = tableName === "Sections" ? "QuestionnaireId" : "SectionId";
+  return trx(tableName)
+    .where({ [key]: parentId })
+    .andWhere("order", ">", order)
+    .increment("order", SPACING);
+};
 
-  position = isNil(position) ? pages.length : clamp(0, pages.length, position);
+const getOrUpdateOrderForInsert = async (
+  trx,
+  collection,
+  type,
+  parentId,
+  position
+) => {
+  const maxOrder = getMaxOrder(collection) + SPACING;
 
-  if (isEmpty(pages)) {
+  position = isNil(position)
+    ? collection.length
+    : clamp(0, collection.length, position);
+
+  if (isEmpty(collection)) {
     return SPACING;
   }
-  if (position === pages.length) {
+  if (position === collection.length) {
     return maxOrder;
   }
 
-  let left = getOr(0, "order", pages[position - 1]);
-  let right = getOr(maxOrder, "order", pages[position]);
+  let left = getOr(0, "order", collection[position - 1]);
+  let right = getOr(maxOrder, "order", collection[position]);
 
   if (valuesHaveConverged(left, right)) {
-    await makeSpaceForInsert(trx, sectionId, left);
+    await makeSpaceForInsert(trx, type, parentId, left);
     right += SPACING;
   }
 
   return calculateMidPoint(left, right);
 };
 
+const getOrUpdateOrderForPageInsert = async (trx, sectionId, id, position) => {
+  const pages = reject({ id }, await getPagesBySection(trx, sectionId));
+
+  return getOrUpdateOrderForInsert(trx, pages, "Pages", sectionId, position);
+};
+
+const getOrUpdateOrderForSectionInsert = async (
+  trx,
+  questionnaireId,
+  id,
+  position
+) => {
+  const sections = reject(
+    { id },
+    await getSectionsByQuestionnaire(trx, questionnaireId)
+  );
+
+  return getOrUpdateOrderForInsert(
+    trx,
+    sections,
+    "Sections",
+    questionnaireId,
+    position
+  );
+};
+
 module.exports = {
-  getOrUpdateOrderForInsert
+  getOrUpdateOrderForPageInsert,
+  getOrUpdateOrderForSectionInsert
 };

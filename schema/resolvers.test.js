@@ -29,7 +29,8 @@ const {
   deleteRoutingCondition,
   deletePageMutation,
   deleteAnswerMutation,
-  deleteOptionMutation
+  deleteOptionMutation,
+  moveSectionMutation
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -680,6 +681,63 @@ describe("resolvers", () => {
     expect(get(destinations, "logicalDestinations")).toHaveLength(2);
     expect(get(destinations, "questionPages")).toHaveLength(2);
     expect(get(destinations, "sections")).toHaveLength(1);
+  });
+
+  it("should reorder section with correct position", async () => {
+    const sectionOne = sections[0];
+    const {
+      data: { createSection: sectionTwo }
+    } = await createSection(questionnaire.id);
+    const {
+      data: { createSection: sectionThree }
+    } = await createSection(questionnaire.id);
+
+    const getSectionsQuery = `
+      query GetQuestionnaire($id: ID!) {
+        questionnaire(id: $id) {
+          id
+          sections{
+            id
+            position
+          }
+        }
+      }
+      `;
+
+    await executeQuery(
+      moveSectionMutation,
+      {
+        input: {
+          id: sectionOne.id,
+          questionnaireId: questionnaire.id,
+          position: 3
+        }
+      },
+      ctx
+    );
+
+    const result = await executeQuery(
+      getSectionsQuery,
+      {
+        id: questionnaire.id
+      },
+      ctx
+    );
+
+    const expected = {
+      data: {
+        questionnaire: {
+          id: questionnaire.id,
+          sections: [
+            { id: sectionTwo.id, position: 0 },
+            { id: sectionThree.id, position: 1 },
+            { id: sectionOne.id, position: 2 }
+          ]
+        }
+      }
+    };
+
+    expect(result).toMatchObject(expected);
   });
 
   describe("routing", () => {
