@@ -740,6 +740,37 @@ describe("resolvers", () => {
     expect(result).toMatchObject(expected);
   });
 
+  it("should get total number of sections", async () => {
+    const getTotalSectionCountQuery = `
+     query GetTotalSectionCount($id: ID!) {
+        questionnaire(id: $id) {
+          questionnaireInfo {
+            totalSectionCount
+          }
+        }
+      }
+      `;
+
+    const result = await executeQuery(
+      getTotalSectionCountQuery,
+      {
+        id: questionnaire.id
+      },
+      ctx
+    );
+
+    const expected = {
+      data: {
+        questionnaire: {
+          questionnaireInfo: {
+            totalSectionCount: 1
+          }
+        }
+      }
+    };
+    expect(result).toMatchObject(expected);
+  });
+
   describe("routing", () => {
     const mutate = async input => createNewRoutingRule(input);
     const newRoutingRule = async input =>

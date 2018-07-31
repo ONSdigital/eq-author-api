@@ -114,6 +114,17 @@ describe("SectionRepository", () => {
     expect(position).toEqual("0");
   });
 
+  it("can get section count ", async () => {
+    const {
+      questionnaire: { id: questionnaireId }
+    } = await setup();
+
+    await SectionRepository.insert(buildSection({ questionnaireId }));
+
+    const count = await SectionRepository.getSectionCount(questionnaireId);
+    expect(count).toEqual("1");
+  });
+
   describe("re-ordering", () => {
     const createSections = (questionnaireId, numberOfPages) => {
       const sections = times(numberOfPages, i =>

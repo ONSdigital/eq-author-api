@@ -81,3 +81,11 @@ module.exports.move = function({ id, questionnaireId, position }) {
 module.exports.getPosition = function({ id }) {
   return this.getById(id).then(get("position"));
 };
+
+module.exports.getSectionCount = function getSectionCount(questionnaireId) {
+  return db("SectionsView")
+    .count()
+    .where({ QuestionnaireId: questionnaireId })
+    .then(head)
+    .then(get("count"));
+};
