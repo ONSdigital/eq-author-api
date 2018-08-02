@@ -175,7 +175,13 @@ const Resolvers = {
   Questionnaire: {
     sections: (questionnaire, args, ctx) =>
       ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
-    createdBy: questionnaire => ({ name: questionnaire.createdBy })
+    createdBy: questionnaire => ({ name: questionnaire.createdBy }),
+    questionnaireInfo: ({ id }) => id
+  },
+
+  QuestionnaireInfo: {
+    totalSectionCount: (questionnaireId, args, ctx) =>
+      ctx.repositories.Section.getSectionCount(questionnaireId)
   },
 
   Section: {
