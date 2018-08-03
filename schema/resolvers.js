@@ -1,8 +1,10 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { merge, includes, isNil } = require("lodash");
+const { includes, isNil } = require("lodash");
 const GraphQLJSON = require("graphql-type-json");
 const formatRichText = require("../utils/formatRichText");
-const getDefaultAnswerProperties = require("../utils/defaultAnswerProperties");
+const {
+  getValidationEntity
+} = require("../repositories/strategies/validationStrategy");
 
 const assertMultipleChoiceAnswer = answer => {
   if (isNil(answer) || !includes(["Checkbox", "Radio"], answer.type)) {
@@ -87,36 +89,8 @@ const Resolvers = {
     undeleteQuestionPage: (_, args, ctx) =>
       ctx.repositories.QuestionPage.undelete(args.input.id),
 
-    createAnswer: async (root, args, ctx) => {
-      const defaultProperties = getDefaultAnswerProperties(args.input.type);
-      const input = merge({}, args.input, { properties: defaultProperties });
-      const answer = await ctx.repositories.Answer.insert(input);
-
-      if (answer.type === "Checkbox" || answer.type === "Radio") {
-        const defaultOptions = [];
-        const defaultOption = {
-          label: "",
-          description: "",
-          value: "",
-          qCode: "",
-          answerId: answer.id
-        };
-
-        defaultOptions.push(defaultOption);
-
-        if (answer.type === "Radio") {
-          defaultOptions.push(defaultOption);
-        }
-
-        const promises = defaultOptions.map(it =>
-          Resolvers.Mutation.createOption(root, { input: it }, ctx)
-        );
-
-        await Promise.all(promises);
-      }
-
-      return answer;
-    },
+    createAnswer: (root, args, ctx) =>
+      ctx.repositories.Answer.createAnswer(args, ctx),
     updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args.input),
     deleteAnswer: (_, args, ctx) =>
       ctx.repositories.Answer.remove(args.input.id),
@@ -168,7 +142,11 @@ const Resolvers = {
     deleteRoutingCondition: (_, args, ctx) =>
       ctx.repositories.Routing.removeRoutingCondition(args.input),
     toggleConditionOption: async (_, args, ctx) =>
-      ctx.repositories.Routing.toggleConditionOption(args.input)
+      ctx.repositories.Routing.toggleConditionOption(args.input),
+    toggleValidationRule: (_, args, ctx) =>
+      ctx.repositories.Validation.toggleValidationRule(args.input),
+    updateValidationRule: (_, args, ctx) =>
+      ctx.repositories.Validation.updateValidationRule(args.input)
   },
 
   Questionnaire: {
@@ -308,7 +286,8 @@ const Resolvers = {
 
   BasicAnswer: {
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.getById(answer.questionPageId)
+      ctx.repositories.QuestionPage.getById(answer.questionPageId),
+    validation: answer => answer
   },
 
   CompositeAnswer: {
@@ -346,6 +325,37 @@ const Resolvers = {
   Option: {
     answer: ({ answerId }, args, ctx) =>
       ctx.repositories.Answer.getById(answerId)
+  },
+
+  ValidationType: {
+    __resolveType: answer => {
+      const validationEntity = getValidationEntity(answer.type);
+
+      switch (validationEntity) {
+        case "number":
+          return "NumberValidation";
+
+        default:
+          throw new TypeError(
+            `Validation is not supported on '${answer.type}' answers`
+          );
+      }
+    }
+  },
+
+  ValidationRule: {
+    __resolveType: () => "MinValueValidationRule"
+  },
+
+  NumberValidation: {
+    minValue: (answer, args, ctx) =>
+      ctx.repositories.Validation.findByTypeId(answer, "minValue")
+  },
+
+  MinValueValidationRule: {
+    enabled: ({ enabled }) => enabled,
+    inclusive: ({ config }) => config.inclusive,
+    custom: ({ custom }) => custom
   },
 
   Date: GraphQLDate,

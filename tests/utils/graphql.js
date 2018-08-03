@@ -535,6 +535,46 @@ mutation MoveSection($input: MoveSectionInput!) {
     position
     __typename
   }
+}`;
+
+const getAnswerValidations = `
+  query QuestionPage($id: ID!) {
+    answer(id: $id){
+     id
+     ...on BasicAnswer {
+       validation{
+         ...on NumberValidation{
+           minValue{
+             id
+             enabled
+             inclusive
+             custom
+           }
+         }
+       }
+     }
+   }
+  }
+`;
+
+const toggleAnswerValidation = `
+  mutation toggleValidation($input: ToggleValidationRuleInput!){
+    toggleValidationRule(input: $input){
+      id
+      enabled
+    }
+  }
+`;
+
+const updateAnswerValidation = `
+mutation updateValidation($input: UpdateValidationRuleInput!){
+  updateValidationRule(input: $input){
+    id
+    ...on MinValueValidationRule {
+      custom
+      inclusive
+    }
+  }
 }
 `;
 
@@ -568,5 +608,8 @@ module.exports = {
   deleteAnswerMutation,
   deleteOptionMutation,
   createOptionMutation,
-  moveSectionMutation
+  moveSectionMutation,
+  getAnswerValidations,
+  toggleAnswerValidation,
+  updateAnswerValidation
 };

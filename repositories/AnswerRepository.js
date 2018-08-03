@@ -6,7 +6,10 @@ const {
   invert,
   map,
   omit,
-  assign
+  assign,
+  values,
+  includes,
+  flatten
 } = require("lodash/fp");
 const { get, merge } = require("lodash");
 const db = require("../db");
@@ -14,6 +17,11 @@ const Answer = require("../db/Answer");
 const mapFields = require("../utils/mapFields");
 const mapping = { QuestionPageId: "questionPageId" };
 const childAnswerParser = require("../utils/childAnswerParser");
+const getDefaultAnswerProperties = require("../utils/defaultAnswerProperties");
+const {
+  createDefaultValidationsForAnswer
+} = require("../repositories/strategies/validationStrategy");
+const { answerTypeMap } = require("../utils/defaultAnswerValidations");
 
 const handleDeprecatedMandatoryFieldFromDb = answer =>
   isObject(answer)
@@ -55,30 +63,72 @@ const getById = id =>
     .where({ isDeleted: false })
     .then(fromDb);
 
-const insert = ({
-  description,
-  guidance,
-  label,
-  secondaryLabel,
-  qCode,
-  type,
-  mandatory,
-  properties,
-  questionPageId
-}) =>
-  Answer.create(
-    toDb({
-      description,
-      guidance,
-      label,
-      secondaryLabel,
-      qCode,
-      type,
-      mandatory,
-      properties,
-      questionPageId
-    })
-  )
+const createAnswer = async (args, ctx) => {
+  return db.transaction(async trx => {
+    const defaultProperties = getDefaultAnswerProperties(args.input.type);
+    const input = merge({}, args.input, { properties: defaultProperties });
+    const answer = await ctx.repositories.Answer.insert(input, trx);
+
+    if (includes(answer.type, flatten(values(answerTypeMap)))) {
+      await createDefaultValidationsForAnswer(answer, trx);
+    }
+
+    if (answer.type === "Checkbox" || answer.type === "Radio") {
+      const defaultOptions = [];
+      const defaultOption = {
+        label: "",
+        description: "",
+        value: "",
+        qCode: "",
+        answerId: answer.id
+      };
+
+      defaultOptions.push(defaultOption);
+
+      if (answer.type === "Radio") {
+        defaultOptions.push(defaultOption);
+      }
+
+      const promises = defaultOptions.map(it =>
+        ctx.repositories.Option.insert(it, trx)
+      );
+
+      await Promise.all(promises);
+    }
+
+    return answer;
+  });
+};
+
+const insert = (
+  {
+    description,
+    guidance,
+    label,
+    secondaryLabel,
+    qCode,
+    type,
+    mandatory,
+    properties,
+    questionPageId
+  },
+  trx = db
+) =>
+  trx("Answers")
+    .insert(
+      toDb({
+        description,
+        guidance,
+        label,
+        secondaryLabel,
+        qCode,
+        type,
+        mandatory,
+        properties,
+        questionPageId
+      })
+    )
+    .returning("*")
     .then(head)
     .then(fromDb);
 
@@ -211,5 +261,6 @@ Object.assign(module.exports, {
   createOtherAnswer,
   deleteOtherAnswer,
   splitComposites,
-  getAnswers
+  getAnswers,
+  createAnswer
 });

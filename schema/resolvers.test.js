@@ -329,6 +329,19 @@ describe("resolvers", () => {
     firstPage = first(pages);
   });
 
+  it("should automatically add properties to an answer", async () => {
+    const numberAnswer = await createNewAnswer(firstPage, "Number");
+    const result = await executeQuery(
+      getAnswerQuery,
+      { id: numberAnswer.id },
+      ctx
+    );
+    expect(result.data.answer.properties).toMatchObject({
+      decimals: 0,
+      required: false
+    });
+  });
+
   it("should split a date range answer into child answers on retrieval", async () => {
     const dateRangeAnswer = await createNewAnswer(firstPage, "DateRange");
 

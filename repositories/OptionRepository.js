@@ -25,22 +25,21 @@ module.exports.getById = function getById(id) {
     .then(fromDb);
 };
 
-module.exports.insert = function insert({
-  label,
-  description,
-  value,
-  qCode,
-  answerId
-}) {
-  return Option.create(
-    toDb({
-      label,
-      description,
-      value,
-      qCode,
-      answerId
-    })
-  )
+module.exports.insert = function insert(
+  { label, description, value, qCode, answerId },
+  trx = db
+) {
+  return trx("Options")
+    .insert(
+      toDb({
+        label,
+        description,
+        value,
+        qCode,
+        answerId
+      })
+    )
+    .returning("*")
     .then(head)
     .then(fromDb);
 };
