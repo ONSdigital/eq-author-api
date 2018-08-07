@@ -35,7 +35,6 @@ const Resolvers = {
       );
       const section = {
         title: "",
-        description: "",
         questionnaireId: questionnaire.id
       };
 

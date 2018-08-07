@@ -38,7 +38,7 @@ module.exports.insert = function insert(args) {
       position
     )
       .then(order => Object.assign(args, { order }))
-      .then(pick(["title", "description", "questionnaireId", "order"]))
+      .then(pick(["title", "questionnaireId", "order"]))
       .then(toDb)
       .then(section => Section.create(section, trx))
       .then(head)
@@ -46,10 +46,9 @@ module.exports.insert = function insert(args) {
   });
 };
 
-module.exports.update = function update({ id, title, description, isDeleted }) {
+module.exports.update = function update({ id, title, isDeleted }) {
   return Section.update(id, {
     title,
-    description,
     isDeleted
   })
     .then(head)

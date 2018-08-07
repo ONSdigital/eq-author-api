@@ -17,7 +17,6 @@ const buildQuestionnaire = questionnaire => ({
 
 const buildSection = section => ({
   title: "Test section",
-  description: "section description",
   ...section
 });
 
@@ -63,8 +62,7 @@ describe("SectionRepository", () => {
 
     await SectionRepository.update({
       id: result.id,
-      title: "updated title",
-      description: "updated description"
+      title: "updated title"
     });
     const updated = await SectionRepository.getById(result.id);
 
