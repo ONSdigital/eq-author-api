@@ -168,7 +168,9 @@ const Resolvers = {
     deleteRoutingCondition: (_, args, ctx) =>
       ctx.repositories.Routing.removeRoutingCondition(args.input),
     toggleConditionOption: async (_, args, ctx) =>
-      ctx.repositories.Routing.toggleConditionOption(args.input)
+      ctx.repositories.Routing.toggleConditionOption(args.input),
+    duplicateQuestionPage: (_, args, ctx) =>
+      ctx.repositories.QuestionPage.duplicateQuestionPage(args.input)
   },
 
   Questionnaire: {
