@@ -1,4 +1,4 @@
-const { head, invert, map, noop, concat } = require("lodash/fp");
+const { head, invert, map, noop } = require("lodash/fp");
 const QuestionPage = require("../db/QuestionPage");
 const mapFields = require("../utils/mapFields");
 const knex = require("../db");
