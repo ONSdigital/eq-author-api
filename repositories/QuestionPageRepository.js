@@ -1,9 +1,9 @@
-const { head, invert, map, noop } = require("lodash/fp");
+const { head, invert, map, noop, concat } = require("lodash/fp");
 const QuestionPage = require("../db/QuestionPage");
 const mapFields = require("../utils/mapFields");
 const knex = require("../db");
 
-const mapping = { SectionId: "sectionId" };
+const mapping = { SectionId: "sectionId", AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
@@ -102,13 +102,48 @@ const duplicateStrategy = async (
     .then(mapFn);
 
   if (callbackFn) {
-    await callbackFn(trx, thingToDuplicate, cloned);
+    await callbackFn(
+      trx,
+      {
+        ...thingToDuplicate,
+        ...where
+      },
+      cloned
+    );
   }
 
   return cloned;
 };
 
-const duplicateAnswers = async (trx, original, cloned) => {
+const isMultipleChoiceAnswer = ({ type }) =>
+  type === "Checkbox" || type === "Radio";
+
+const duplicateOptions = async (trx, originalAnswer, clonedAnswer) => {
+  // TODO need to deal with "other" option
+  // TODO need to ignore deleted options
+  const optionsToDuplicate = await trx("Options")
+    .where({ AnswerId: originalAnswer.id, isDeleted: false })
+    .select("id");
+  const columns = ["label", "description", "value", "qCode"];
+
+  return Promise.all(
+    map(option =>
+      duplicateStrategy(trx, "Options", columns, option, fromDb, noop, {
+        AnswerId: clonedAnswer.id
+      })
+    )(optionsToDuplicate)
+  );
+};
+
+const answerCloned = async (trx, original, clonedAnswer) => {
+  if (isMultipleChoiceAnswer(original)) {
+    await duplicateOptions(trx, original, clonedAnswer);
+  }
+};
+
+const duplicateAnswers = async (trx, originalPage, clonedPage) => {
+  // TODO pin this down to only answers for the page
+  // TODO pin this down to only non-deleted answers
   const answersToDuplicate = await trx("Answers").select("id");
   const columns = [
     "description",
@@ -123,15 +158,15 @@ const duplicateAnswers = async (trx, original, cloned) => {
 
   return Promise.all(
     map(answer =>
-      duplicateStrategy(trx, "Answers", columns, answer, fromDb, noop, {
-        QuestionPageId: cloned.id
+      duplicateStrategy(trx, "Answers", columns, answer, fromDb, answerCloned, {
+        QuestionPageId: clonedPage.id
       })
     )(answersToDuplicate)
   );
 };
 
-const questionPageCloned = async (trx, original, cloned) => {
-  await duplicateAnswers(trx, original, cloned);
+const questionPageCloned = async (trx, originalPage, clonedPage) => {
+  await duplicateAnswers(trx, originalPage, clonedPage);
 };
 
 const duplicateQuestionPage = (input, db = knex) => {
