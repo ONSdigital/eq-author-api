@@ -550,6 +550,12 @@ const getAnswerValidations = `
              inclusive
              custom
            }
+           maxValue{
+            id
+            enabled
+            inclusive
+            custom
+          }
          }
        }
      }
@@ -571,6 +577,10 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
   updateValidationRule(input: $input){
     id
     ...on MinValueValidationRule {
+      custom
+      inclusive
+    }
+    ...on MaxValueValidationRule {
       custom
       inclusive
     }

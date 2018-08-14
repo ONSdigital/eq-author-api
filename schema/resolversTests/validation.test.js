@@ -97,16 +97,22 @@ describe("resolvers", () => {
     firstPage = first(pages);
   });
 
-  it("should create a min validation db entries for Currency and Number answers", async () => {
+  it("should create min and max validation db entries for Currency and Number answers", async () => {
     const currencyAnswer = await createNewAnswer(firstPage, "Currency");
     const currencyValidation = await queryAnswerValidations(currencyAnswer.id);
 
     const numberAnswer = await createNewAnswer(firstPage, "Number");
     const numberValidation = await queryAnswerValidations(numberAnswer.id);
 
-    const validationObject = id => ({
+    const validationObject = (minValueId, maxValueId) => ({
       minValue: {
-        id,
+        id: minValueId,
+        enabled: false,
+        inclusive: false,
+        custom: null
+      },
+      maxValue: {
+        id: maxValueId,
         enabled: false,
         inclusive: false,
         custom: null
@@ -114,33 +120,45 @@ describe("resolvers", () => {
     });
 
     expect(currencyValidation).toMatchObject(
-      validationObject(currencyValidation.minValue.id)
+      validationObject(
+        currencyValidation.minValue.id,
+        currencyValidation.maxValue.id
+      )
     );
     expect(numberValidation).toMatchObject(
-      validationObject(numberValidation.minValue.id)
+      validationObject(
+        numberValidation.minValue.id,
+        numberValidation.maxValue.id
+      )
     );
   });
 
-  it("can toggle validation rule on and off", async () => {
+  it("can toggle min validation rule on and off without affecting max", async () => {
     const currencyAnswer = await createNewAnswer(firstPage, "Currency");
-    const currencyValidation = await queryAnswerValidations(currencyAnswer.id);
+    let currencyValidation = await queryAnswerValidations(currencyAnswer.id);
 
-    const resultOn = await mutateValidationToggle({
+    await mutateValidationToggle({
       id: currencyValidation.minValue.id,
       enabled: true
     });
 
-    expect(resultOn).toHaveProperty("enabled", true);
+    currencyValidation = await queryAnswerValidations(currencyAnswer.id);
 
-    const resultOff = await mutateValidationToggle({
+    expect(currencyValidation.minValue).toHaveProperty("enabled", true);
+    expect(currencyValidation.maxValue).toHaveProperty("enabled", false);
+
+    await mutateValidationToggle({
       id: currencyValidation.minValue.id,
       enabled: false
     });
 
-    expect(resultOff).toHaveProperty("enabled", false);
+    currencyValidation = await queryAnswerValidations(currencyAnswer.id);
+
+    expect(currencyValidation.minValue).toHaveProperty("enabled", false);
+    expect(currencyValidation.maxValue).toHaveProperty("enabled", false);
   });
 
-  it("can update inclusive and custom values", async () => {
+  it("can update inclusive and custom min values", async () => {
     const currencyAnswer = await createNewAnswer(firstPage, "Currency");
     const currencyValidation = await queryAnswerValidations(currencyAnswer.id);
 
@@ -153,6 +171,24 @@ describe("resolvers", () => {
     });
     expect(result).toMatchObject({
       id: currencyValidation.minValue.id,
+      custom: 10,
+      inclusive: true
+    });
+  });
+
+  it("can update inclusive and custom max values", async () => {
+    const currencyAnswer = await createNewAnswer(firstPage, "Currency");
+    const currencyValidation = await queryAnswerValidations(currencyAnswer.id);
+
+    const result = await mutateValidationParameters({
+      id: currencyValidation.maxValue.id,
+      maxValueInput: {
+        custom: 10,
+        inclusive: true
+      }
+    });
+    expect(result).toMatchObject({
+      id: currencyValidation.maxValue.id,
       custom: 10,
       inclusive: true
     });

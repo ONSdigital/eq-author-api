@@ -1,16 +1,22 @@
 const Validation = require("../db/Validation");
-const { head } = require("lodash/fp");
+const { head, flow, keys, remove, first } = require("lodash/fp");
 
 const toggleValidationRule = ({ id, enabled }) => {
   return Validation.update(id, { enabled }).then(head);
 };
 
-const findByTypeId = ({ id }, validationType) => {
+const findByAnswerIdAndValidationType = ({ id }, validationType) => {
   return Validation.find({ AnswerId: id, validationType });
 };
 
+const getInputType = flow(
+  keys,
+  remove(key => key === "id"),
+  first
+);
+
 const updateValidationRule = input => {
-  const { inclusive, custom } = input.minValueInput;
+  const { custom, inclusive } = input[getInputType(input)];
   return Validation.update(input.id, { custom, config: { inclusive } }).then(
     head
   );
@@ -18,6 +24,6 @@ const updateValidationRule = input => {
 
 Object.assign(module.exports, {
   toggleValidationRule,
-  findByTypeId,
+  findByAnswerIdAndValidationType,
   updateValidationRule
 });

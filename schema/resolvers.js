@@ -344,15 +344,41 @@ const Resolvers = {
   },
 
   ValidationRule: {
-    __resolveType: () => "MinValueValidationRule"
+    __resolveType: ({ validationType }) => {
+      switch (validationType) {
+        case "maxValue":
+          return "MaxValueValidationRule";
+        case "minValue":
+          return "MinValueValidationRule";
+
+        default:
+          throw new TypeError(
+            `Validation is not supported on '${validationType}' answers`
+          );
+      }
+    }
   },
 
   NumberValidation: {
     minValue: (answer, args, ctx) =>
-      ctx.repositories.Validation.findByTypeId(answer, "minValue")
+      ctx.repositories.Validation.findByAnswerIdAndValidationType(
+        answer,
+        "minValue"
+      ),
+    maxValue: (answer, args, ctx) =>
+      ctx.repositories.Validation.findByAnswerIdAndValidationType(
+        answer,
+        "maxValue"
+      )
   },
 
   MinValueValidationRule: {
+    enabled: ({ enabled }) => enabled,
+    inclusive: ({ config }) => config.inclusive,
+    custom: ({ custom }) => custom
+  },
+
+  MaxValueValidationRule: {
     enabled: ({ enabled }) => enabled,
     inclusive: ({ config }) => config.inclusive,
     custom: ({ custom }) => custom
