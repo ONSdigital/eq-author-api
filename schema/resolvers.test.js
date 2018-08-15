@@ -1,4 +1,5 @@
-const { first, get } = require("lodash");
+const { first, get, omit } = require("lodash");
+const { head } = require("lodash/fp");
 const repositories = require("../repositories");
 const db = require("../db");
 const executeQuery = require("../tests/utils/executeQuery");
@@ -327,6 +328,44 @@ describe("resolvers", () => {
     sections = questionnaire.sections;
     pages = first(sections).pages;
     firstPage = first(pages);
+  });
+
+  it.only("test some knex stuff", () => {
+    const duplicate = async (columns, from, condition) => {
+      const result = db.transaction(async trx => {
+        console.log(await trx(from).select("*"));
+        const query = await trx(from)
+          .select("*")
+          .where(condition)
+          .then(head);
+
+        console.log(query);
+
+        console.log(await trx(from).select("*"));
+
+        await trx
+          .table(from)
+          .insert(omit(query, ["id"]))
+          .returning("id");
+
+        console.log(await trx(from).select("*"));
+        return result;
+      });
+
+      return [result];
+    };
+
+    const duplicateSurvey = surveyID => {
+      duplicate(
+        ["title", "surveyId", "theme", "legalBasis"],
+        "Questionnaires",
+        { id: surveyID }
+      ).then(result => {
+        console.log(result);
+      });
+    };
+
+    duplicateSurvey("1");
   });
 
   it("should split a date range answer into child answers on retrieval", async () => {

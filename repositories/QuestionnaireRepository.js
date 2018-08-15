@@ -75,6 +75,7 @@ module.exports.remove = function(id) {
   return Questionnaire.update(id, { isDeleted: true })
     .then(head)
     .then(fromDb);
+  //
 };
 
 module.exports.undelete = function(id) {
