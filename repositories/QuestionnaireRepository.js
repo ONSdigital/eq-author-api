@@ -1,4 +1,5 @@
 const { head, map } = require("lodash/fp");
+const { omit } = require("lodash");
 const Questionnaire = require("../db/Questionnaire");
 const mapFields = require("../utils/mapFields");
 const mapping = { created_at: "createdAt" }; // eslint-disable-line camelcase
@@ -72,10 +73,24 @@ module.exports.update = function({
 };
 
 module.exports.remove = function(id) {
-  return Questionnaire.update(id, { isDeleted: true })
-    .then(head)
-    .then(fromDb);
-  //
+  const duplicate = (table, condition) => {
+    const original = table
+      .findAll()
+      .where(condition)
+      .then(head);
+
+    original.then(result => {
+      return table.create(omit(result, "id"));
+    });
+
+    return original;
+  };
+
+  return duplicate(Questionnaire, {
+    id: id
+  }).then(result => {
+    console.log(result);
+  });
 };
 
 module.exports.undelete = function(id) {

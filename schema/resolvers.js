@@ -47,7 +47,6 @@ const Resolvers = {
       ctx.repositories.Questionnaire.remove(args.input.id),
     undeleteQuestionnaire: (_, args, ctx) =>
       ctx.repositories.Questionnaire.undelete(args.input.id),
-
     createSection: async (root, args, ctx) => {
       const section = await ctx.repositories.Section.insert(args.input);
       const page = {
