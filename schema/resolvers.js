@@ -49,6 +49,9 @@ const Resolvers = {
       ctx.repositories.Questionnaire.remove(args.input.id),
     undeleteQuestionnaire: (_, args, ctx) =>
       ctx.repositories.Questionnaire.undelete(args.input.id),
+    duplicateQuestionnaire: () => {
+      throw new Error("Not implemented");
+    },
 
     createSection: async (root, args, ctx) => {
       const section = await ctx.repositories.Section.insert(args.input);
@@ -69,6 +72,9 @@ const Resolvers = {
     undeleteSection: (_, args, ctx) =>
       ctx.repositories.Section.undelete(args.input.id),
     moveSection: (_, args, ctx) => ctx.repositories.Section.move(args.input),
+    duplicateSection: () => {
+      throw new Error("Not implemented");
+    },
 
     createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
 
@@ -77,6 +83,8 @@ const Resolvers = {
     undeletePage: (_, args, ctx) =>
       ctx.repositories.Page.undelete(args.input.id),
     movePage: (_, args, ctx) => ctx.repositories.Page.move(args.input),
+    duplicatePage: (_, args, ctx) =>
+      ctx.repositories.Page.duplicatePage(args.input.id, args.input.position),
 
     createQuestionPage: (root, args, ctx) =>
       ctx.repositories.Page.insert(

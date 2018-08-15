@@ -27,7 +27,7 @@ const checkForExistingExclusive = async answerId => {
   }
 };
 
-const findAll = (where = {}, orderBy = "created_at", direction = "asc") =>
+const findAll = (where = {}, orderBy = "id", direction = "asc") =>
   Option.findAll()
     .where({ isDeleted: false, otherAnswerId: null })
     .where(where)
