@@ -287,7 +287,8 @@ const Resolvers = {
   BasicAnswer: {
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.getById(answer.questionPageId),
-    validation: answer => answer
+    validation: answer =>
+      getValidationEntity(answer.type) !== "number" ? null : answer
   },
 
   CompositeAnswer: {
