@@ -1,4 +1,4 @@
-const { head, invert, map } = require("lodash/fp");
+const { head, invert, map, isEmpty } = require("lodash/fp");
 const Option = require("../db/Option");
 const mapFields = require("../utils/mapFields");
 const db = require("../db");
@@ -6,6 +6,19 @@ const { handleOptionDeleted } = require("./strategies/routingStrategy");
 const mapping = { AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
+
+const checkForExistingExclusive = async answerId => {
+  const existingExclusive = await Option.findAll().where(
+    toDb({
+      answerId,
+      mutuallyExclusive: true,
+      isDeleted: false
+    })
+  );
+  if (!isEmpty(existingExclusive)) {
+    throw new Error("There is already an exclusive checkbox on this answer.");
+  }
+};
 
 module.exports.findAll = function findAll(
   where = {},
@@ -19,16 +32,35 @@ module.exports.findAll = function findAll(
     .then(map(fromDb));
 };
 
+module.exports.findExclusiveOptionByAnswerId = function findExclusiveOptionByAnswerId(
+  answerId
+) {
+  return Option.findAll()
+    .where(
+      toDb({
+        isDeleted: false,
+        otherAnswerId: null,
+        mutuallyExclusive: true,
+        answerId
+      })
+    )
+    .then(fromDb)
+    .then(head);
+};
+
 module.exports.getById = function getById(id) {
   return Option.findById(id)
     .where({ isDeleted: false })
     .then(fromDb);
 };
 
-module.exports.insert = function insert(
-  { label, description, value, qCode, answerId },
+module.exports.insert = async function insert(
+  { label, description, value, qCode, answerId, mutuallyExclusive = false },
   trx = db
 ) {
+  if (mutuallyExclusive) {
+    await checkForExistingExclusive(answerId);
+  }
   return trx("Options")
     .insert(
       toDb({
@@ -36,7 +68,8 @@ module.exports.insert = function insert(
         description,
         value,
         qCode,
-        answerId
+        answerId,
+        mutuallyExclusive
       })
     )
     .returning("*")

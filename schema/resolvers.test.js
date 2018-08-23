@@ -30,7 +30,8 @@ const {
   deletePageMutation,
   deleteAnswerMutation,
   deleteOptionMutation,
-  moveSectionMutation
+  moveSectionMutation,
+  createExclusiveMutation
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
@@ -91,6 +92,15 @@ const createNewOtherMutation = async answer =>
 const createOther = async answer => {
   const result = await createNewOtherMutation(answer);
   return result.data.createOther;
+};
+
+const createExclusive = async answer => {
+  const result = await executeQuery(
+    createExclusiveMutation,
+    { input: { answerId: answer.id } },
+    ctx
+  );
+  return result;
 };
 
 const deleteOther = async answer =>
@@ -412,6 +422,21 @@ describe("resolvers", () => {
     const updatedCheckboxAnswer = await refreshAnswerDetails(checkboxAnswer);
     expect(updatedCheckboxAnswer.other).not.toBeNull();
     expect(updatedCheckboxAnswer.other).toMatchObject(other);
+  });
+
+  it("can create exclusive option for checkbox answers", async () => {
+    const checkboxAnswer = await createNewAnswer(firstPage, "Checkbox");
+    const result = await createExclusive(checkboxAnswer);
+
+    expect(result).not.toHaveProperty("errors");
+  });
+
+  it("fails when trying to create a second exclusive option", async () => {
+    const checkboxAnswer = await createNewAnswer(firstPage, "Checkbox");
+    await createExclusive(checkboxAnswer);
+    const result = await createExclusive(checkboxAnswer);
+
+    expect(result.errors).toHaveLength(1);
   });
 
   it("should create other answer for Radio answers", async () => {
