@@ -69,7 +69,7 @@ describe("QuestionPage query", () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.QuestionPage.getById).toHaveBeenCalledWith(id);
     expect(repositories.Answer.findAll).toHaveBeenCalledWith({
-      QuestionPageId: id
+      questionPageId: id
     });
   });
 

@@ -68,7 +68,7 @@ describe("Section query", () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Section.getById).toHaveBeenCalledWith(id);
-    expect(repositories.Page.findAll).toHaveBeenCalledWith({ SectionId: id });
+    expect(repositories.Page.findAll).toHaveBeenCalledWith({ sectionId: id });
   });
 
   it("should have an association with Questionnaire", async () => {

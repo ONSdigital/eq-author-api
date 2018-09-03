@@ -1,9 +1,5 @@
-const { get, head, invert, map, pick } = require("lodash/fp");
+const { get, head, pick } = require("lodash/fp");
 const Section = require("../db/Section");
-const mapFields = require("../utils/mapFields");
-const mapping = { QuestionnaireId: "questionnaireId" };
-const fromDb = mapFields(mapping);
-const toDb = mapFields(invert(mapping));
 const db = require("../db");
 const {
   getOrUpdateOrderForSectionInsert
@@ -16,16 +12,14 @@ module.exports.findAll = function findAll(
 ) {
   return db("SectionsView")
     .select("*")
-    .where(toDb(where))
-    .orderBy(orderBy, direction)
-    .then(map(fromDb));
+    .where(where)
+    .orderBy(orderBy, direction);
 };
 
 module.exports.getById = function getById(id) {
   return db("SectionsView")
     .where("id", parseInt(id, 10))
-    .first()
-    .then(fromDb);
+    .first();
 };
 
 module.exports.insert = function insert(args) {
@@ -39,10 +33,8 @@ module.exports.insert = function insert(args) {
     )
       .then(order => Object.assign(args, { order }))
       .then(pick(["title", "questionnaireId", "order"]))
-      .then(toDb)
       .then(section => Section.create(section, trx))
-      .then(head)
-      .then(fromDb);
+      .then(head);
   });
 };
 
@@ -50,29 +42,23 @@ module.exports.update = function update({ id, title, isDeleted }) {
   return Section.update(id, {
     title,
     isDeleted
-  })
-    .then(head)
-    .then(fromDb);
+  }).then(head);
 };
 
 module.exports.remove = function remove(id) {
-  return Section.update(id, { isDeleted: true })
-    .then(head)
-    .then(fromDb);
+  return Section.update(id, { isDeleted: true }).then(head);
 };
 
 module.exports.undelete = function(id) {
-  return Section.update(id, { isDeleted: false })
-    .then(head)
-    .then(fromDb);
+  return Section.update(id, { isDeleted: false }).then(head);
 };
 
 module.exports.move = function({ id, questionnaireId, position }) {
   return db.transaction(trx => {
     return getOrUpdateOrderForSectionInsert(trx, questionnaireId, id, position)
-      .then(order => Section.update(id, toDb({ questionnaireId, order }), trx))
+      .then(order => Section.update(id, { questionnaireId, order }, trx))
       .then(head)
-      .then(fromDb)
+
       .then(section => Object.assign(section, { position }));
   });
 };
@@ -84,7 +70,7 @@ module.exports.getPosition = function({ id }) {
 module.exports.getSectionCount = function getSectionCount(questionnaireId) {
   return db("SectionsView")
     .count()
-    .where({ QuestionnaireId: questionnaireId })
+    .where({ questionnaireId })
     .then(head)
     .then(get("count"));
 };

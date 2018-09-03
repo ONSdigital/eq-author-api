@@ -6,7 +6,7 @@ const toggleValidationRule = ({ id, enabled }) => {
 };
 
 const findByAnswerIdAndValidationType = ({ id }, validationType) => {
-  return Validation.find({ AnswerId: id, validationType });
+  return Validation.find({ answerId: id, validationType });
 };
 
 const getInputType = flow(

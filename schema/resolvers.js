@@ -167,7 +167,7 @@ const Resolvers = {
 
   Questionnaire: {
     sections: (questionnaire, args, ctx) =>
-      ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
+      ctx.repositories.Section.findAll({ questionnaireId: questionnaire.id }),
     createdBy: questionnaire => ({ name: questionnaire.createdBy }),
     questionnaireInfo: ({ id }) => id,
     metadata: (questionnaire, args, ctx) =>
@@ -180,7 +180,7 @@ const Resolvers = {
   },
   Section: {
     pages: (section, args, ctx) =>
-      ctx.repositories.Page.findAll({ SectionId: section.id }),
+      ctx.repositories.Page.findAll({ sectionId: section.id }),
     questionnaire: (section, args, ctx) =>
       ctx.repositories.Questionnaire.getById(section.questionnaireId),
     title: (page, args) => formatRichText(page.title, args.format),
@@ -206,15 +206,15 @@ const Resolvers = {
   QuestionPage: {
     answers: ({ id }, args, ctx) =>
       ctx.repositories.Answer.findAll({
-        QuestionPageId: id
+        questionPageId: id
       }),
     section: ({ sectionId }, args, ctx) => {
       return ctx.repositories.Section.getById(sectionId);
     },
     position: (page, args, ctx) => Resolvers.Page.position(page, args, ctx),
-    routingRuleSet: ({ id: QuestionPageId }, args, ctx) =>
+    routingRuleSet: ({ id: questionPageId }, args, ctx) =>
       ctx.repositories.Routing.findRoutingRuleSetByQuestionPageId({
-        QuestionPageId
+        questionPageId
       }),
     title: (page, args) => formatRichText(page.title, args.format)
   },
@@ -222,7 +222,7 @@ const Resolvers = {
   RoutingRuleSet: {
     routingRules: ({ id }, args, ctx) => {
       return ctx.repositories.Routing.findAllRoutingRules({
-        RoutingRuleSetId: id
+        routingRuleSetId: id
       });
     },
     questionPage: ({ questionPageId }, args, ctx) => {
@@ -235,7 +235,7 @@ const Resolvers = {
   RoutingRule: {
     conditions: ({ id }, args, ctx) => {
       return ctx.repositories.Routing.findAllRoutingConditions({
-        RoutingRuleId: id
+        routingRuleId: id
       });
     },
     goto: (routingRule, args, ctx) =>
@@ -320,7 +320,7 @@ const Resolvers = {
       ctx.repositories.QuestionPage.getById(answer.questionPageId),
     options: (answer, args, ctx) =>
       ctx.repositories.Option.findAll({
-        AnswerId: answer.id,
+        answerId: answer.id,
         mutuallyExclusive: false
       }),
     mutuallyExclusiveOption: (answer, args, ctx) =>

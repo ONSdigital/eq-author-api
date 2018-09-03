@@ -3,7 +3,6 @@ const {
   head,
   isBoolean,
   isObject,
-  invert,
   map,
   omit,
   assign,
@@ -14,8 +13,6 @@ const {
 const { get, merge } = require("lodash");
 const db = require("../db");
 const Answer = require("../db/Answer");
-const mapFields = require("../utils/mapFields");
-const mapping = { QuestionPageId: "questionPageId" };
 const childAnswerParser = require("../utils/childAnswerParser");
 const getDefaultAnswerProperties = require("../utils/defaultAnswerProperties");
 const {
@@ -33,13 +30,9 @@ const handleDeprecatedMandatoryFieldToDb = answer =>
     ? merge({}, answer, { properties: { required: answer.mandatory } })
     : answer;
 
-const fromDb = flow(
-  mapFields(mapping),
-  handleDeprecatedMandatoryFieldFromDb
-);
+const fromDb = flow(handleDeprecatedMandatoryFieldFromDb);
 
 const toDb = flow(
-  mapFields(invert(mapping)),
   handleDeprecatedMandatoryFieldToDb,
   omit("mandatory")
 );
@@ -51,7 +44,7 @@ const {
 
 const { handleAnswerDeleted } = require("./strategies/routingStrategy");
 
-const findAll = (where = {}, orderBy = "created_at", direction = "asc") =>
+const findAll = (where = {}, orderBy = "createdAt", direction = "asc") =>
   Answer.findAll()
     .where({ isDeleted: false, parentAnswerId: null })
     .where(where)
@@ -193,7 +186,7 @@ const undelete = id =>
 const getOtherAnswer = (
   id,
   where = {},
-  orderBy = "created_at",
+  orderBy = "createdAt",
   direction = "asc"
 ) =>
   Answer.findAll()

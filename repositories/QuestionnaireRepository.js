@@ -1,25 +1,19 @@
-const { head, map } = require("lodash/fp");
+const { head } = require("lodash/fp");
 const Questionnaire = require("../db/Questionnaire");
-const mapFields = require("../utils/mapFields");
-const mapping = { created_at: "createdAt" }; // eslint-disable-line camelcase
-const fromDb = mapFields(mapping);
 
 module.exports.getById = function(id) {
-  return Questionnaire.findById(id)
-    .where({ isDeleted: false })
-    .then(fromDb);
+  return Questionnaire.findById(id).where({ isDeleted: false });
 };
 
 module.exports.findAll = function findAll(
   where = {},
-  orderBy = "created_at",
+  orderBy = "createdAt",
   direction = "desc"
 ) {
   return Questionnaire.findAll()
     .where({ isDeleted: false })
     .where(where)
-    .orderBy(orderBy, direction)
-    .then(map(fromDb));
+    .orderBy(orderBy, direction);
 };
 
 module.exports.insert = function({
@@ -41,9 +35,7 @@ module.exports.insert = function({
     surveyId,
     summary,
     createdBy
-  })
-    .then(head)
-    .then(fromDb);
+  }).then(head);
 };
 
 module.exports.update = function({
@@ -66,19 +58,13 @@ module.exports.update = function({
     navigation,
     isDeleted,
     summary
-  })
-    .then(head)
-    .then(fromDb);
+  }).then(head);
 };
 
 module.exports.remove = function(id) {
-  return Questionnaire.update(id, { isDeleted: true })
-    .then(head)
-    .then(fromDb);
+  return Questionnaire.update(id, { isDeleted: true }).then(head);
 };
 
 module.exports.undelete = function(id) {
-  return Questionnaire.update(id, { isDeleted: false })
-    .then(head)
-    .then(fromDb);
+  return Questionnaire.update(id, { isDeleted: false }).then(head);
 };

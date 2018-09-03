@@ -90,7 +90,7 @@ describe("Duplicate strategy tests", () => {
   it("will insert data into the db correctly, given some data", async () => {
     const { section } = await setup();
 
-    const dataToInsert = await buildPage({ SectionId: section.id });
+    const dataToInsert = await buildPage({ sectionId: section.id });
 
     const dataReturnedFromInsert = await db.transaction(trx => {
       return insertData(trx, "Pages", dataToInsert, head, "*");
@@ -111,7 +111,7 @@ describe("Duplicate strategy tests", () => {
   it("will select data from the db correctly, given some previously inserted data", async () => {
     const { section } = await setup();
 
-    const dataToInsert = buildPage({ SectionId: section.id });
+    const dataToInsert = buildPage({ sectionId: section.id });
 
     const dataReturnedFromInsert = await db.transaction(trx => {
       return insertData(trx, "Pages", dataToInsert, head, "*");
@@ -130,10 +130,10 @@ describe("Duplicate strategy tests", () => {
   });
 
   it("will duplicate a record", async () => {
-    const fieldsToOmit = ["id", "created_at", "updated_at"];
+    const fieldsToOmit = ["id", "createdAt", "updatedAt"];
     const { section } = await setup();
 
-    const dataToInsert = buildPage({ SectionId: section.id });
+    const dataToInsert = buildPage({ sectionId: section.id });
 
     const dataReturnedFromInsert = await db.transaction(trx => {
       return insertData(trx, "Pages", dataToInsert, head, "*");
@@ -153,7 +153,7 @@ describe("Duplicate strategy tests", () => {
   });
 
   it("will duplicate an option", async () => {
-    const fieldsToOmit = ["id", "created_at", "updated_at"];
+    const fieldsToOmit = ["id", "createdAt", "updatedAt"];
 
     const originalOption = await db.transaction(trx => {
       return insertData(trx, "Options", buildOption(), head, "*");
@@ -169,7 +169,7 @@ describe("Duplicate strategy tests", () => {
   });
 
   it("will duplicate an answer", async () => {
-    const fieldsToOmit = ["created_at", "updated_at"];
+    const fieldsToOmit = ["createdAt", "updatedAt"];
 
     const originalAnswer = await db.transaction(trx => {
       return insertData(trx, "Answers", buildAnswer(), head, "*");
@@ -191,7 +191,7 @@ describe("Duplicate strategy tests", () => {
       const answer = await insertData(
         trx,
         "Answers",
-        buildAnswer({ QuestionPageId: page.id }),
+        buildAnswer({ questionPageId: page.id }),
         head,
         "*"
       );
@@ -199,7 +199,7 @@ describe("Duplicate strategy tests", () => {
         trx,
         "Options",
         buildOption({
-          AnswerId: answer.id
+          answerId: answer.id
         }),
         head,
         "*"
@@ -210,10 +210,10 @@ describe("Duplicate strategy tests", () => {
     const duplicateOption = await db.transaction(async trx => {
       const duplicateAnswer = await duplicateAnswerStrategy(trx, answer);
       return selectData(trx, "Options", "*", {
-        AnswerId: duplicateAnswer.id
+        answerId: duplicateAnswer.id
       }).then(head);
     });
-    const fieldsToIgnore = ["id", "created_at", "updated_at"];
+    const fieldsToIgnore = ["id", "createdAt", "updatedAt"];
     expect(omit(fieldsToIgnore, duplicateOption)).toMatchObject(
       omit(fieldsToIgnore, option)
     );
@@ -224,7 +224,7 @@ describe("Duplicate strategy tests", () => {
       trx,
       "Options",
       buildOption({
-        AnswerId: answer.id,
+        answerId: answer.id,
         label
       }),
       head,
@@ -237,7 +237,7 @@ describe("Duplicate strategy tests", () => {
       const answer = await insertData(
         trx,
         "Answers",
-        buildAnswer({ QuestionPageId: page.id }),
+        buildAnswer({ questionPageId: page.id }),
         head,
         "*"
       );
@@ -257,7 +257,7 @@ describe("Duplicate strategy tests", () => {
         "Options",
         "*",
         {
-          AnswerId: duplicateAnswer.id
+          answerId: duplicateAnswer.id
         },
         {
           column: "id",
@@ -274,7 +274,7 @@ describe("Duplicate strategy tests", () => {
   });
 
   it("will duplicate an answer with an other option", async () => {
-    const fieldsToOmit = ["created_at", "updated_at"];
+    const fieldsToOmit = ["createdAt", "updatedAt"];
     const originalAnswer = await db.transaction(trx => {
       return insertData(trx, "Answers", buildAnswer(), head, "*");
     });
@@ -295,7 +295,7 @@ describe("Duplicate strategy tests", () => {
         trx,
         "Options",
         buildOption({
-          AnswerId: originalAnswer.id,
+          answerId: originalAnswer.id,
           otherAnswerId: originalOtherAnswer.id
         }),
         head,
@@ -312,7 +312,7 @@ describe("Duplicate strategy tests", () => {
           parentAnswerId: duplicateAnswer.id
         }).then(head);
         const duplicateOption = await selectData(trx, "Options", "*", {
-          AnswerId: duplicateAnswer.id,
+          answerId: duplicateAnswer.id,
           otherAnswerId: duplicateOtherAnswer.id
         }).then(head);
         return { duplicateOtherAnswer, duplicateOption };
@@ -326,13 +326,13 @@ describe("Duplicate strategy tests", () => {
     expect(
       omit(duplicateOption, [
         ...fieldsToOmitIncludingId,
-        "AnswerId",
+        "answerId",
         "otherAnswerId"
       ])
     ).toMatchObject(
       omit(originalOption, [
         ...fieldsToOmitIncludingId,
-        "AnswerId",
+        "answerId",
         "otherAnswerId"
       ])
     );
@@ -344,10 +344,10 @@ describe("Duplicate strategy tests", () => {
   });
 
   it("will duplicate a page", async () => {
-    const notDuplicatedFields = ["created_at", "updated_at"];
+    const notDuplicatedFields = ["createdAt", "updatedAt"];
     const { section } = await setup();
     const originalPage = await db.transaction(trx =>
-      insertData(trx, "Pages", buildPage({ SectionId: section.id }), head, "*")
+      insertData(trx, "Pages", buildPage({ sectionId: section.id }), head, "*")
     );
     const duplicatePage = await db.transaction(trx =>
       duplicatePageStrategy(trx, omit(originalPage, notDuplicatedFields))
@@ -358,27 +358,27 @@ describe("Duplicate strategy tests", () => {
   });
 
   it("will duplicate the answers on the page but not deleted ones", async () => {
-    const notDuplicatedFields = ["created_at", "updated_at"];
+    const notDuplicatedFields = ["createdAt", "updatedAt"];
     const { section } = await setup();
     const { originalPage, originalAnswer } = await db.transaction(async trx => {
       const originalPage = await insertData(
         trx,
         "Pages",
-        buildPage({ SectionId: section.id }),
+        buildPage({ sectionId: section.id }),
         head,
         "*"
       );
       const originalAnswer = await insertData(
         trx,
         "Answers",
-        buildAnswer({ QuestionPageId: originalPage.id }),
+        buildAnswer({ questionPageId: originalPage.id }),
         head,
         "*"
       );
       await insertData(
         trx,
         "Answers",
-        buildAnswer({ QuestionPageId: originalPage.id, isDeleted: true }),
+        buildAnswer({ questionPageId: originalPage.id, isDeleted: true }),
         head,
         "*"
       );
@@ -390,15 +390,15 @@ describe("Duplicate strategy tests", () => {
 
     const duplicateAnswers = await db.transaction(trx =>
       selectData(trx, "Answers", "*", {
-        QuestionPageId: duplicatePage.id
+        questionPageId: duplicatePage.id
       })
     );
     expect(duplicateAnswers).toHaveLength(1);
     const firstAnswer = head(duplicateAnswers);
     expect(
-      omit(firstAnswer, [...notDuplicatedFields, "id", "QuestionPageId"])
+      omit(firstAnswer, [...notDuplicatedFields, "id", "questionPageId"])
     ).toMatchObject(
-      omit(originalAnswer, [...notDuplicatedFields, "id", "QuestionPageId"])
+      omit(originalAnswer, [...notDuplicatedFields, "id", "questionPageId"])
     );
   });
 
@@ -409,21 +409,21 @@ describe("Duplicate strategy tests", () => {
         const originalPage = await insertData(
           trx,
           "Pages",
-          buildPage({ SectionId: section.id }),
+          buildPage({ sectionId: section.id }),
           head,
           "*"
         );
         const originalAnswer = await insertData(
           trx,
           "Answers",
-          buildAnswer({ QuestionPageId: originalPage.id }),
+          buildAnswer({ questionPageId: originalPage.id }),
           head,
           "*"
         );
         const originalValidation = await insertData(
           trx,
           "Validation_AnswerRules",
-          buildValidation({ AnswerId: originalAnswer.id }),
+          buildValidation({ answerId: originalAnswer.id }),
           head,
           "*"
         );
@@ -437,10 +437,10 @@ describe("Duplicate strategy tests", () => {
 
     const duplicatedValidation = await db.transaction(trx =>
       selectData(trx, "Validation_AnswerRules", "*", {
-        AnswerId: duplicatedAnswer.id
+        answerId: duplicatedAnswer.id
       }).then(head)
     );
-    const fieldsToIgnore = ["id", "created_at", "updated_at", "AnswerId"];
+    const fieldsToIgnore = ["id", "createdAt", "updatedAt", "answerId"];
 
     expect(omit(duplicatedValidation, fieldsToIgnore)).toMatchObject(
       omit(originalValidation, fieldsToIgnore)

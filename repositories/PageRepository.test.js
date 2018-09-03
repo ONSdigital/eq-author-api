@@ -456,7 +456,7 @@ describe("PagesRepository", () => {
 
       const duplicatePage = await PageRepository.duplicatePage(result.id, 1);
 
-      const fieldsToOmit = ["id", "order", "title", "created_at", "updated_at"];
+      const fieldsToOmit = ["id", "order", "title", "createdAt", "updatedAt"];
 
       expect(omit(result, fieldsToOmit)).toMatchObject(
         omit(duplicatePage, fieldsToOmit)

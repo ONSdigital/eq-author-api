@@ -1,28 +1,21 @@
-const { head, invert, map } = require("lodash/fp");
+const { head } = require("lodash/fp");
 const QuestionPage = require("../db/QuestionPage");
-const mapFields = require("../utils/mapFields");
-const knex = require("../db");
 
-const mapping = { SectionId: "sectionId" };
-const fromDb = mapFields(mapping);
-const toDb = mapFields(invert(mapping));
+const knex = require("../db");
 
 module.exports.findAll = function findAll(
   where = {},
-  orderBy = "created_at",
+  orderBy = "createdAt",
   direction = "asc"
 ) {
   return QuestionPage.findAll()
     .where({ isDeleted: false })
     .where(where)
-    .orderBy(orderBy, direction)
-    .then(map(fromDb));
+    .orderBy(orderBy, direction);
 };
 
 module.exports.getById = function getById(id) {
-  return QuestionPage.findById(id)
-    .where({ isDeleted: false })
-    .then(fromDb);
+  return QuestionPage.findById(id).where({ isDeleted: false });
 };
 
 module.exports.insert = function insert(
@@ -30,17 +23,15 @@ module.exports.insert = function insert(
   db = knex
 ) {
   return QuestionPage.create(
-    toDb({
+    {
       title,
       description,
       guidance,
       sectionId,
       order
-    }),
+    },
     db
-  )
-    .then(head)
-    .then(fromDb);
+  ).then(head);
 };
 
 module.exports.update = function update({
@@ -55,19 +46,13 @@ module.exports.update = function update({
     description,
     guidance,
     isDeleted
-  })
-    .then(head)
-    .then(fromDb);
+  }).then(head);
 };
 
 module.exports.remove = function remove(id) {
-  return QuestionPage.update(id, { isDeleted: true })
-    .then(head)
-    .then(fromDb);
+  return QuestionPage.update(id, { isDeleted: true }).then(head);
 };
 
 module.exports.undelete = function(id) {
-  return QuestionPage.update(id, { isDeleted: false })
-    .then(head)
-    .then(fromDb);
+  return QuestionPage.update(id, { isDeleted: false }).then(head);
 };
