@@ -99,6 +99,8 @@ const Resolvers = {
 
     createOption: (root, args, ctx) =>
       ctx.repositories.Option.insert(args.input),
+    createMutuallyExclusiveOption: (root, { input }, ctx) =>
+      ctx.repositories.Option.insert({ mutuallyExclusive: true, ...input }),
     updateOption: (_, args, ctx) => ctx.repositories.Option.update(args.input),
     deleteOption: (_, args, ctx) =>
       ctx.repositories.Option.remove(args.input.id),
@@ -302,7 +304,12 @@ const Resolvers = {
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.getById(answer.questionPageId),
     options: (answer, args, ctx) =>
-      ctx.repositories.Option.findAll({ AnswerId: answer.id }),
+      ctx.repositories.Option.findAll({
+        AnswerId: answer.id,
+        mutuallyExclusive: false
+      }),
+    mutuallyExclusiveOption: (answer, args, ctx) =>
+      ctx.repositories.Option.findExclusiveOptionByAnswerId(answer.id),
     other: async ({ id }, args, ctx) => {
       const answer = await ctx.repositories.Answer.getOtherAnswer(id);
 

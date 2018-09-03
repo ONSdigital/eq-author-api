@@ -56,6 +56,16 @@ mutation CreateOption($input: CreateOptionInput!){
 }
 `;
 
+const createExclusiveMutation = `
+mutation createMutuallyExclusiveOption($input: CreateMutuallyExclusiveOptionInput!) {
+  createMutuallyExclusiveOption(input: $input) {
+    id
+    description
+    label
+  }
+}
+`;
+
 const createQuestionPageMutation = `
   mutation CreateQuestionPage($input: CreateQuestionPageInput!){
     createQuestionPage(input: $input){
@@ -621,5 +631,6 @@ module.exports = {
   moveSectionMutation,
   getAnswerValidations,
   toggleAnswerValidation,
-  updateAnswerValidation
+  updateAnswerValidation,
+  createExclusiveMutation
 };

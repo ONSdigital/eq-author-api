@@ -68,7 +68,10 @@ describe("answer query", () => {
 
     expect(result.errors).toBeUndefined();
     expect(repositories.Answer.getById).toHaveBeenCalledWith(id);
-    expect(repositories.Option.findAll).toHaveBeenCalledWith({ AnswerId: id });
+    expect(repositories.Option.findAll).toHaveBeenCalledWith({
+      AnswerId: id,
+      mutuallyExclusive: false
+    });
   });
 
   it("should have an association with Page", async () => {
