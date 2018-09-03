@@ -431,7 +431,7 @@ describe("resolvers", () => {
     expect(result).not.toHaveProperty("errors");
   });
 
-  it("fails when trying to create a second exclusive option", async () => {
+  it.only("fails when trying to create a second exclusive option", async () => {
     const checkboxAnswer = await createNewAnswer(firstPage, "Checkbox");
     await createExclusive(checkboxAnswer);
     const result = await createExclusive(checkboxAnswer);

@@ -1,4 +1,4 @@
-const { head, invert, map, isEmpty } = require("lodash/fp");
+const { head, invert, map, isNil } = require("lodash/fp");
 const Option = require("../db/Option");
 const mapFields = require("../utils/mapFields");
 const db = require("../db");
@@ -8,34 +8,21 @@ const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
 const checkForExistingExclusive = async answerId => {
-  const existingExclusive = await Option.findAll().where(
-    toDb({
-      answerId,
-      mutuallyExclusive: true,
-      isDeleted: false
-    })
-  );
-  if (!isEmpty(existingExclusive)) {
+  const existingExclusive = await findExclusiveOptionByAnswerId(answerId);
+  if (!isNil(existingExclusive)) {
     throw new Error("There is already an exclusive checkbox on this answer.");
   }
 };
 
-module.exports.findAll = function findAll(
-  where = {},
-  orderBy = "created_at",
-  direction = "asc"
-) {
-  return Option.findAll()
+const findAll = (where = {}, orderBy = "created_at", direction = "asc") =>
+  Option.findAll()
     .where({ isDeleted: false, otherAnswerId: null })
     .where(where)
     .orderBy(orderBy, direction)
     .then(map(fromDb));
-};
 
-module.exports.findExclusiveOptionByAnswerId = function findExclusiveOptionByAnswerId(
-  answerId
-) {
-  return Option.findAll()
+const findExclusiveOptionByAnswerId = answerId =>
+  Option.findAll()
     .where(
       toDb({
         isDeleted: false,
@@ -44,20 +31,18 @@ module.exports.findExclusiveOptionByAnswerId = function findExclusiveOptionByAns
         answerId
       })
     )
-    .then(fromDb)
-    .then(head);
-};
+    .then(head)
+    .then(fromDb);
 
-module.exports.getById = function getById(id) {
-  return Option.findById(id)
+const getById = id =>
+  Option.findById(id)
     .where({ isDeleted: false })
     .then(fromDb);
-};
 
-module.exports.insert = async function insert(
+const insert = async (
   { label, description, value, qCode, answerId, mutuallyExclusive = false },
   trx = db
-) {
+) => {
   if (mutuallyExclusive) {
     await checkForExistingExclusive(answerId);
   }
@@ -77,15 +62,8 @@ module.exports.insert = async function insert(
     .then(fromDb);
 };
 
-module.exports.update = function update({
-  id,
-  label,
-  description,
-  value,
-  qCode,
-  isDeleted
-}) {
-  return Option.update(id, {
+const update = ({ id, label, description, value, qCode, isDeleted }) =>
+  Option.update(id, {
     label,
     description,
     value,
@@ -94,7 +72,6 @@ module.exports.update = function update({
   })
     .then(head)
     .then(fromDb);
-};
 
 const deleteOption = async (trx, id) => {
   const deletedOption = await trx("Options")
@@ -113,23 +90,26 @@ const deleteOption = async (trx, id) => {
   return deletedOption;
 };
 
-module.exports.remove = function remove(id) {
-  return db.transaction(trx => deleteOption(trx, id));
-};
+const remove = id => db.transaction(trx => deleteOption(trx, id));
 
-module.exports.undelete = function(id) {
-  return Option.update(id, { isDeleted: false })
+const undelete = id =>
+  Option.update(id, { isDeleted: false })
     .then(head)
     .then(fromDb);
-};
 
-module.exports.getOtherOption = function(
-  answerId,
-  orderBy = "created_at",
-  direction = "asc"
-) {
-  return Option.findAll()
+const getOtherOption = (answerId, orderBy = "created_at", direction = "asc") =>
+  Option.findAll()
     .where({ isDeleted: false, otherAnswerId: answerId })
     .orderBy(orderBy, direction)
     .first();
-};
+
+Object.assign(module.exports, {
+  findAll,
+  findExclusiveOptionByAnswerId,
+  getById,
+  insert,
+  update,
+  remove,
+  undelete,
+  getOtherOption
+});
