@@ -7,6 +7,19 @@ const mapping = { AnswerId: "answerId" };
 const fromDb = mapFields(mapping);
 const toDb = mapFields(invert(mapping));
 
+const findExclusiveOptionByAnswerId = answerId =>
+  Option.findAll()
+    .where(
+      toDb({
+        isDeleted: false,
+        otherAnswerId: null,
+        mutuallyExclusive: true,
+        answerId
+      })
+    )
+    .then(head)
+    .then(fromDb);
+
 const checkForExistingExclusive = async answerId => {
   const existingExclusive = await findExclusiveOptionByAnswerId(answerId);
   if (!isNil(existingExclusive)) {
@@ -20,19 +33,6 @@ const findAll = (where = {}, orderBy = "created_at", direction = "asc") =>
     .where(where)
     .orderBy(orderBy, direction)
     .then(map(fromDb));
-
-const findExclusiveOptionByAnswerId = answerId =>
-  Option.findAll()
-    .where(
-      toDb({
-        isDeleted: false,
-        otherAnswerId: null,
-        mutuallyExclusive: true,
-        answerId
-      })
-    )
-    .then(head)
-    .then(fromDb);
 
 const getById = id =>
   Option.findById(id)
