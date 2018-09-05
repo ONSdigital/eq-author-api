@@ -139,7 +139,7 @@ describe("PagesRepository", () => {
       });
     });
 
-    it("can move pages within same section", async () => {
+    it("can move pages backwards within same section", async () => {
       const { section } = await setup();
       const pages = await createPages(section.id, 5);
 
@@ -157,6 +157,44 @@ describe("PagesRepository", () => {
       });
 
       expect(map(updatePages, "id")).toEqual(map(reverse(pages), "id"));
+    });
+
+    it("can move pages to the end of the current section", async () => {
+      const { section } = await setup();
+      const pages = await createPages(section.id, 5);
+
+      const middlePage = pages[3];
+
+      await PageRepository.move({
+        id: middlePage.id,
+        sectionId: section.id,
+        position: "5"
+      });
+
+      const updatePages = await PageRepository.findAll({
+        sectionId: section.id
+      });
+
+      expect(last(updatePages).id).toEqual(middlePage.id);
+    });
+
+    it("can move pages forwards in the current section", async () => {
+      const { section } = await setup();
+      const pages = await createPages(section.id, 5);
+
+      const firstPage = pages[0];
+
+      await PageRepository.move({
+        id: firstPage.id,
+        sectionId: section.id,
+        position: "3"
+      });
+
+      const updatePages = await PageRepository.findAll({
+        sectionId: section.id
+      });
+
+      expect(updatePages[3].id).toEqual(firstPage.id);
     });
 
     it("gracefully handles position values greater than number of pages", async () => {
