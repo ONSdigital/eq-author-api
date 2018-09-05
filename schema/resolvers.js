@@ -148,21 +148,28 @@ const Resolvers = {
     toggleValidationRule: (_, args, ctx) =>
       ctx.repositories.Validation.toggleValidationRule(args.input),
     updateValidationRule: (_, args, ctx) =>
-      ctx.repositories.Validation.updateValidationRule(args.input)
+      ctx.repositories.Validation.updateValidationRule(args.input),
+    createMetadata: (root, args, ctx) =>
+      ctx.repositories.Metadata.insert(args.input),
+    updateMetadata: (_, args, ctx) =>
+      ctx.repositories.Metadata.update(args.input),
+    deleteMetadata: (_, args, ctx) =>
+      ctx.repositories.Metadata.remove(args.input.id)
   },
 
   Questionnaire: {
     sections: (questionnaire, args, ctx) =>
       ctx.repositories.Section.findAll({ QuestionnaireId: questionnaire.id }),
     createdBy: questionnaire => ({ name: questionnaire.createdBy }),
-    questionnaireInfo: ({ id }) => id
+    questionnaireInfo: ({ id }) => id,
+    metadata: (questionnaire, args, ctx) =>
+      ctx.repositories.Metadata.findAll({ QuestionnaireId: questionnaire.id })
   },
 
   QuestionnaireInfo: {
     totalSectionCount: (questionnaireId, args, ctx) =>
       ctx.repositories.Section.getSectionCount(questionnaireId)
   },
-
   Section: {
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ SectionId: section.id }),
@@ -392,8 +399,16 @@ const Resolvers = {
     custom: ({ custom }) => custom
   },
 
+  Metadata: {
+    textValue: ({ type, value }) => (type === "Text" ? value : null),
+    languageValue: ({ type, value }) => (type === "Language" ? value : null),
+    regionValue: ({ type, value }) => (type === "Region" ? value : null),
+    dateValue: ({ type, value }) => (type === "Date" ? value : null)
+  },
+
   Date: GraphQLDate,
 
   JSON: GraphQLJSON
 };
+
 module.exports = Resolvers;

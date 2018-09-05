@@ -1297,9 +1297,9 @@ entities@^1.1.1, entities@~1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.1.tgz#6e5c2d0a5621b5dadaecef80b90edfb5cd7772f0"
 
-eq-author-graphql-schema@0.24.0:
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/eq-author-graphql-schema/-/eq-author-graphql-schema-0.24.0.tgz#238d2ce167a9962cdf9eb7d73cd94f83a9ba7304"
+eq-author-graphql-schema@^0.25.0:
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/eq-author-graphql-schema/-/eq-author-graphql-schema-0.25.0.tgz#0125702e18c669d74f6bcd8d7462836ddcc27515"
 
 error-ex@^1.2.0, error-ex@^1.3.1:
   version "1.3.1"

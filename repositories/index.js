@@ -6,5 +6,6 @@ module.exports = {
   Answer: require("./AnswerRepository"),
   Option: require("./OptionRepository"),
   Routing: require("./RoutingRepository"),
-  Validation: require("./ValidationRepository")
+  Validation: require("./ValidationRepository"),
+  Metadata: require("./MetadataRepository")
 };
