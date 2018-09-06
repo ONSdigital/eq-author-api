@@ -29,7 +29,6 @@ describe("createSection", () => {
     const input = {
       alias: "Section alias",
       title: "Test section",
-      description: "Test section description",
       questionnaireId: QUESTIONNAIRE_ID
     };
 

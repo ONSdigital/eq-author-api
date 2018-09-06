@@ -24,8 +24,7 @@ describe("updateSection", () => {
     const input = {
       id: "1",
       title: "Updated section title",
-      alias: "Updated section alias",
-      description: "This is an updated section description"
+      alias: "Updated section alias"
     };
 
     const result = await executeQuery(
