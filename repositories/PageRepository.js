@@ -1,7 +1,9 @@
 const { map, head, invert, get } = require("lodash/fp");
+const updateTitle = require("../utils/updateTitle");
 const Page = require("../db/Page");
 const QuestionPageRepository = require("./QuestionPageRepository");
 const mapFields = require("../utils/mapFields");
+const { duplicatePageStrategy } = require("./strategies/duplicateStrategy");
 const db = require("../db");
 const {
   getOrUpdateOrderForPageInsert
@@ -95,6 +97,20 @@ function getRoutingDestinations(pageId) {
   return db.transaction(trx => getAvailableRoutingDestinations(trx, pageId));
 }
 
+function duplicatePage(id, position) {
+  return db.transaction(async trx => {
+    const page = await trx
+      .select("*")
+      .from("Pages")
+      .where({ id })
+      .then(head);
+
+    return duplicatePageStrategy(trx, page, position, {
+      title: updateTitle(page.title)
+    }).then(fromDb);
+  });
+}
+
 Object.assign(module.exports, {
   findAll,
   getById,
@@ -104,5 +120,6 @@ Object.assign(module.exports, {
   undelete,
   move,
   getPosition,
-  getRoutingDestinations
+  getRoutingDestinations,
+  duplicatePage
 });

@@ -2,7 +2,7 @@ const db = require("../db");
 const QuestionnaireRepository = require("../repositories/QuestionnaireRepository");
 const SectionRepository = require("../repositories/SectionRepository");
 const PageRepository = require("../repositories/PageRepository");
-const { last, head, map, times } = require("lodash");
+const { last, head, map, times, omit, parseInt } = require("lodash");
 
 const reverse = array => array.slice().reverse();
 
@@ -52,7 +52,7 @@ const eachP = (items, iter) =>
 
 describe("PagesRepository", () => {
   beforeAll(() => db.migrate.latest());
-  afterAll(() => db.migrate.rollback().then(() => db.destroy()));
+  afterAll(() => db.destroy());
   afterEach(() => db("Questionnaires").delete());
 
   it("throws for unknown page types", () => {
@@ -194,7 +194,10 @@ describe("PagesRepository", () => {
     });
 
     it("can move pages between sections", async () => {
-      const { section, questionnaire: { id: questionnaireId } } = await setup();
+      const {
+        section,
+        questionnaire: { id: questionnaireId }
+      } = await setup();
 
       const section2 = await SectionRepository.insert(
         buildSection({ title: "Section 2", questionnaireId })
@@ -215,7 +218,10 @@ describe("PagesRepository", () => {
     });
 
     it("correctly re-orders pages as they're moved between sections", async () => {
-      const { section, questionnaire: { id: questionnaireId } } = await setup();
+      const {
+        section,
+        questionnaire: { id: questionnaireId }
+      } = await setup();
 
       const section2 = await SectionRepository.insert(
         buildSection({ title: "Section 2", questionnaireId })
@@ -438,6 +444,77 @@ describe("PagesRepository", () => {
       const position = await PageRepository.getPosition({ id: pages[2].id });
 
       expect(position).toBe(pages[2].position);
+    });
+  });
+
+  describe("Duplicating a page", () => {
+    it("copies the necessary data into the duplicate from the original", async () => {
+      const { section } = await setup();
+
+      const page = buildPage({ sectionId: section.id });
+      const result = await PageRepository.insert(page);
+
+      const duplicatePage = await PageRepository.duplicatePage(result.id, 1);
+
+      const fieldsToOmit = ["id", "order", "title", "created_at", "updated_at"];
+
+      expect(omit(result, fieldsToOmit)).toMatchObject(
+        omit(duplicatePage, fieldsToOmit)
+      );
+    });
+
+    it("prepends 'Copy of' to the question title of the copy when duplicating a page", async () => {
+      const { section } = await setup();
+
+      const page = buildPage({ sectionId: section.id });
+      const result = await PageRepository.insert(page);
+
+      const duplicatePage = await PageRepository.duplicatePage(result.id, 1);
+
+      const startsWithCopyOf = duplicatePage.title.startsWith("Copy of");
+
+      expect(startsWithCopyOf).toBe(true);
+    });
+
+    it("is able to insert the copied page below the original", async () => {
+      const { section } = await setup();
+
+      const pageOne = await PageRepository.insert(
+        buildPage({ sectionId: section.id })
+      );
+
+      const pageTwo = await PageRepository.duplicatePage(pageOne.id, 1);
+
+      const positionOfPageOne = await PageRepository.getPosition(pageOne);
+      const positionOfPageTwo = await PageRepository.getPosition(pageTwo);
+
+      expect(parseInt(positionOfPageOne) + 1).toEqual(
+        parseInt(positionOfPageTwo)
+      );
+    });
+
+    it("maintains the order of other questions within the section after duplicating a page", async () => {
+      const { section } = await setup();
+
+      const pageOne = await PageRepository.insert(
+        buildPage({ sectionId: section.id })
+      );
+      const pageTwo = await PageRepository.insert(
+        buildPage({ sectionId: section.id })
+      );
+
+      const pageThree = await PageRepository.duplicatePage(pageOne.id, 1);
+
+      const positionOfPageOne = await PageRepository.getPosition(pageOne);
+      const positionOfPageTwo = await PageRepository.getPosition(pageTwo);
+      const positionOfPageThree = await PageRepository.getPosition(pageThree);
+
+      expect(parseInt(positionOfPageOne) + 1).toEqual(
+        parseInt(positionOfPageThree)
+      );
+      expect(parseInt(positionOfPageTwo) - 1).toEqual(
+        parseInt(positionOfPageThree)
+      );
     });
   });
 });

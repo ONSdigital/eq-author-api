@@ -329,7 +329,7 @@ describe("resolvers", () => {
   let firstPage;
 
   beforeAll(() => db.migrate.latest());
-  afterAll(() => db.migrate.rollback().then(() => db.destroy()));
+  afterAll(() => db.destroy());
   afterEach(() => db("Questionnaires").delete());
 
   beforeEach(async () => {

@@ -17,7 +17,7 @@ const buildQuestionnaire = (json = {}) => {
 
 describe("QuestionnaireRepository", () => {
   beforeAll(() => knex.migrate.latest());
-  afterAll(() => knex.migrate.rollback().then(() => knex.destroy()));
+  afterAll(() => knex.destroy());
   afterEach(() => knex("Questionnaires").delete());
 
   it("should create new Questionnaire", async () => {

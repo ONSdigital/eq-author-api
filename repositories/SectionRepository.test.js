@@ -36,7 +36,7 @@ const eachP = (items, iter) =>
 
 describe("SectionRepository", () => {
   beforeAll(() => db.migrate.latest());
-  afterAll(() => db.migrate.rollback().then(() => db.destroy()));
+  afterAll(() => db.destroy());
   afterEach(() => db("Questionnaires").delete());
 
   it("allows sections to be created", async () => {
