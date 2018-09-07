@@ -305,7 +305,9 @@ const Resolvers = {
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.getById(answer.questionPageId),
     validation: answer =>
-      getValidationEntity(answer.type) !== "number" ? null : answer
+      ["number", "date"].includes(getValidationEntity(answer.type))
+        ? answer
+        : null
   },
 
   CompositeAnswer: {
