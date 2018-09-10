@@ -576,6 +576,7 @@ const getAnswerValidations = `
                value
                unit
              }
+             relativePostion
            }
          }
        }
@@ -604,6 +605,14 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
     ...on MaxValueValidationRule {
       custom
       inclusive
+    }
+    ...on EarliestDateValidationRule {
+      customDate: custom
+      offset {
+        value
+        unit
+      }
+      relativePostion
     }
   }
 }

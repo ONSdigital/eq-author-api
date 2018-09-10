@@ -83,6 +83,9 @@ const mutateValidationParameters = async input => {
     },
     ctx
   );
+  if (result.errors) {
+    throw new Error(result.errors[0]);
+  }
   return result.data.updateValidationRule;
 };
 
@@ -227,9 +230,35 @@ describe("resolvers", () => {
         }
       });
 
-      expect(validationObject(validation.earliestDate.id)).toMatchObject(
-        validation
+      expect(validation).toMatchObject(
+        validationObject(validation.earliestDate.id)
       );
+    });
+
+    it("should be able to update earliest date properties", async () => {
+      const answer = await createNewAnswer(firstPage, "Date");
+      const validation = await queryAnswerValidations(answer.id);
+      const result = await mutateValidationParameters({
+        id: validation.earliestDate.id,
+        earliestDateInput: {
+          custom: "2017-01-01",
+          offset: {
+            value: 8,
+            unit: "Months"
+          },
+          relativePostion: "After"
+        }
+      });
+      const expected = {
+        id: validation.earliestDate.id,
+        customDate: "2017-01-01",
+        offset: {
+          value: 8,
+          unit: "Months"
+        },
+        relativePostion: "After"
+      };
+      expect(result).toMatchObject(expected);
     });
   });
 });

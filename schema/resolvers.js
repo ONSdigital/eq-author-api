@@ -377,6 +377,8 @@ const Resolvers = {
           return "MaxValueValidationRule";
         case "minValue":
           return "MinValueValidationRule";
+        case "earliestDate":
+          return "EarliestDateValidationRule";
 
         default:
           throw new TypeError(
@@ -420,6 +422,7 @@ const Resolvers = {
   },
 
   EarliestDateValidationRule: {
+    custom: ({ custom }) => (custom ? new Date(custom) : null),
     offset: ({ config: { offset } }) => offset,
     relativePostion: ({ config: { relativePostion } }) => relativePostion
   },
