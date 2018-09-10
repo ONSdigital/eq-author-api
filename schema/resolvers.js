@@ -359,6 +359,8 @@ const Resolvers = {
       switch (validationEntity) {
         case "number":
           return "NumberValidation";
+        case "date":
+          return "DateValidation";
 
         default:
           throw new TypeError(
@@ -397,6 +399,14 @@ const Resolvers = {
       )
   },
 
+  DateValidation: {
+    earliestDate: (answer, args, ctx) =>
+      ctx.repositories.Validation.findByAnswerIdAndValidationType(
+        answer,
+        "earliestDate"
+      )
+  },
+
   MinValueValidationRule: {
     enabled: ({ enabled }) => enabled,
     inclusive: ({ config }) => config.inclusive,
@@ -407,6 +417,11 @@ const Resolvers = {
     enabled: ({ enabled }) => enabled,
     inclusive: ({ config }) => config.inclusive,
     custom: ({ custom }) => custom
+  },
+
+  EarliestDateValidationRule: {
+    offset: ({ config: { offset } }) => offset,
+    relativePostion: ({ config: { relativePostion } }) => relativePostion
   },
 
   Metadata: {

@@ -530,7 +530,7 @@ mutation UpdateAnswer($input: UpdateAnswerInput!) {
     mandatory
     ...on CompositeAnswer{
       childAnswers{
-        id 
+        id
         label
       }
     }
@@ -566,6 +566,17 @@ const getAnswerValidations = `
             inclusive
             custom
           }
+         }
+         ...on DateValidation {
+           earliestDate {
+             id
+             enabled
+             custom
+             offset {
+               value
+               unit
+             }
+           }
          }
        }
      }

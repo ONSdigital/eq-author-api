@@ -57,6 +57,9 @@ const queryAnswerValidations = async id => {
     },
     ctx
   );
+  if (result.errors) {
+    throw new Error(result.errors[0]);
+  }
   return result.data.answer.validation;
 };
 
@@ -214,6 +217,7 @@ describe("resolvers", () => {
       const validationObject = id => ({
         earliestDate: {
           id,
+          enabled: false,
           offset: {
             value: 0,
             unit: "Days"
@@ -223,8 +227,8 @@ describe("resolvers", () => {
         }
       });
 
-      expect(validation).toMatchObject(
-        validationObject(validation.earliestDate.id)
+      expect(validationObject(validation.earliestDate.id)).toMatchObject(
+        validation
       );
     });
   });
