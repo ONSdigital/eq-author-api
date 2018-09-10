@@ -411,7 +411,12 @@ const Resolvers = {
     textValue: ({ type, value }) => (type === "Text" ? value : null),
     languageValue: ({ type, value }) => (type === "Language" ? value : null),
     regionValue: ({ type, value }) => (type === "Region" ? value : null),
-    dateValue: ({ type, value }) => (type === "Date" ? value : null)
+    dateValue: ({ type, value }) => {
+      if (type !== "Date" || !value) {
+        return null;
+      }
+      return new Date(value);
+    }
   },
 
   Date: GraphQLDate,
