@@ -27,7 +27,6 @@ exports.up = async function(knex) {
       AnswerId: id,
       validationType: "earliestDate",
       config: {
-        inclusive: false,
         offset: {
           value: 0,
           unit: "Days"

@@ -16,7 +16,6 @@ const defaultValidationRuleConfigs = {
     inclusive: false
   },
   earliestDate: {
-    inclusive: false,
     offset: {
       value: 0,
       unit: "Days"
