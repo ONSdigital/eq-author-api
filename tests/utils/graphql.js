@@ -576,7 +576,7 @@ const getAnswerValidations = `
                value
                unit
              }
-             relativePostion
+             relativePosition
            }
          }
        }
@@ -612,7 +612,7 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
         value
         unit
       }
-      relativePostion
+      relativePosition
     }
   }
 }

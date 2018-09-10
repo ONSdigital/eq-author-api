@@ -20,7 +20,7 @@ const defaultValidationRuleConfigs = {
       value: 0,
       unit: "Days"
     },
-    relativePostion: "Before"
+    relativePosition: "Before"
   }
 };
 

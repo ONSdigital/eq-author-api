@@ -424,7 +424,7 @@ const Resolvers = {
   EarliestDateValidationRule: {
     custom: ({ custom }) => (custom ? new Date(custom) : null),
     offset: ({ config: { offset } }) => offset,
-    relativePostion: ({ config: { relativePostion } }) => relativePostion
+    relativePosition: ({ config: { relativePosition } }) => relativePosition
   },
 
   Metadata: {

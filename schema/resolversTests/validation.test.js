@@ -225,7 +225,7 @@ describe("resolvers", () => {
             value: 0,
             unit: "Days"
           },
-          relativePostion: "Before",
+          relativePosition: "Before",
           custom: null
         }
       });
@@ -246,7 +246,7 @@ describe("resolvers", () => {
             value: 8,
             unit: "Months"
           },
-          relativePostion: "After"
+          relativePosition: "After"
         }
       });
       const expected = {
@@ -256,7 +256,7 @@ describe("resolvers", () => {
           value: 8,
           unit: "Months"
         },
-        relativePostion: "After"
+        relativePosition: "After"
       };
       expect(result).toMatchObject(expected);
     });
