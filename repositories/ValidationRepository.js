@@ -18,7 +18,7 @@ const getInputType = flow(
 const updateValidationRule = input => {
   const { custom, ...config } = input[getInputType(input)];
   return Validation.update(input.id, {
-    custom,
+    custom: JSON.stringify(custom),
     config: JSON.stringify(config)
   }).then(head);
 };
