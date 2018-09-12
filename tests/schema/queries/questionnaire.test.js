@@ -62,7 +62,7 @@ describe("questionnaire query", () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.Questionnaire.getById).toHaveBeenCalledWith(id);
     expect(repositories.Section.findAll).toHaveBeenCalledWith({
-      QuestionnaireId: id
+      questionnaireId: id
     });
   });
 

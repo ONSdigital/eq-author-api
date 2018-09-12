@@ -20,20 +20,20 @@ const getMaxOrder = flow(
   getOr(0, "order")
 );
 
-const getPagesBySection = (trx, SectionId) =>
+const getPagesBySection = (trx, sectionId) =>
   trx("PagesView")
     .columns("id", "order")
-    .where({ SectionId })
+    .where({ sectionId })
     .orderBy("order");
 
-const getSectionsByQuestionnaire = (trx, QuestionnaireId) =>
+const getSectionsByQuestionnaire = (trx, questionnaireId) =>
   trx("SectionsView")
     .columns("id", "order")
-    .where({ QuestionnaireId })
+    .where({ questionnaireId })
     .orderBy("order");
 
 const makeSpaceForInsert = (trx, tableName, parentId, order) => {
-  const key = tableName === "Sections" ? "QuestionnaireId" : "SectionId";
+  const key = tableName === "Sections" ? "questionnaireId" : "sectionId";
   return trx(tableName)
     .where({ [key]: parentId })
     .andWhere("order", ">", order)

@@ -29,7 +29,7 @@ const deleteAnswer = async (trx, { id }) =>
 const createOption = async (trx, { id, parentAnswerId }) =>
   trx("Options")
     .insert({
-      AnswerId: parentAnswerId,
+      answerId: parentAnswerId,
       otherAnswerId: id
     })
     .returning("*")

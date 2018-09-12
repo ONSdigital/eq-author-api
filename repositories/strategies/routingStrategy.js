@@ -1,132 +1,96 @@
-const { head, invert, map } = require("lodash/fp");
+const { head } = require("lodash/fp");
 const { parseInt, isNil, find, isEmpty, get } = require("lodash");
-
-const mapFields = require("../../utils/mapFields");
-
-const mapping = {
-  QuestionnaireId: "questionnaireId",
-  SectionId: "sectionId",
-  QuestionPageId: "questionPageId",
-  ElseDestination: "elseDestination",
-  RoutingRuleSetId: "routingRuleSetId",
-  RuleDestination: "ruleDestination",
-  RoutingRuleId: "routingRuleId",
-  AnswerId: "answerId",
-  OptionId: "optionId",
-  ConditionId: "conditionId",
-  SectionDestinationId: "sectionDestinationId",
-  PageDestinationId: "pageDestinationId",
-  RoutingDestinationId: "routingDestinationId"
-};
-
-const toDb = mapFields(invert(mapping));
-const fromDb = mapFields(mapping);
 
 const updateAllRoutingConditions = (trx, where, values) =>
   trx("Routing_Conditions")
-    .where(toDb(where))
-    .update(toDb(values))
+    .where(where)
+    .update(values)
     .returning("*");
 
 const updateRoutingCondition = (trx, id, questionPageId, answerId) =>
   trx("Routing_Conditions")
     .where({ id })
-    .update(
-      toDb({
-        questionPageId,
-        answerId
-      })
-    )
+    .update({
+      questionPageId,
+      answerId
+    })
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 
 const getFirstAnswer = (trx, questionPageId) =>
   trx("Answers")
-    .where(toDb({ questionPageId, isDeleted: false }))
+    .where({ questionPageId, isDeleted: false })
     .orderBy("id")
-    .first()
-    .then(fromDb);
+    .first();
 
 const findAnswerByIdAndQuestionPageId = (trx, id, questionPageId) =>
   trx("Answers")
     .where({ isDeleted: false })
-    .where(toDb({ id, questionPageId }))
-    .then(head)
-    .then(fromDb);
+    .where({ id, questionPageId })
+    .then(head);
 
 const deleteRoutingConditionValues = (trx, where) =>
   trx("Routing_ConditionValues")
-    .where(toDb(where))
+    .where(where)
     .del();
 
 const getPageById = (trx, id) =>
   trx("PagesView")
     .where({ id })
-    .first()
-    .then(fromDb);
+    .first();
 
 const getSectionById = (trx, id) =>
   trx("Sections")
     .where({ id, isDeleted: false })
-    .first()
-    .then(fromDb);
+    .first();
 
 const getPageDestinations = (trx, { sectionId, order }) =>
   trx("PagesView")
-    .where(toDb({ sectionId }))
-    .where("order", ">", order)
-    .then(map(fromDb));
+    .where({ sectionId })
+    .where("order", ">", order);
 
 const getSectionDestinations = (trx, { id, questionnaireId }) =>
   trx("Sections")
     .select("*")
-    .where(toDb({ questionnaireId, isDeleted: false }))
+    .where({ questionnaireId, isDeleted: false })
     .where("id", ">", id)
-    .orderBy("created_at", "asc")
-    .then(map(fromDb));
+    .orderBy("createdAt", "asc");
 
 const findRoutingRuleSet = (trx, questionPageId) =>
   trx("Routing_RuleSets")
-    .where(toDb({ questionPageId, isDeleted: false }))
-    .first()
-    .then(fromDb);
+    .where({ questionPageId, isDeleted: false })
+    .first();
 
 const getRoutingRuleSetById = (trx, routingRuleSetId) => {
   return trx("Routing_RuleSets")
-    .where(toDb({ id: routingRuleSetId, isDeleted: false }))
-    .first()
-    .then(fromDb);
+    .where({ id: routingRuleSetId, isDeleted: false })
+    .first();
 };
 
 const insertRoutingCondition = (trx, routingCondition) =>
   trx("Routing_Conditions")
-    .insert(toDb(routingCondition))
+    .insert(routingCondition)
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 
 const insertRoutingRule = (trx, routingRule) =>
   trx("Routing_Rules")
-    .insert(toDb(routingRule))
+    .insert(routingRule)
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 
 const insertRoutingRuleSet = async (
   trx,
   { questionPageId, routingDestinationId }
 ) =>
   trx("Routing_RuleSets")
-    .insert(
-      toDb({
-        questionPageId: parseInt(questionPageId),
-        routingDestinationId: parseInt(routingDestinationId)
-      })
-    )
+    .insert({
+      questionPageId: parseInt(questionPageId),
+      routingDestinationId: parseInt(routingDestinationId)
+    })
+
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 
 const checkAnswerBelongsToPage = async (trx, answerId, questionPageId) => {
   if (isNil(answerId)) {
@@ -179,7 +143,7 @@ const toggleConditionOptionStrategy = async (
   { conditionId, optionId, checked }
 ) => {
   const table = trx("Routing_ConditionValues");
-  const where = toDb({ optionId, conditionId });
+  const where = { optionId, conditionId };
   const existing = await table.where(where);
 
   if (!isEmpty(existing) && checked) {
@@ -187,13 +151,10 @@ const toggleConditionOptionStrategy = async (
   }
 
   const query = checked
-    ? table.insert(toDb({ conditionId, optionId }))
-    : table.where(toDb({ optionId })).del();
+    ? table.insert({ conditionId, optionId })
+    : table.where({ optionId }).del();
 
-  return query
-    .returning("*")
-    .then(head)
-    .then(fromDb);
+  return query.returning("*").then(head);
 };
 
 async function getAvailableRoutingDestinations(trx, pageId) {
@@ -222,7 +183,9 @@ const checkRoutingDestinations = async (
       })
     ) {
       throw new Error(
-        `Unable to route from this question ${logicalDestination.destinationType}`
+        `Unable to route from this question ${
+          logicalDestination.destinationType
+        }`
       );
     }
   }
@@ -258,8 +221,7 @@ const createRoutingDestination = async trx =>
   trx("Routing_Destinations")
     .insert({})
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 
 async function createRoutingRuleStrategy(
   trx,

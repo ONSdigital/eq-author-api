@@ -17,7 +17,7 @@ const createDefaultValidationsForAnswer = async ({ id, type }, trx = db) => {
 
   const promises = validationTypes.map(validationType => {
     return trx("Validation_AnswerRules").insert({
-      AnswerId: id,
+      answerId: id,
       validationType,
       config: defaultValidationRuleConfigs[validationType]
     });

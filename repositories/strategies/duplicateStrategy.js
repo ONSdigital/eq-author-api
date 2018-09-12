@@ -18,7 +18,7 @@ const insertData = async (
   if (returnedData.order) {
     const order = await getOrUpdateOrderForPageInsert(
       trx,
-      returnedData.SectionId,
+      returnedData.sectionId,
       returnedData.id,
       position
     );
@@ -51,7 +51,7 @@ const duplicateRecord = async (
   overrides = {},
   position
 ) => {
-  const duplicatedRecord = omit(record, "id", "created_at", "updated_at");
+  const duplicatedRecord = omit(record, "id", "createdAt", "updatedAt");
   const { parentRelation, ...other } = overrides;
 
   if (!isNil(parentRelation)) {
@@ -109,7 +109,7 @@ const duplicateOtherAnswer = async (trx, otherAnswer, duplicateAnswer) => {
   }).then(head);
 
   await duplicateOptionStrategy(trx, otherOptionToDuplicate, {
-    parentRelation: { id: duplicateAnswer.id, columnName: "AnswerId" },
+    parentRelation: { id: duplicateAnswer.id, columnName: "answerId" },
     otherAnswerId: duplicateOtherAnswerId
   });
 };
@@ -134,7 +134,7 @@ const duplicateAnswerStrategy = async (trx, answer, overrides = {}) => {
     "Options",
     "*",
     {
-      AnswerId: answer.id,
+      answerId: answer.id,
       otherAnswerId: null,
       isDeleted: false
     },
@@ -149,7 +149,7 @@ const duplicateAnswerStrategy = async (trx, answer, overrides = {}) => {
     (queue, option) =>
       queue.then(() =>
         duplicateOptionStrategy(trx, option, {
-          parentRelation: { id: duplicateAnswer.id, columnName: "AnswerId" }
+          parentRelation: { id: duplicateAnswer.id, columnName: "answerId" }
         })
       ),
     Promise.resolve()
@@ -162,13 +162,13 @@ const duplicateAnswerStrategy = async (trx, answer, overrides = {}) => {
     "Validation_AnswerRules",
     "*",
     {
-      AnswerId: answer.id
+      answerId: answer.id
     }
   );
   await Promise.all(
     validationsToDuplicate.map(validation =>
       duplicateValidationStrategy(trx, validation, {
-        parentRelation: { id: duplicateAnswer.id, columnName: "AnswerId" }
+        parentRelation: { id: duplicateAnswer.id, columnName: "answerId" }
       })
     )
   );
@@ -186,7 +186,7 @@ const duplicatePageStrategy = async (trx, page, position, overrides = {}) => {
   );
 
   const answersToDuplicate = await selectData(trx, "Answers", "*", {
-    QuestionPageId: page.id,
+    questionPageId: page.id,
     isDeleted: false
   });
 
@@ -195,7 +195,7 @@ const duplicatePageStrategy = async (trx, page, position, overrides = {}) => {
       duplicateAnswerStrategy(trx, answer, {
         parentRelation: {
           id: duplicatePage.id,
-          columnName: "QuestionPageId"
+          columnName: "questionPageId"
         }
       })
     )

@@ -69,7 +69,7 @@ describe("answer query", () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.Answer.getById).toHaveBeenCalledWith(id);
     expect(repositories.Option.findAll).toHaveBeenCalledWith({
-      AnswerId: id,
+      answerId: id,
       mutuallyExclusive: false
     });
   });

@@ -1,24 +1,17 @@
-const { head, invert, map, isNil } = require("lodash/fp");
+const { head, isNil } = require("lodash/fp");
 const Option = require("../db/Option");
-const mapFields = require("../utils/mapFields");
 const db = require("../db");
 const { handleOptionDeleted } = require("./strategies/routingStrategy");
-const mapping = { AnswerId: "answerId" };
-const fromDb = mapFields(mapping);
-const toDb = mapFields(invert(mapping));
 
 const findExclusiveOptionByAnswerId = answerId =>
   Option.findAll()
-    .where(
-      toDb({
-        isDeleted: false,
-        otherAnswerId: null,
-        mutuallyExclusive: true,
-        answerId
-      })
-    )
-    .then(head)
-    .then(fromDb);
+    .where({
+      isDeleted: false,
+      otherAnswerId: null,
+      mutuallyExclusive: true,
+      answerId
+    })
+    .then(head);
 
 const checkForExistingExclusive = async answerId => {
   const existingExclusive = await findExclusiveOptionByAnswerId(answerId);
@@ -31,13 +24,9 @@ const findAll = (where = {}, orderBy = "id", direction = "asc") =>
   Option.findAll()
     .where({ isDeleted: false, otherAnswerId: null })
     .where(where)
-    .orderBy(orderBy, direction)
-    .then(map(fromDb));
+    .orderBy(orderBy, direction);
 
-const getById = id =>
-  Option.findById(id)
-    .where({ isDeleted: false })
-    .then(fromDb);
+const getById = id => Option.findById(id).where({ isDeleted: false });
 
 const insert = async (
   { label, description, value, qCode, answerId, mutuallyExclusive = false },
@@ -47,19 +36,16 @@ const insert = async (
     await checkForExistingExclusive(answerId);
   }
   return trx("Options")
-    .insert(
-      toDb({
-        label,
-        description,
-        value,
-        qCode,
-        answerId,
-        mutuallyExclusive
-      })
-    )
+    .insert({
+      label,
+      description,
+      value,
+      qCode,
+      answerId,
+      mutuallyExclusive
+    })
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 };
 
 const update = ({ id, label, description, value, qCode, isDeleted }) =>
@@ -69,9 +55,7 @@ const update = ({ id, label, description, value, qCode, isDeleted }) =>
     value,
     qCode,
     isDeleted
-  })
-    .then(head)
-    .then(fromDb);
+  }).then(head);
 
 const deleteOption = async (trx, id) => {
   const deletedOption = await trx("Options")
@@ -82,8 +66,7 @@ const deleteOption = async (trx, id) => {
       isDeleted: true
     })
     .returning("*")
-    .then(head)
-    .then(fromDb);
+    .then(head);
 
   await handleOptionDeleted(trx, id);
 
@@ -92,12 +75,9 @@ const deleteOption = async (trx, id) => {
 
 const remove = id => db.transaction(trx => deleteOption(trx, id));
 
-const undelete = id =>
-  Option.update(id, { isDeleted: false })
-    .then(head)
-    .then(fromDb);
+const undelete = id => Option.update(id, { isDeleted: false }).then(head);
 
-const getOtherOption = (answerId, orderBy = "created_at", direction = "asc") =>
+const getOtherOption = (answerId, orderBy = "createdAt", direction = "asc") =>
   Option.findAll()
     .where({ isDeleted: false, otherAnswerId: answerId })
     .orderBy(orderBy, direction)

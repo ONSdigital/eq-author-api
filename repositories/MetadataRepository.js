@@ -1,11 +1,6 @@
-const { head, invert, map } = require("lodash/fp");
+const { head } = require("lodash/fp");
 
 const Metadata = require("../db/Metadata");
-const mapFields = require("../utils/mapFields");
-const mapping = { QuestionnaireId: "questionnaireId" };
-
-const fromDb = mapFields(mapping);
-const toDb = mapFields(invert(mapping));
 
 const TYPE_VALUE = {
   Date: "dateValue",
@@ -15,22 +10,17 @@ const TYPE_VALUE = {
 };
 
 module.exports.getById = function(id) {
-  return Metadata.findById(id)
-    .where({ isDeleted: false })
-    .then(fromDb);
+  return Metadata.findById(id).where({ isDeleted: false });
 };
 
 module.exports.findAll = function findAll(where = {}) {
   return Metadata.findAll()
     .where({ isDeleted: false })
-    .where(where)
-    .then(map(fromDb));
+    .where(where);
 };
 
 module.exports.insert = function({ questionnaireId }) {
-  return Metadata.create(toDb({ questionnaireId }))
-    .then(head)
-    .then(fromDb);
+  return Metadata.create({ questionnaireId }).then(head);
 };
 
 module.exports.update = function({ id, key, alias, type, ...values }) {
@@ -42,13 +32,9 @@ module.exports.update = function({ id, key, alias, type, ...values }) {
     alias,
     type,
     value: values[typeField]
-  })
-    .then(head)
-    .then(fromDb);
+  }).then(head);
 };
 
 module.exports.remove = function(id) {
-  return Metadata.update(id, { isDeleted: true })
-    .then(head)
-    .then(fromDb);
+  return Metadata.update(id, { isDeleted: true }).then(head);
 };

@@ -1,7 +1,6 @@
-const { head, invert, map } = require("lodash/fp");
+const { head, map } = require("lodash/fp");
 const { get, isNil, parseInt } = require("lodash");
 const db = require("../db");
-const mapFields = require("../utils/mapFields");
 
 const {
   updateRoutingConditionStrategy,
@@ -17,20 +16,6 @@ const {
 const Routing = require("../db/Routing");
 const PageRepository = require("./PageRepository");
 const SectionRepository = require("./SectionRepository");
-
-const mapping = {
-  QuestionPageId: "questionPageId",
-  RoutingRuleSetId: "routingRuleSetId",
-  RoutingRuleId: "routingRuleId",
-  AnswerId: "answerId",
-  OptionId: "optionId",
-  ConditionId: "conditionId",
-  PageId: "pageId",
-  SectionId: "sectionId",
-  RoutingDestinationId: "routingDestinationId"
-};
-const fromDb = mapFields(mapping);
-const toDb = mapFields(invert(mapping));
 
 const getRoutingDestinations = async pageId => {
   const logicalDestinations = [
@@ -70,59 +55,47 @@ function findRoutingRuleSetByQuestionPageId(where = {}) {
   return Routing.findAllRoutingRuleSets()
     .where({ isDeleted: false })
     .where(where)
-    .first()
-    .then(fromDb);
+    .first();
 }
 
 function findAllRoutingRules(where = {}) {
   return Routing.findAllRoutingRules()
     .where({ isDeleted: false })
-    .where(where)
-    .then(map(fromDb));
+    .where(where);
 }
 
 function getRoutingRuleById(id) {
   return Routing.findAllRoutingRules()
     .where({ id, isDeleted: false })
-    .first()
-    .then(fromDb);
+    .first();
 }
 
 function getRoutingRuleSetById(id) {
   return Routing.findAllRoutingRuleSets()
-    .where(toDb({ id: parseInt(id), isDeleted: false }))
-    .then(head)
-    .then(fromDb);
+    .where({ id: parseInt(id), isDeleted: false })
+    .then(head);
 }
 
 function findAllRoutingConditions(where = {}) {
-  return Routing.findAllRoutingConditions()
-    .where(where)
-    .then(map(fromDb));
+  return Routing.findAllRoutingConditions().where(where);
 }
 
 function findAllRoutingConditionValues(where = {}) {
   return Routing.findAllRoutingConditionValues()
-    .where(toDb(where))
-    .then(map(fromDb))
+    .where(where)
     .then(map("optionId"));
 }
 
 function createRoutingRuleSet({ questionPageId }) {
   return db.transaction(trx =>
-    createRoutingRuleSetStrategy(trx, questionPageId).then(fromDb)
+    createRoutingRuleSetStrategy(trx, questionPageId)
   );
 }
 
 const deleteRoutingRuleSet = ({ id }) =>
-  Routing.updateRoutingRuleSet(
-    id,
-    toDb({
-      isDeleted: true
-    })
-  )
-    .then(head)
-    .then(fromDb);
+  Routing.updateRoutingRuleSet(id, {
+    isDeleted: true
+  }).then(head);
 
 async function createRoutingRule(createRoutingRuleInput) {
   return db.transaction(trx =>
@@ -163,9 +136,7 @@ const updateDestination = async (id, destination) => {
     updatedFields[key] = parseInt(absoluteDestination.destinationId);
   }
 
-  return Routing.updateRoutingDestination(id, toDb(updatedFields))
-    .then(head)
-    .then(fromDb);
+  return Routing.updateRoutingDestination(id, updatedFields).then(head);
 };
 
 async function updateRoutingRuleSet({ id, else: destination }) {
@@ -196,16 +167,12 @@ async function updateRoutingRule({ id, goto: destination }) {
 
 function updateRoutingCondition({ id, questionPageId, answerId }) {
   return db.transaction(trx =>
-    updateRoutingConditionStrategy(trx, { id, questionPageId, answerId }).then(
-      fromDb
-    )
+    updateRoutingConditionStrategy(trx, { id, questionPageId, answerId })
   );
 }
 
 function removeRoutingRule({ id }) {
-  return Routing.updateRoutingRule(id, { isDeleted: true })
-    .then(head)
-    .then(fromDb);
+  return Routing.updateRoutingRule(id, { isDeleted: true }).then(head);
 }
 
 function removeRoutingCondition({ id }) {
@@ -213,9 +180,7 @@ function removeRoutingCondition({ id }) {
 }
 
 function undeleteRoutingRule(id) {
-  return Routing.updateRoutingRule(id, { isDeleted: false })
-    .then(head)
-    .then(fromDb);
+  return Routing.updateRoutingRule(id, { isDeleted: false }).then(head);
 }
 
 function resolveRoutingDestination(sectionId, pageId) {
@@ -231,7 +196,7 @@ function resolveRoutingDestination(sectionId, pageId) {
 const getRoutingDestination = async routingDestinationId => {
   const destination = await Routing.findRoutingDestinationById(
     routingDestinationId
-  ).then(fromDb);
+  );
 
   if (!destination) {
     return null;
