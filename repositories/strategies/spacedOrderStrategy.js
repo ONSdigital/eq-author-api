@@ -60,8 +60,10 @@ const getOrUpdateOrderForInsert = async (
     return maxOrder;
   }
 
+  collection.splice(position, 0, { id: "dummyElement" });
+
   let left = getOr(0, "order", collection[position - 1]);
-  let right = getOr(maxOrder, "order", collection[position]);
+  let right = getOr(maxOrder, "order", collection[position + 1]);
 
   if (valuesHaveConverged(left, right)) {
     await makeSpaceForInsert(trx, type, parentId, left);
@@ -71,8 +73,16 @@ const getOrUpdateOrderForInsert = async (
   return calculateMidPoint(left, right);
 };
 
-const getOrUpdateOrderForPageInsert = async (trx, sectionId, id, position) => {
-  const pages = reject({ id }, await getPagesBySection(trx, sectionId));
+const getOrUpdateOrderForPageInsert = async (
+  trx,
+  sectionId,
+  movingPageId,
+  position
+) => {
+  const pages = reject(
+    { id: parseInt(movingPageId, 10) },
+    await getPagesBySection(trx, sectionId)
+  );
 
   return getOrUpdateOrderForInsert(trx, pages, "Pages", sectionId, position);
 };
@@ -84,7 +94,7 @@ const getOrUpdateOrderForSectionInsert = async (
   position
 ) => {
   const sections = reject(
-    { id },
+    { id: parseInt(id, 10) },
     await getSectionsByQuestionnaire(trx, questionnaireId)
   );
 

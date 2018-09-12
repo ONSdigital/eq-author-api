@@ -172,6 +172,28 @@ describe("SectionRepository", () => {
       expect(map(updatedSections, "id")).toEqual(map(reverse(sections), "id"));
     });
 
+    it("can move sections forwards", async () => {
+      const {
+        questionnaire: { id: questionnaireId }
+      } = await setup();
+
+      const sections = await createSections(questionnaireId, 5);
+
+      const firstSection = sections[0];
+
+      await SectionRepository.move({
+        id: firstSection.id,
+        questionnaireId: questionnaireId,
+        position: "3"
+      });
+
+      const updatedSections = await SectionRepository.findAll({
+        questionnaireId
+      });
+
+      expect(updatedSections[3].id).toEqual(firstSection.id);
+    });
+
     it("gracefully handles position values greater than number of pages", async () => {
       const {
         questionnaire: { id: questionnaireId }
