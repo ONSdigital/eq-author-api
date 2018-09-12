@@ -171,7 +171,7 @@ const Resolvers = {
     createdBy: questionnaire => ({ name: questionnaire.createdBy }),
     questionnaireInfo: ({ id }) => id,
     metadata: (questionnaire, args, ctx) =>
-      ctx.repositories.Metadata.findAll({ QuestionnaireId: questionnaire.id })
+      ctx.repositories.Metadata.findAll({ questionnaireId: questionnaire.id })
   },
 
   QuestionnaireInfo: {

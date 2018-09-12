@@ -48,7 +48,7 @@ describe("Metadata query", () => {
     );
     expect(result.errors).toBeUndefined();
     expect(repositories.Metadata.findAll).toHaveBeenCalledWith({
-      QuestionnaireId: QUESTIONNAIRE_ID
+      questionnaireId: QUESTIONNAIRE_ID
     });
     expect(result.data.questionnaire.metadata).toHaveLength(4);
     expect(result.data.questionnaire.metadata[0]).toEqual(
