@@ -809,6 +809,83 @@ describe("resolvers", () => {
     expect(result).toMatchObject(expected);
   });
 
+  it("should get metadata for questionnaire", async () => {
+    const createMetadata = `
+      mutation CreateMetadata($input: CreateMetadataInput!) {
+        createMetadata(input: $input) {
+          ...Metadata
+          __typename
+        }
+      }
+      
+      fragment Metadata on Metadata {
+        id
+        key
+        alias
+        type
+        textValue
+        languageValue
+        regionValue
+        dateValue
+        __typename
+      }
+    `;
+
+    const {
+      data: { createMetadata: metadata }
+    } = await executeQuery(
+      createMetadata,
+      {
+        input: { questionnaireId: questionnaire.id }
+      },
+      ctx
+    );
+
+    const getQuestionnaireWithMetadata = `
+      query GetQuestionnaireWithMetadata($id: ID!) {
+        questionnaire(id: $id) {
+          id
+          metadata {
+            ...Metadata
+            __typename
+          }
+          __typename
+        }
+      }
+      
+      fragment Metadata on Metadata {
+        id
+        key
+        alias
+        type
+        textValue
+        languageValue
+        regionValue
+        dateValue
+        __typename
+      }
+      `;
+
+    const result = await executeQuery(
+      getQuestionnaireWithMetadata,
+      {
+        id: questionnaire.id
+      },
+      ctx
+    );
+
+    const expected = {
+      data: {
+        questionnaire: {
+          id: questionnaire.id,
+          metadata: [metadata],
+          __typename: "Questionnaire"
+        }
+      }
+    };
+    expect(result).toMatchObject(expected);
+  });
+
   describe("routing", () => {
     const mutate = async input => createNewRoutingRule(input);
     const newRoutingRule = async input =>
