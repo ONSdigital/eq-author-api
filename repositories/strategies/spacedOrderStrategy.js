@@ -94,7 +94,7 @@ const getOrUpdateOrderForSectionInsert = async (
   position
 ) => {
   const sections = reject(
-    { id },
+    { id: parseInt(id, 10) },
     await getSectionsByQuestionnaire(trx, questionnaireId)
   );
 
