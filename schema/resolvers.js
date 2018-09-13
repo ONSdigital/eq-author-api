@@ -1,6 +1,7 @@
 const { GraphQLDate } = require("graphql-iso-date");
 const { includes, isNil } = require("lodash");
 const GraphQLJSON = require("graphql-type-json");
+const { getName } = require("../utils/getName");
 const formatRichText = require("../utils/formatRichText");
 const {
   getValidationEntity
@@ -178,11 +179,13 @@ const Resolvers = {
     totalSectionCount: (questionnaireId, args, ctx) =>
       ctx.repositories.Section.getSectionCount(questionnaireId)
   },
+
   Section: {
     pages: (section, args, ctx) =>
       ctx.repositories.Page.findAll({ sectionId: section.id }),
     questionnaire: (section, args, ctx) =>
       ctx.repositories.Questionnaire.getById(section.questionnaireId),
+    displayName: section => getName(section, "Section"),
     title: (page, args) => formatRichText(page.title, args.format),
     position: ({ position, id }, args, ctx) => {
       if (position !== undefined) {
@@ -216,6 +219,7 @@ const Resolvers = {
       ctx.repositories.Routing.findRoutingRuleSetByQuestionPageId({
         questionPageId
       }),
+    displayName: page => getName(page, "QuestionPage"),
     title: (page, args) => formatRichText(page.title, args.format)
   },
 
@@ -307,14 +311,16 @@ const Resolvers = {
     validation: answer =>
       ["number", "date"].includes(getValidationEntity(answer.type))
         ? answer
-        : null
+        : null,
+    displayName: answer => getName(answer, "BasicAnswer")
   },
 
   CompositeAnswer: {
     childAnswers: (answer, args, ctx) =>
       ctx.repositories.Answer.splitComposites(answer),
     page: (answer, args, ctx) =>
-      ctx.repositories.QuestionPage.getById(answer.questionPageId)
+      ctx.repositories.QuestionPage.getById(answer.questionPageId),
+    displayName: answer => getName(answer, "CompositeAnswer")
   },
 
   MultipleChoiceAnswer: {
@@ -344,12 +350,14 @@ const Resolvers = {
         answer,
         option
       };
-    }
+    },
+    displayName: answer => getName(answer, "MultipleChoiceAnswer")
   },
 
   Option: {
     answer: ({ answerId }, args, ctx) =>
-      ctx.repositories.Answer.getById(answerId)
+      ctx.repositories.Answer.getById(answerId),
+    displayName: option => getName(option, "Option")
   },
 
   ValidationType: {

@@ -886,6 +886,132 @@ describe("resolvers", () => {
     expect(result).toMatchObject(expected);
   });
 
+  it("should resolve displayName for section", async () => {
+    const getSectionWithDisplayName = `
+      query GetSection($id: ID!) {
+        section(id: $id) {
+          id
+          displayName
+        }   
+      }
+      `;
+    const {
+      data: { section }
+    } = await executeQuery(
+      getSectionWithDisplayName,
+      {
+        id: first(sections).id
+      },
+      ctx
+    );
+
+    expect(section).toHaveProperty("displayName");
+  });
+
+  it("should resolve displayName for question page", async () => {
+    const getQuestionPageWithDisplayName = `
+      query GetQuestionPage($id: ID!) {
+        questionPage(id: $id) {
+          id
+          displayName
+        }   
+      }
+      `;
+    const {
+      data: { questionPage }
+    } = await executeQuery(
+      getQuestionPageWithDisplayName,
+      {
+        id: firstPage.id
+      },
+      ctx
+    );
+
+    expect(questionPage).toHaveProperty("displayName");
+  });
+
+  it("should resolve displayName for basic answer", async () => {
+    const { id } = await createNewAnswer(firstPage, "Number");
+
+    const getBasicAnswerWithDisplayName = `
+      query GetAnswer($id: ID!) {
+        answer(id: $id) {
+          id
+          displayName
+        }   
+      }
+      `;
+
+    const {
+      data: { answer }
+    } = await executeQuery(
+      getBasicAnswerWithDisplayName,
+      {
+        id: id
+      },
+      ctx
+    );
+
+    expect(answer).toHaveProperty("displayName");
+  });
+
+  it("should resolve displayName for composite answer", async () => {
+    const { id } = await createNewAnswer(firstPage, "DateRange");
+
+    const getBasicAnswerWithDisplayName = `
+      query GetAnswer($id: ID!) {
+        answer(id: $id) {
+          id
+          displayName
+        }   
+      }
+      `;
+
+    const {
+      data: { answer }
+    } = await executeQuery(
+      getBasicAnswerWithDisplayName,
+      {
+        id: id
+      },
+      ctx
+    );
+
+    expect(answer).toHaveProperty("displayName");
+  });
+
+  it("should resolve displayName for multiple choice answer", async () => {
+    const { id } = await createNewAnswer(firstPage, "Radio");
+
+    const getBasicAnswerWithDisplayName = `
+      query GetAnswer($id: ID!) {
+        answer(id: $id) {
+          id
+          displayName
+          ... on MultipleChoiceAnswer {
+            options {
+              id
+              displayName
+            }
+          }
+        }   
+      }
+      `;
+
+    const {
+      data: { answer }
+    } = await executeQuery(
+      getBasicAnswerWithDisplayName,
+      {
+        id: id
+      },
+      ctx
+    );
+
+    expect(answer).toHaveProperty("displayName");
+    expect(first(answer.options)).toHaveProperty("displayName");
+  });
+
   describe("routing", () => {
     const mutate = async input => createNewRoutingRule(input);
     const newRoutingRule = async input =>
