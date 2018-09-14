@@ -1,9 +1,11 @@
 const answerTypeMap = {
-  number: ["Currency", "Number"]
+  number: ["Currency", "Number"],
+  date: ["Date"]
 };
 
 const validationRuleMap = {
-  number: ["minValue", "maxValue"]
+  number: ["minValue", "maxValue"],
+  date: ["earliestDate"]
 };
 
 const defaultValidationRuleConfigs = {
@@ -12,6 +14,13 @@ const defaultValidationRuleConfigs = {
   },
   maxValue: {
     inclusive: false
+  },
+  earliestDate: {
+    offset: {
+      value: 0,
+      unit: "Days"
+    },
+    relativePosition: "Before"
   }
 };
 

@@ -305,7 +305,9 @@ const Resolvers = {
     page: (answer, args, ctx) =>
       ctx.repositories.QuestionPage.getById(answer.questionPageId),
     validation: answer =>
-      getValidationEntity(answer.type) !== "number" ? null : answer
+      ["number", "date"].includes(getValidationEntity(answer.type))
+        ? answer
+        : null
   },
 
   CompositeAnswer: {
@@ -357,6 +359,8 @@ const Resolvers = {
       switch (validationEntity) {
         case "number":
           return "NumberValidation";
+        case "date":
+          return "DateValidation";
 
         default:
           throw new TypeError(
@@ -373,6 +377,8 @@ const Resolvers = {
           return "MaxValueValidationRule";
         case "minValue":
           return "MinValueValidationRule";
+        case "earliestDate":
+          return "EarliestDateValidationRule";
 
         default:
           throw new TypeError(
@@ -395,6 +401,14 @@ const Resolvers = {
       )
   },
 
+  DateValidation: {
+    earliestDate: (answer, args, ctx) =>
+      ctx.repositories.Validation.findByAnswerIdAndValidationType(
+        answer,
+        "earliestDate"
+      )
+  },
+
   MinValueValidationRule: {
     enabled: ({ enabled }) => enabled,
     inclusive: ({ config }) => config.inclusive,
@@ -405,6 +419,12 @@ const Resolvers = {
     enabled: ({ enabled }) => enabled,
     inclusive: ({ config }) => config.inclusive,
     custom: ({ custom }) => custom
+  },
+
+  EarliestDateValidationRule: {
+    custom: ({ custom }) => (custom ? new Date(custom) : null),
+    offset: ({ config: { offset } }) => offset,
+    relativePosition: ({ config: { relativePosition } }) => relativePosition
   },
 
   Metadata: {

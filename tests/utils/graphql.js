@@ -530,7 +530,7 @@ mutation UpdateAnswer($input: UpdateAnswerInput!) {
     mandatory
     ...on CompositeAnswer{
       childAnswers{
-        id 
+        id
         label
       }
     }
@@ -567,6 +567,18 @@ const getAnswerValidations = `
             custom
           }
          }
+         ...on DateValidation {
+           earliestDate {
+             id
+             enabled
+             custom
+             offset {
+               value
+               unit
+             }
+             relativePosition
+           }
+         }
        }
      }
    }
@@ -593,6 +605,14 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
     ...on MaxValueValidationRule {
       custom
       inclusive
+    }
+    ...on EarliestDateValidationRule {
+      customDate: custom
+      offset {
+        value
+        unit
+      }
+      relativePosition
     }
   }
 }

@@ -16,10 +16,11 @@ const getInputType = flow(
 );
 
 const updateValidationRule = input => {
-  const { custom, inclusive } = input[getInputType(input)];
-  return Validation.update(input.id, { custom, config: { inclusive } }).then(
-    head
-  );
+  const { custom, ...config } = input[getInputType(input)];
+  return Validation.update(input.id, {
+    custom: JSON.stringify(custom),
+    config: JSON.stringify(config)
+  }).then(head);
 };
 
 Object.assign(module.exports, {
