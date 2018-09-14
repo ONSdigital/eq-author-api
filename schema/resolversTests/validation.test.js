@@ -217,10 +217,19 @@ describe("resolvers", () => {
     it("should create earliest validation db entries for Date answers", async () => {
       const answer = await createNewAnswer(firstPage, "Date");
       const validation = await queryAnswerValidations(answer.id);
-      const validationObject = id => ({
+      const validationObject = (earliestId, latestId) => ({
         earliestDate: {
-          id,
+          id: earliestId,
           enabled: false,
+          offset: {
+            value: 0,
+            unit: "Days"
+          },
+          relativePosition: "Before",
+          custom: null
+        },
+        latestDate: {
+          id: latestId,
           offset: {
             value: 0,
             unit: "Days"
@@ -231,7 +240,7 @@ describe("resolvers", () => {
       });
 
       expect(validation).toMatchObject(
-        validationObject(validation.earliestDate.id)
+        validationObject(validation.earliestDate.id, validation.latestDate.id)
       );
     });
 
@@ -259,6 +268,34 @@ describe("resolvers", () => {
         relativePosition: "After"
       };
       expect(result).toMatchObject(expected);
+    });
+
+    it("should be able to update latest date properties", async () => {
+      const answer = await createNewAnswer(firstPage, "Date");
+      const validation = await queryAnswerValidations(answer.id);
+      const result = await mutateValidationParameters({
+        id: validation.latestDate.id,
+        latestDateInput: {
+          custom: "2017-01-01",
+          offset: {
+            value: 8,
+            unit: "Months"
+          },
+          relativePosition: "After"
+        }
+      });
+      const expected = {
+        id: validation.latestDate.id,
+        customDate: "2017-01-01",
+        offset: {
+          value: 8,
+          unit: "Months"
+        },
+        relativePosition: "After"
+      };
+      // When the objects don't match it can trigger a jest bug
+      // https://github.com/facebook/jest/issues/6730
+      expect(JSON.parse(JSON.stringify(result))).toMatchObject(expected);
     });
   });
 });
