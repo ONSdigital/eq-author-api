@@ -79,7 +79,7 @@ describe("MetadataRepository", () => {
 
     const updateValues = {
       id,
-      key: "ru_ref",
+      key: "foo_bar",
       alias: "Reporting Unit Reference",
       type: "Text",
       textValue: "10000000",
@@ -99,7 +99,7 @@ describe("MetadataRepository", () => {
 
     const updateValues = {
       id,
-      key: "ru_ref",
+      key: "foo_bar",
       alias: "Reporting Unit Reference",
       type: "Date",
       dateValue: new Date("2018-09-04"),
@@ -125,7 +125,7 @@ describe("MetadataRepository", () => {
 
     const updateValues = {
       id,
-      key: "ru_ref",
+      key: "foo_bar",
       alias: "Reporting Unit Reference",
       type: "Region",
       regionValue: "GB_ENG",
@@ -145,18 +145,169 @@ describe("MetadataRepository", () => {
 
     const updateValues = {
       id,
-      key: "ru_ref",
+      key: "foo_bar",
       alias: "Reporting Unit Reference",
       type: "Language",
-      languageValue: "cy",
+      languageValue: "en",
       questionnaireId: questionnaireId
     };
 
     const result = await MetadataRepository.update(updateValues);
 
     expect(result).toMatchObject(
-      omit({ ...updateValues, value: "cy" }, ["languageValue"])
+      omit({ ...updateValues, value: "en" }, ["languageValue"])
     );
+  });
+
+  it("should update Metadata Language type with default value", async () => {
+    const metadata = buildMetadata(questionnaireId);
+    const { id } = await MetadataRepository.insert(metadata);
+
+    const updateValues = {
+      id,
+      key: "",
+      alias: "",
+      type: "Language",
+      languageValue: "",
+      questionnaireId: questionnaireId
+    };
+
+    const result = await MetadataRepository.update(updateValues);
+
+    expect(result).toMatchObject(
+      omit({ ...updateValues, value: "en" }, ["languageValue"])
+    );
+  });
+
+  it("should update Metadata Region type with default value", async () => {
+    const metadata = buildMetadata(questionnaireId);
+    const { id } = await MetadataRepository.insert(metadata);
+
+    const updateValues = {
+      id,
+      key: "",
+      alias: "",
+      type: "Region",
+      regionValue: "",
+      questionnaireId: questionnaireId
+    };
+
+    const result = await MetadataRepository.update(updateValues);
+
+    expect(result).toMatchObject(
+      omit({ ...updateValues, value: "GB_ENG" }, ["regionValue"])
+    );
+  });
+
+  it("should update Metadata type and use update value", async () => {
+    const metadata = buildMetadata(questionnaireId);
+    const { id } = await MetadataRepository.insert(metadata);
+
+    const updateValues = {
+      id,
+      key: "",
+      alias: "",
+      type: "Text",
+      textValue: "test",
+      questionnaireId: questionnaireId
+    };
+
+    await MetadataRepository.update(updateValues);
+
+    const result = await MetadataRepository.update({
+      ...updateValues,
+      type: "Region",
+      regionValue: "GB_ENG"
+    });
+
+    expect(result).toMatchObject(
+      omit(
+        {
+          ...updateValues,
+          type: "Region",
+          value: "GB_ENG"
+        },
+        ["regionValue", "textValue"]
+      )
+    );
+  });
+
+  it("should update Metadata value with default values", async () => {
+    const metadata = buildMetadata(questionnaireId);
+    const { id } = await MetadataRepository.insert(metadata);
+
+    const updateValues = {
+      id,
+      key: "tx_id",
+      alias: "",
+      type: "Text",
+      languageValue: "",
+      questionnaireId: questionnaireId
+    };
+
+    const result = await MetadataRepository.update(updateValues);
+
+    expect(result).toMatchObject({
+      id,
+      key: "tx_id",
+      alias: "Tx Id",
+      type: "Text",
+      value: "0f534ffc-9442-414c-b39f-a756b4adc6cb"
+    });
+  });
+
+  it("should update Metadata with new defaults when new key given", async () => {
+    const metadata = buildMetadata(questionnaireId);
+    const { id } = await MetadataRepository.insert(metadata);
+
+    const updateValues = {
+      id,
+      key: "tx_id",
+      alias: "",
+      type: "Text",
+      textValue: "",
+      questionnaireId: questionnaireId
+    };
+
+    await MetadataRepository.update(updateValues);
+    const result = await MetadataRepository.update({
+      ...updateValues,
+      key: "iat"
+    });
+
+    expect(result).toMatchObject({
+      id,
+      key: "iat",
+      alias: "Iat",
+      type: "Text",
+      value: "1458047712"
+    });
+  });
+
+  it("should update Metadata with custom values when same key given", async () => {
+    const metadata = buildMetadata(questionnaireId);
+    const { id } = await MetadataRepository.insert(metadata);
+
+    const updateValues = {
+      id,
+      key: "tx_id",
+      alias: "",
+      type: "Text",
+      textValue: "",
+      questionnaireId: questionnaireId
+    };
+
+    await MetadataRepository.update(updateValues);
+    const result = await MetadataRepository.update({
+      ...updateValues,
+      key: "tx_id",
+      textValue: "foobar"
+    });
+
+    expect(result).toMatchObject({
+      id,
+      value: "foobar"
+    });
   });
 
   it("should remove Metadata", async () => {

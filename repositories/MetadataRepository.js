@@ -1,13 +1,13 @@
 const { head } = require("lodash/fp");
+const { find, merge } = require("lodash");
 
 const Metadata = require("../db/Metadata");
 
-const TYPE_VALUE = {
-  Date: "dateValue",
-  Text: "textValue",
-  Region: "regionValue",
-  Language: "languageValue"
-};
+const {
+  defaultTypeValueNames,
+  defaultTypeValues,
+  defaultValues
+} = require("../utils/defaultMetadata");
 
 module.exports.getById = function(id) {
   return Metadata.findById(id).where({ isDeleted: false });
@@ -24,15 +24,25 @@ module.exports.insert = function({ questionnaireId }) {
 };
 
 module.exports.update = function({ id, key, alias, type, ...values }) {
-  const typeField = TYPE_VALUE[type];
+  return this.getById(id).then(current => {
+    const update = {
+      id,
+      key,
+      alias,
+      type,
+      value: values[defaultTypeValueNames[type]]
+    };
 
-  return Metadata.update(id, {
-    id,
-    key,
-    alias,
-    type,
-    value: values[typeField]
-  }).then(head);
+    if (current.type !== type && !update.value) {
+      update.value = defaultTypeValues[type];
+    }
+
+    if (current.key !== key) {
+      merge(update, find(defaultValues, { key }));
+    }
+
+    return Metadata.update(id, update).then(head);
+  });
 };
 
 module.exports.remove = function(id) {
