@@ -214,7 +214,7 @@ describe("resolvers", () => {
   });
 
   describe("Date", () => {
-    it("should create earliest validation db entries for Date answers", async () => {
+    it("should create earliest ans latest validation db entries for Date answers", async () => {
       const answer = await createNewAnswer(firstPage, "Date");
       const validation = await queryAnswerValidations(answer.id);
       const validationObject = (earliestId, latestId) => ({
@@ -234,7 +234,7 @@ describe("resolvers", () => {
             value: 0,
             unit: "Days"
           },
-          relativePosition: "Before",
+          relativePosition: "After",
           custom: null
         }
       });
