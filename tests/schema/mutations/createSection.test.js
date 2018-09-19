@@ -5,8 +5,9 @@ describe("createSection", () => {
   const createSection = `
     mutation CreateSection($input: CreateSectionInput!) {
       createSection(input: $input) {
-        id,
+        id
         title
+        alias
       }
     }
   `;
@@ -26,6 +27,7 @@ describe("createSection", () => {
 
   it("should allow creation of Section", async () => {
     const input = {
+      alias: "Section alias",
       title: "Test section",
       description: "Test section description",
       questionnaireId: QUESTIONNAIRE_ID
