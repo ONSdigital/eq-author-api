@@ -1,17 +1,19 @@
 exports.up = async function(knex, Promise) {
-  const ids = await knex
+  const answersWithId = await knex
     .select("Answers.id")
     .from("Answers")
     .where({ type: "Date" });
+
+  const ids = answersWithId.map(({ id }) => id);
 
   await knex("Validation_AnswerRules")
     .whereIn("answerId", ids)
     .del();
 
-  const inserts = ids.map(({ id }) =>
+  const inserts = ids.map(id =>
     knex("Validation_AnswerRules").insert([
       {
-        AnswerId: id,
+        answerId: id,
         validationType: "earliestDate",
         config: {
           offset: {
@@ -22,7 +24,7 @@ exports.up = async function(knex, Promise) {
         }
       },
       {
-        AnswerId: id,
+        answerId: id,
         validationType: "latestDate",
         config: {
           offset: {

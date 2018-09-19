@@ -234,7 +234,7 @@ describe("resolvers", () => {
             value: 0,
             unit: "Days"
           },
-          relativePosition: "Before",
+          relativePosition: "After",
           custom: null
         }
       });
