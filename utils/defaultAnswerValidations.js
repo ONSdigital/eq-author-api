@@ -5,7 +5,7 @@ const answerTypeMap = {
 
 const validationRuleMap = {
   number: ["minValue", "maxValue"],
-  date: ["earliestDate"]
+  date: ["earliestDate", "latestDate"]
 };
 
 const defaultValidationRuleConfigs = {
@@ -16,6 +16,13 @@ const defaultValidationRuleConfigs = {
     inclusive: false
   },
   earliestDate: {
+    offset: {
+      value: 0,
+      unit: "Days"
+    },
+    relativePosition: "Before"
+  },
+  latestDate: {
     offset: {
       value: 0,
       unit: "Days"

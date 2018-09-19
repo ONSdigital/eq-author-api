@@ -387,6 +387,8 @@ const Resolvers = {
           return "MinValueValidationRule";
         case "earliestDate":
           return "EarliestDateValidationRule";
+        case "latestDate":
+          return "LatestDateValidationRule";
 
         default:
           throw new TypeError(
@@ -414,6 +416,11 @@ const Resolvers = {
       ctx.repositories.Validation.findByAnswerIdAndValidationType(
         answer,
         "earliestDate"
+      ),
+    latestDate: (answer, args, ctx) =>
+      ctx.repositories.Validation.findByAnswerIdAndValidationType(
+        answer,
+        "latestDate"
       )
   },
 
@@ -430,6 +437,12 @@ const Resolvers = {
   },
 
   EarliestDateValidationRule: {
+    custom: ({ custom }) => (custom ? new Date(custom) : null),
+    offset: ({ config: { offset } }) => offset,
+    relativePosition: ({ config: { relativePosition } }) => relativePosition
+  },
+
+  LatestDateValidationRule: {
     custom: ({ custom }) => (custom ? new Date(custom) : null),
     offset: ({ config: { offset } }) => offset,
     relativePosition: ({ config: { relativePosition } }) => relativePosition
