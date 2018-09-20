@@ -23,6 +23,7 @@ const buildSection = section => ({
 });
 
 const buildPage = page => ({
+  alias: "Page alias",
   title: "Test page",
   description: "page description",
   guidance: "page description",
@@ -64,6 +65,7 @@ describe("PagesRepository", () => {
     const { section } = await setup();
 
     const page = buildPage({ sectionId: section.id });
+
     const result = await PageRepository.insert(page);
 
     expect(result).toMatchObject(page);
@@ -494,11 +496,31 @@ describe("PagesRepository", () => {
 
       const duplicatePage = await PageRepository.duplicatePage(result.id, 1);
 
-      const fieldsToOmit = ["id", "order", "title", "createdAt", "updatedAt"];
+      const fieldsToOmit = [
+        "id",
+        "order",
+        "alias",
+        "title",
+        "createdAt",
+        "updatedAt"
+      ];
 
       expect(omit(result, fieldsToOmit)).toMatchObject(
         omit(duplicatePage, fieldsToOmit)
       );
+    });
+
+    it("prepends 'Copy of' to the question alias of the copy when duplicating a page", async () => {
+      const { section } = await setup();
+
+      const page = buildPage({ sectionId: section.id });
+      const result = await PageRepository.insert(page);
+
+      const duplicatePage = await PageRepository.duplicatePage(result.id, 1);
+
+      const startsWithCopyOf = duplicatePage.alias.startsWith("Copy of");
+
+      expect(startsWithCopyOf).toBe(true);
     });
 
     it("prepends 'Copy of' to the question title of the copy when duplicating a page", async () => {

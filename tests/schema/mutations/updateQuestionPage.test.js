@@ -5,9 +5,10 @@ describe("updateQuestionPage", () => {
   const updateQuestionPage = `
     mutation UpdateQuestionPage($input: UpdateQuestionPageInput!) {
       updateQuestionPage(input: $input) {
-        id,
-        title,
-        description,
+        id
+        alias
+        title
+        description
         guidance
       }
     }
@@ -24,6 +25,7 @@ describe("updateQuestionPage", () => {
   it("should allow update of Question", async () => {
     const input = {
       id: "1",
+      alias: "Updated question alias",
       title: "Updated question title",
       description: "This is an updated question description",
       guidance: "Updated question description"
