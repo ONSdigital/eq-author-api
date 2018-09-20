@@ -5,8 +5,9 @@ describe("updateSection", () => {
   const updateSection = `
     mutation UpdateSection($input: UpdateSectionInput!) {
       updateSection(input: $input) {
-        id,
+        id
         title
+        alias
       }
     }
   `;
@@ -23,6 +24,7 @@ describe("updateSection", () => {
     const input = {
       id: "1",
       title: "Updated section title",
+      alias: "Updated section alias",
       description: "This is an updated section description"
     };
 

@@ -17,6 +17,7 @@ const buildQuestionnaire = questionnaire => ({
 
 const buildSection = section => ({
   title: "Test section",
+  alias: "Test alias",
   ...section
 });
 
@@ -56,17 +57,20 @@ describe("SectionRepository", () => {
       questionnaire: { id: questionnaireId }
     } = await setup();
 
-    const result = await SectionRepository.insert(
+    const section = await SectionRepository.insert(
       buildSection({ questionnaireId: questionnaireId })
     );
 
-    await SectionRepository.update({
-      id: result.id,
-      title: "updated title"
-    });
-    const updated = await SectionRepository.getById(result.id);
+    const update = {
+      id: section.id,
+      title: "updated title",
+      alias: "updated alias"
+    };
 
-    expect(updated.title).not.toEqual(result.title);
+    await SectionRepository.update(update);
+    const result = await SectionRepository.getById(section.id);
+
+    expect(result).toMatchObject(update);
   });
 
   it("allow sections to be deleted", async () => {
