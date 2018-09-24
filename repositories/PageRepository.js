@@ -1,4 +1,4 @@
-const updateTitle = require("../utils/updateTitle");
+const addPrefix = require("../utils/addPrefix");
 const { duplicatePageStrategy } = require("./strategies/duplicateStrategy");
 const { head, get } = require("lodash/fp");
 const Page = require("../db/Page");
@@ -95,7 +95,8 @@ function duplicatePage(id, position) {
       .then(head);
 
     return duplicatePageStrategy(trx, page, position, {
-      title: updateTitle(page.title)
+      alias: addPrefix(page.alias),
+      title: addPrefix(page.title)
     });
   });
 }

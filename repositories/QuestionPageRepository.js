@@ -19,12 +19,13 @@ module.exports.getById = function getById(id) {
 };
 
 module.exports.insert = function insert(
-  { title, description, guidance, sectionId, order },
+  { title, alias, description, guidance, sectionId, order },
   db = knex
 ) {
   return QuestionPage.create(
     {
       title,
+      alias,
       description,
       guidance,
       sectionId,
@@ -37,12 +38,14 @@ module.exports.insert = function insert(
 module.exports.update = function update({
   id,
   title,
+  alias,
   description,
   guidance,
   isDeleted
 }) {
   return QuestionPage.update(id, {
     title,
+    alias,
     description,
     guidance,
     isDeleted

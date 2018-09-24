@@ -5,9 +5,10 @@ describe("createQuestionPage", () => {
   const createQuestionPage = `
     mutation CreateQuestionPage($input: CreateQuestionPageInput!) {
       createQuestionPage(input: $input) {
-        id,
-        title,
-        description,
+        id
+        title
+        alias
+        description
         guidance
       }
     }
@@ -24,6 +25,7 @@ describe("createQuestionPage", () => {
   it("should allow creation of Question", async () => {
     const input = {
       title: "Test question",
+      alias: "Test alias",
       description: "Test question description",
       guidance: "Test question guidance",
       sectionId: "1"
