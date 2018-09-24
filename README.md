@@ -21,10 +21,14 @@ In most cases sensible defaults have been selected.
 > Running using `docker-compose` will ensure that a suitable postgres instance
 > is started. So there is no need to configure the environment variables.
 
-| Environment Variable | Description |
-| -------------------- | ----------- |
-| PORT                 | The port which express listens on (defaults to `4000`). |
-| DB_CONNECTION_URI    | Connection string for database |
+## Environment Variables
+
+| Name | Description | Required |
+| --- | --- | --- |
+| `NODE_ENV` | Sets the environment the code is running in | Yes |
+| `DB_CONNECTION_URI` | Connection string for database | Yes |
+| `PORT` | The port which express listens on (defaults to `4000`). | No |
+| `EQ_AUTHOR_API_VERSION` | The current Author API version. This is what gets reported on the /status endpoint | No |
 
 ### Run using Docker
 
@@ -43,20 +47,6 @@ docker-compose up
 Once the containers are running you should be able to navigate to http://localhost:4000/graphiql and begin exploring the eQ Author GraphQL API.
 
 Changes to the application should hot reload via `nodemon`.
-
-## Usage
-
-### Querying the API
-
-![querying the API](./doc/images/query.gif)
-
-### Mutating state using the API
-
-![mutating state using the API](./doc/images/mutation.gif)
-
-### Browsing the API documentation
-
-![browsing the API documentation](./doc/images/docs.gif)
 
 ### Querying pages
 
