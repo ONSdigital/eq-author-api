@@ -18,9 +18,20 @@ describe("getName", () => {
 
   it("should use correct key", () => {
     entity = {
+      alias: "I am an alias",
+      title: "I am a title",
+      label: "I am a label",
+      key: "I am a key"
+    };
+
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.alias)
+    );
+    entity = {
       alias: "",
       title: "I am a title",
-      label: "I am a label"
+      label: "I am a label",
+      key: "I am a key"
     };
 
     map(keys(defaultNames), typeName =>
@@ -30,11 +41,23 @@ describe("getName", () => {
     entity = {
       alias: "",
       title: "",
-      label: "I am a label"
+      label: "I am a label",
+      key: "I am a key"
     };
 
     map(keys(defaultNames), typeName =>
       expect(getName(entity, typeName)).toEqual(entity.label)
+    );
+
+    entity = {
+      alias: "",
+      title: "",
+      label: "",
+      key: "I am a key"
+    };
+
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.key)
     );
   });
 
@@ -59,17 +82,6 @@ describe("getName", () => {
 
     map(keys(defaultNames), typeName =>
       expect(getName(entity, typeName)).toEqual(entity.label)
-    );
-  });
-
-  it("should use key if none of the other fields are avaialable", () => {
-    entity = {
-      foo: "I am a title",
-      key: "I am a key"
-    };
-
-    map(keys(defaultNames), typeName =>
-      expect(getName(entity, typeName)).toEqual(entity.key)
     );
   });
 });
