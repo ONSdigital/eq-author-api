@@ -61,4 +61,15 @@ describe("getName", () => {
       expect(getName(entity, typeName)).toEqual(entity.label)
     );
   });
+
+  it("should use key if none of the other fields are avaialable", () => {
+    entity = {
+      foo: "I am a title",
+      key: "I am a key"
+    };
+
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.key)
+    );
+  });
 });

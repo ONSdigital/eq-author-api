@@ -7,12 +7,13 @@ const defaultNames = {
   Option: "Untitled Label",
   BasicAnswer: "Untitled Answer",
   MultipleChoiceAnswer: "Untitled Answer",
-  CompositeAnswer: "Untitled Answer"
+  CompositeAnswer: "Untitled Answer",
+  Metadata: "Untitled Metadata"
 };
 
 const getName = (entity, typeName) => {
   const title = find(
-    pick(entity, ["alias", "title", "label"]),
+    pick(entity, ["alias", "title", "label", "key"]),
     value => !isEmpty(stripTags(value))
   );
 
