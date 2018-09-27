@@ -238,7 +238,7 @@ describe("MetadataRepository", () => {
 
     const updateValues = {
       id,
-      key: "tx_id",
+      key: "ru_ref",
       alias: "",
       type: "Text",
       languageValue: "",
@@ -249,10 +249,10 @@ describe("MetadataRepository", () => {
 
     expect(result).toMatchObject({
       id,
-      key: "tx_id",
-      alias: "Tx Id",
+      key: "ru_ref",
+      alias: "Ru Ref",
       type: "Text",
-      value: "0f534ffc-9442-414c-b39f-a756b4adc6cb"
+      value: "12346789012A"
     });
   });
 
@@ -262,25 +262,25 @@ describe("MetadataRepository", () => {
 
     const updateValues = {
       id,
-      key: "tx_id",
+      key: "ru_ref",
       alias: "",
       type: "Text",
-      textValue: "",
+      languageValue: "",
       questionnaireId: questionnaireId
     };
 
     await MetadataRepository.update(updateValues);
     const result = await MetadataRepository.update({
       ...updateValues,
-      key: "iat"
+      key: "ru_name"
     });
 
     expect(result).toMatchObject({
       id,
-      key: "iat",
-      alias: "Iat",
+      key: "ru_name",
+      alias: "Ru Name",
       type: "Text",
-      value: "1458047712"
+      value: "ESSENTIAL ENTERPRISE LTD."
     });
   });
 

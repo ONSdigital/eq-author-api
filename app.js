@@ -11,12 +11,15 @@ const pinoMiddleware = require("express-pino-logger");
 const { PORT } = require("./config/settings");
 const createLogger = require("./utils/createLogger");
 const status = require("./middleware/status");
+const getLaunchUrl = require("./middleware/launch");
 
 const app = express();
 const pino = pinoMiddleware();
 
 const logger = createLogger(pino.logger);
 addErrorLoggingToSchema(schema, logger);
+
+const context = { repositories };
 
 app.use(
   "/graphql",
@@ -25,12 +28,14 @@ app.use(
   bodyParser.json(),
   graphqlExpress({
     schema,
-    context: { repositories },
+    context,
     formatError: logger.log
   })
 );
 
 app.get("/status", status);
+
+app.get("/launch/:questionnaireId", getLaunchUrl(context));
 
 if (process.env.NODE_ENV === "development") {
   app.use(
