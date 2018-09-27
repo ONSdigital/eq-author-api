@@ -84,4 +84,22 @@ describe("getName", () => {
       expect(getName(entity, typeName)).toEqual(entity.label)
     );
   });
+
+  it("should ignore whitespace", () => {
+    entity = {
+      alias: "<p> </p><p> </p>",
+      label: "Some label"
+    };
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.label)
+    );
+
+    entity = {
+      alias: "  ",
+      label: "Some label"
+    };
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.label)
+    );
+  });
 });

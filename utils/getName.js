@@ -14,7 +14,12 @@ const defaultNames = {
 const getName = (entity, typeName) => {
   const title = find(
     pick(entity, ["alias", "title", "label", "key"]),
-    value => !isEmpty(stripTags(value))
+    value => {
+      if (!value) {
+        return false;
+      }
+      return !isEmpty(stripTags(value).trim());
+    }
   );
 
   return title ? stripTags(title) : defaultNames[typeName];
