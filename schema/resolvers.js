@@ -457,7 +457,8 @@ const Resolvers = {
         return null;
       }
       return new Date(value);
-    }
+    },
+    displayName: metadata => getName(metadata, "Metadata")
   },
 
   Date: GraphQLDate,
