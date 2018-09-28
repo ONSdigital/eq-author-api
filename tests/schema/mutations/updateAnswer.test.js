@@ -44,4 +44,23 @@ describe("updateAnswer", () => {
     expect(result.errors).toBeUndefined();
     expect(repositories.Answer.update).toHaveBeenCalledWith(input);
   });
+
+  it("should allow update of Answer with deprecated fields", async () => {
+    const input = {
+      id: "1",
+      description: "This is an updated answer description",
+      guidance: "This is an update answer guidance",
+      qCode: "123",
+      label: "updated test answer",
+      type: "Date",
+      mandatory: true
+    };
+    const result = await executeQuery(
+      updateAnswer,
+      { input },
+      { repositories }
+    );
+    expect(result.errors).toBeUndefined();
+    expect(repositories.Answer.update).toHaveBeenCalledWith(input);
+  });
 });
