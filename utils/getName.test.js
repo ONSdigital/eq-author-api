@@ -18,9 +18,20 @@ describe("getName", () => {
 
   it("should use correct key", () => {
     entity = {
+      alias: "I am an alias",
+      title: "I am a title",
+      label: "I am a label",
+      key: "I am a key"
+    };
+
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.alias)
+    );
+    entity = {
       alias: "",
       title: "I am a title",
-      label: "I am a label"
+      label: "I am a label",
+      key: "I am a key"
     };
 
     map(keys(defaultNames), typeName =>
@@ -30,11 +41,23 @@ describe("getName", () => {
     entity = {
       alias: "",
       title: "",
-      label: "I am a label"
+      label: "I am a label",
+      key: "I am a key"
     };
 
     map(keys(defaultNames), typeName =>
       expect(getName(entity, typeName)).toEqual(entity.label)
+    );
+
+    entity = {
+      alias: "",
+      title: "",
+      label: "",
+      key: "I am a key"
+    };
+
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.key)
     );
   });
 
@@ -57,6 +80,24 @@ describe("getName", () => {
       label: "I am a label"
     };
 
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.label)
+    );
+  });
+
+  it("should ignore whitespace", () => {
+    entity = {
+      alias: "<p> </p><p> </p>",
+      label: "Some label"
+    };
+    map(keys(defaultNames), typeName =>
+      expect(getName(entity, typeName)).toEqual(entity.label)
+    );
+
+    entity = {
+      alias: "  ",
+      label: "Some label"
+    };
     map(keys(defaultNames), typeName =>
       expect(getName(entity, typeName)).toEqual(entity.label)
     );

@@ -14,42 +14,6 @@ const defaultTypeValues = {
 
 const defaultValues = [
   {
-    key: "tx_id",
-    alias: "Tx Id",
-    type: "Text",
-    value: "0f534ffc-9442-414c-b39f-a756b4adc6cb"
-  },
-  {
-    key: "iat",
-    alias: "Iat",
-    type: "Text",
-    value: "1458047712"
-  },
-  {
-    key: "exp",
-    alias: "Exp",
-    type: "Text",
-    value: "1458057712"
-  },
-  {
-    key: "eq_id",
-    alias: "Eq Id",
-    type: "Text",
-    value: "678"
-  },
-  {
-    key: "collection_exercise_sid",
-    alias: "Collection Exercise Sid",
-    type: "Text",
-    value: "00000000-0000-0000-0000-000000000000"
-  },
-  {
-    key: "form_type",
-    alias: "Form Type",
-    type: "Text",
-    value: ""
-  },
-  {
     key: "ru_ref",
     alias: "Ru Ref",
     type: "Text",
@@ -68,28 +32,10 @@ const defaultValues = [
     value: "ESSENTIAL ENTERPRISE LTD."
   },
   {
-    key: "user_id",
-    alias: "User Id",
-    type: "Text",
-    value: "UNKNOWN"
-  },
-  {
     key: "period_id",
     alias: "Period Id",
     type: "Text",
     value: "201605"
-  },
-  {
-    key: "case_id",
-    alias: "Case Id",
-    type: "Text",
-    value: ""
-  },
-  {
-    key: "account_service_url",
-    alias: "Account Service Url",
-    type: "Text",
-    value: ""
   },
   {
     key: "period_str",
@@ -102,18 +48,6 @@ const defaultValues = [
     alias: "Language",
     type: "Language",
     value: "en"
-  },
-  {
-    key: "survey_url",
-    alias: "Survey Url",
-    type: "Text",
-    value: ""
-  },
-  {
-    key: "case_ref",
-    alias: "Case Ref",
-    type: "Text",
-    value: "1000000000000001"
   },
   {
     key: "ref_p_start_date",

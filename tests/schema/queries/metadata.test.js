@@ -13,6 +13,7 @@ describe("Metadata query", () => {
           languageValue
           regionValue
           dateValue
+          displayName
         }
       }
     }
@@ -31,8 +32,14 @@ describe("Metadata query", () => {
       }),
       Metadata: mockRepository({
         findAll: [
-          { id: 1, type: "Text", value: "hello" },
-          { id: 2, type: "Language", value: "en" },
+          {
+            id: 1,
+            type: "Text",
+            value: "hello",
+            alias: "Metadata1",
+            key: "UnusedKey"
+          },
+          { id: 2, type: "Language", value: "en", key: "Metadata2" },
           { id: 3, type: "Region", value: "GB_ENG" },
           { id: 4, type: "Date", value: "2018-01-01" }
         ]
@@ -51,25 +58,20 @@ describe("Metadata query", () => {
       questionnaireId: QUESTIONNAIRE_ID
     });
     expect(result.data.questionnaire.metadata).toHaveLength(4);
-    expect(result.data.questionnaire.metadata[0]).toEqual(
-      expect.objectContaining({
-        textValue: "hello"
-      })
-    );
-    expect(result.data.questionnaire.metadata[1]).toEqual(
-      expect.objectContaining({
-        languageValue: "en"
-      })
-    );
-    expect(result.data.questionnaire.metadata[2]).toEqual(
-      expect.objectContaining({
-        regionValue: "GB_ENG"
-      })
-    );
-    expect(result.data.questionnaire.metadata[3]).toEqual(
-      expect.objectContaining({
-        dateValue: "2018-01-01"
-      })
-    );
+    expect(result.data.questionnaire.metadata[0]).toMatchObject({
+      textValue: "hello",
+      displayName: "Metadata1"
+    });
+    expect(result.data.questionnaire.metadata[1]).toMatchObject({
+      languageValue: "en",
+      displayName: "Metadata2"
+    });
+    expect(result.data.questionnaire.metadata[2]).toMatchObject({
+      regionValue: "GB_ENG",
+      displayName: "Untitled Metadata"
+    });
+    expect(result.data.questionnaire.metadata[3]).toMatchObject({
+      dateValue: "2018-01-01"
+    });
   });
 });
