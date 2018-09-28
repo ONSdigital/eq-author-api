@@ -244,7 +244,6 @@ const buildSections = async (sectionConfigs, questionnaire, references) => {
     const { pages, id, ...sectionConfig } = sectionConfigs[i];
     const section = await SectionRepository.insert({
       title: "Test section",
-      description: "section description",
       ...sectionConfig,
       questionnaireId: questionnaire.id
     });

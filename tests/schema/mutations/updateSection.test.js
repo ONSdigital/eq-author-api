@@ -33,6 +33,12 @@ describe("updateSection", () => {
   });
 
   it("should allow update of Section", async () => {
+    input = {
+      id: "1",
+      title: "Updated section title",
+      alias: "Updated section alias"
+    };
+
     const result = await executeQuery(
       updateSection,
       { input },
