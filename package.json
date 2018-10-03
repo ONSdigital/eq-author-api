@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "eslint": "^5.0.1",
-    "eslint-config-eq-author": "^1.0.2",
+    "eslint-config-eq-author": "^2.0.0",
     "husky": "^1.0.1",
     "lint-staged": "^7.0.5",
     "prettier": "^1.5.3",
