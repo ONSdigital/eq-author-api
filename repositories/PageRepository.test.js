@@ -542,10 +542,13 @@ describe("PagesRepository", () => {
       const pageOne = await PageRepository.insert(
         buildPage({ sectionId: section.id })
       );
-
-      const pageTwo = await PageRepository.duplicatePage(pageOne.id, 1);
-
       const positionOfPageOne = await PageRepository.getPosition(pageOne);
+
+      const pageTwo = await PageRepository.duplicatePage(
+        pageOne.id,
+        parseInt(positionOfPageOne) + 1
+      );
+
       const positionOfPageTwo = await PageRepository.getPosition(pageTwo);
 
       expect(parseInt(positionOfPageOne) + 1).toEqual(

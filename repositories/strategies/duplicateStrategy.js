@@ -1,5 +1,8 @@
 const { omit, head, get, isNil } = require("lodash");
-const { getOrUpdateOrderForPageInsert } = require("./spacedOrderStrategy");
+const {
+  getOrUpdateOrderForPageInsert,
+  getOrUpdateOrderForSectionInsert
+} = require("./spacedOrderStrategy");
 
 const insertData = async (
   trx,
@@ -16,12 +19,13 @@ const insertData = async (
     .then(callback);
 
   if (returnedData.order) {
-    const order = await getOrUpdateOrderForPageInsert(
-      trx,
-      returnedData.sectionId,
-      returnedData.id,
-      position
-    );
+    let updateOrder = getOrUpdateOrderForPageInsert;
+    let parentId = returnedData.sectionId;
+    if (tableName === "Sections") {
+      updateOrder = getOrUpdateOrderForSectionInsert;
+      parentId = returnedData.questionnaireId;
+    }
+    const order = await updateOrder(trx, parentId, returnedData.id, position);
 
     await trx
       .table(tableName)
@@ -204,11 +208,44 @@ const duplicatePageStrategy = async (trx, page, position, overrides = {}) => {
   return selectData(trx, "Pages", "*", { id: duplicatePage.id }).then(head);
 };
 
+const duplicateSectionStrategy = async (
+  trx,
+  section,
+  position,
+  overrides = {}
+) => {
+  const duplicateSection = await duplicateRecord(
+    trx,
+    "Sections",
+    section,
+    overrides,
+    position
+  );
+
+  const pagesToDuplicate = await selectData(trx, "PagesView", "*", {
+    sectionId: section.id
+  });
+
+  await Promise.all(
+    pagesToDuplicate.map(({ position, ...page }) =>
+      duplicatePageStrategy(trx, page, position, {
+        parentRelation: {
+          id: duplicateSection.id,
+          columnName: "sectionId"
+        }
+      })
+    )
+  );
+
+  return duplicateSection;
+};
+
 Object.assign(module.exports, {
   insertData,
   selectData,
   duplicateRecord,
   duplicateOptionStrategy,
   duplicateAnswerStrategy,
-  duplicatePageStrategy
+  duplicatePageStrategy,
+  duplicateSectionStrategy
 });

@@ -113,7 +113,17 @@ describe("SectionRepository", () => {
     );
 
     const position = await SectionRepository.getPosition(result);
-    expect(position).toEqual("0");
+    expect(position).toEqual(0);
+  });
+
+  it("throws if asked for the position of an invalid id", async () => {
+    let error = undefined;
+    try {
+      await SectionRepository.getPosition({ id: 999900 });
+    } catch (e) {
+      error = e;
+    }
+    expect(error).not.toBeUndefined();
   });
 
   it("can get section count ", async () => {
@@ -379,6 +389,28 @@ describe("SectionRepository", () => {
       });
 
       expect(map(updatedResults, "id")).toEqual(map(reverse(sections), "id"));
+    });
+  });
+
+  describe("Duplication", () => {
+    it("should duplicate a section", async () => {
+      const {
+        questionnaire: { id: questionnaireId }
+      } = await setup();
+
+      const section = await SectionRepository.insert(
+        buildSection({ questionnaireId })
+      );
+      const positionOfSection = await SectionRepository.getPosition(section);
+
+      const duplicateSection = await SectionRepository.duplicateSection(
+        section.id,
+        positionOfSection
+      );
+      expect(duplicateSection).toMatchObject({
+        title: `Copy of ${section.title}`,
+        alias: `Copy of ${section.alias}`
+      });
     });
   });
 });

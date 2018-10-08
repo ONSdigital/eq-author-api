@@ -6,7 +6,8 @@ const {
   duplicateRecord,
   duplicateOptionStrategy,
   duplicateAnswerStrategy,
-  duplicatePageStrategy
+  duplicatePageStrategy,
+  duplicateSectionStrategy
 } = require("./duplicateStrategy");
 const QuestionnaireRepository = require("../QuestionnaireRepository");
 const SectionRepository = require("../SectionRepository");
@@ -80,12 +81,15 @@ const setup = async () => {
 describe("Duplicate strategy tests", () => {
   beforeAll(() => db.migrate.latest());
   afterAll(() => db.destroy());
-  afterEach(() =>
-    Promise.all([
-      db("Questionnaires").delete(),
-      db("Answers").delete(),
-      db("Options").delete()
-    ]));
+  afterEach(async () => {
+    await db.transaction(async trx => {
+      await trx.table("Questionnaires").delete();
+      await trx.table("Sections").delete();
+      await trx.table("Pages").delete();
+      await trx.table("Answers").delete();
+      await trx.table("Options").delete();
+    });
+  });
 
   it("will insert data into the db correctly, given some data", async () => {
     const { section } = await setup();
@@ -445,5 +449,84 @@ describe("Duplicate strategy tests", () => {
     expect(omit(duplicatedValidation, fieldsToIgnore)).toMatchObject(
       omit(originalValidation, fieldsToIgnore)
     );
+  });
+
+  describe("Section", () => {
+    const extractDuplicatedFields = pages =>
+      pages.map(page =>
+        omit(page, ["sectionId", "id", "createdAt", "updatedAt"])
+      );
+
+    it("will duplicate a section to the position specified", async () => {
+      const { section } = await setup();
+
+      const fieldsToOmit = ["createdAt", "updatedAt"];
+
+      const duplicateSection = await db.transaction(trx => {
+        return duplicateSectionStrategy(trx, section, 1);
+      });
+
+      const fieldsToOmitIncludingId = [...fieldsToOmit, "id"];
+      expect(omit(duplicateSection, fieldsToOmitIncludingId)).toMatchObject(
+        omit(section, fieldsToOmitIncludingId)
+      );
+
+      const position = await SectionRepository.getPosition(duplicateSection);
+      expect(position).toEqual(1);
+    });
+
+    it("will duplicate pages for a section", async () => {
+      const { section } = await setup();
+
+      const pages = await db.transaction(trx => {
+        return selectData(trx, "Pages", "*", {
+          sectionId: section.id
+        });
+      });
+
+      const duplicateSection = await db.transaction(trx => {
+        return duplicateSectionStrategy(trx, section, 1);
+      });
+
+      const duplicatedPages = await db.transaction(trx => {
+        return selectData(trx, "Pages", "*", {
+          sectionId: duplicateSection.id
+        });
+      });
+
+      expect(extractDuplicatedFields(duplicatedPages)).toEqual(
+        extractDuplicatedFields(pages)
+      );
+    });
+
+    it("will not duplicate deleted pages", async () => {
+      const { section } = await setup();
+
+      const pages = await db.transaction(async trx => {
+        await insertData(
+          trx,
+          "Pages",
+          buildPage({ sectionId: section.id, isDeleted: true }),
+          head,
+          "*"
+        );
+
+        return selectData(trx, "Pages", "*", {
+          sectionId: section.id
+        });
+      });
+
+      const duplicateSection = await db.transaction(trx => {
+        return duplicateSectionStrategy(trx, section, 1);
+      });
+
+      const duplicatedPages = await db.transaction(trx => {
+        return selectData(trx, "Pages", "*", {
+          sectionId: duplicateSection.id
+        });
+      });
+
+      expect(duplicatedPages.length).toEqual(pages.length - 1);
+    });
   });
 });

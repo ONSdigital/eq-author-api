@@ -4,6 +4,8 @@ const db = require("../db");
 const {
   getOrUpdateOrderForSectionInsert
 } = require("./strategies/spacedOrderStrategy");
+const addPrefix = require("../utils/addPrefix");
+const { duplicateSectionStrategy } = require("./strategies/duplicateStrategy");
 
 module.exports.findAll = function findAll(
   where = {},
@@ -65,7 +67,14 @@ module.exports.move = function({ id, questionnaireId, position }) {
 };
 
 module.exports.getPosition = function({ id }) {
-  return this.getById(id).then(get("position"));
+  return this.getById(id)
+    .then(get("position"))
+    .then(position => {
+      if (position) {
+        return parseInt(position, 10);
+      }
+      throw new Error(`No position found for section with id: ${id}`);
+    });
 };
 
 module.exports.getSectionCount = function getSectionCount(questionnaireId) {
@@ -74,4 +83,19 @@ module.exports.getSectionCount = function getSectionCount(questionnaireId) {
     .where({ questionnaireId })
     .then(head)
     .then(get("count"));
+};
+
+module.exports.duplicateSection = function duplicateSection(id, position) {
+  return db.transaction(async trx => {
+    const section = await trx
+      .select("*")
+      .from("Sections")
+      .where({ id })
+      .first();
+
+    return duplicateSectionStrategy(trx, section, position, {
+      alias: addPrefix(section.alias),
+      title: addPrefix(section.title)
+    });
+  });
 };
