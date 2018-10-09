@@ -4,7 +4,6 @@
   "main": "app.js",
   "license": "MIT",
   "scripts": {
-    "prestart": "yarn upgrade eq-author-graphql-schema",
     "start": "yarn knex -- migrate:latest && nodemon",
     "start:dev": "yarn knex -- migrate:latest && nodemon --inspect=0.0.0.0:5858",
     "lint": "eslint .",
