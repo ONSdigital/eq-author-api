@@ -16,10 +16,18 @@ const getInputType = flow(
 );
 
 const updateValidationRule = input => {
-  const { custom, ...config } = input[getInputType(input)];
+  const {
+    custom,
+    entityType,
+    previousAnswer: previousAnswerId,
+    ...config
+  } = input[getInputType(input)];
+
   return Validation.update(input.id, {
     custom: JSON.stringify(custom),
-    config: JSON.stringify(config)
+    config: JSON.stringify(config),
+    entityType,
+    previousAnswerId
   }).then(head);
 };
 

@@ -565,6 +565,7 @@ const getAnswerValidations = `
             enabled
             inclusive
             custom
+            entityType
           }
          }
          ...on DateValidation {
@@ -615,6 +616,10 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
     ...on MaxValueValidationRule {
       custom
       inclusive
+      entityType
+      previousAnswer {
+        id
+      }
     }
     ...on EarliestDateValidationRule {
       customDate: custom

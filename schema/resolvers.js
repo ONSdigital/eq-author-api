@@ -435,7 +435,12 @@ const Resolvers = {
   MaxValueValidationRule: {
     enabled: ({ enabled }) => enabled,
     inclusive: ({ config }) => config.inclusive,
-    custom: ({ custom }) => custom
+    custom: ({ custom }) => custom,
+    entityType: ({ entityType }) => entityType,
+    previousAnswer: ({ previousAnswerId }, args, ctx) =>
+      isNil(previousAnswerId)
+        ? null
+        : ctx.repositories.Answer.getById(previousAnswerId)
   },
 
   EarliestDateValidationRule: {

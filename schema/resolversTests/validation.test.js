@@ -154,17 +154,18 @@ describe("resolvers", () => {
           id: maxValueId,
           enabled: false,
           inclusive: false,
-          custom: null
+          custom: null,
+          entityType: "Custom"
         }
       });
 
-      expect(currencyValidation).toMatchObject(
+      expect(currencyValidation).toEqual(
         validationObject(
           currencyValidation.minValue.id,
           currencyValidation.maxValue.id
         )
       );
-      expect(numberValidation).toMatchObject(
+      expect(numberValidation).toEqual(
         validationObject(
           numberValidation.minValue.id,
           numberValidation.maxValue.id
@@ -205,11 +206,62 @@ describe("resolvers", () => {
           inclusive: true
         }
       });
+
       expect(result).toMatchObject({
         id: currencyValidation.maxValue.id,
         custom: 10,
         inclusive: true
       });
+    });
+
+    it("can update inclusive and previous answer max values", async () => {
+      const previousAnswer = await createNewAnswer(firstPage, "Number");
+      const currencyAnswer = await createNewAnswer(firstPage, "Currency");
+      const currencyValidation = await queryAnswerValidations(
+        currencyAnswer.id
+      );
+
+      const result = await mutateValidationParameters({
+        id: currencyValidation.maxValue.id,
+        maxValueInput: {
+          previousAnswer: previousAnswer.id,
+          inclusive: true
+        }
+      });
+
+      expect(result).toMatchObject({
+        id: currencyValidation.maxValue.id,
+        previousAnswer: {
+          id: previousAnswer.id
+        },
+        inclusive: true
+      });
+    });
+
+    it("can update inclusive and entity type", async () => {
+      const currencyAnswer = await createNewAnswer(firstPage, "Currency");
+      const currencyValidation = await queryAnswerValidations(
+        currencyAnswer.id
+      );
+
+      const entityTypes = ["Custom", "PreviousAnswer"];
+
+      const promises = entityTypes.map(async entityType => {
+        const result = await mutateValidationParameters({
+          id: currencyValidation.maxValue.id,
+          maxValueInput: {
+            entityType: entityType,
+            inclusive: true
+          }
+        });
+
+        expect(result).toMatchObject({
+          id: currencyValidation.maxValue.id,
+          entityType: entityType
+        });
+      });
+
+      await Promise.all(promises);
     });
   });
 
