@@ -73,9 +73,11 @@ const Resolvers = {
     undeleteSection: (_, args, ctx) =>
       ctx.repositories.Section.undelete(args.input.id),
     moveSection: (_, args, ctx) => ctx.repositories.Section.move(args.input),
-    duplicateSection: () => {
-      throw new Error("Not implemented");
-    },
+    duplicateSection: (_, args, ctx) =>
+      ctx.repositories.Section.duplicateSection(
+        args.input.id,
+        args.input.position
+      ),
 
     createPage: (root, args, ctx) => ctx.repositories.Page.insert(args.input),
 
