@@ -48,8 +48,8 @@ const findAll = (where = {}, orderBy = "createdAt", direction = "asc") =>
   Answer.findAll()
     .where({ isDeleted: false, parentAnswerId: null })
     .where(where)
-    .orderBy(orderBy, direction)
-    .then(map(fromDb));
+    .orderBy(orderBy, direction);
+// .then(map(fromDb));
 
 const getById = id =>
   Answer.findById(id)

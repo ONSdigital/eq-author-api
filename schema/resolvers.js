@@ -15,6 +15,19 @@ const assertMultipleChoiceAnswer = answer => {
   }
 };
 
+const filterQueryBuilder = (entity, { filter }) => {
+  if (filter) {
+    filter.map(({ condition, field, operator, comparator }) => {
+      if (condition === "OR") {
+        entity.orWhere(field, operator, comparator);
+      } else {
+        entity.andWhere(field, operator, comparator);
+      }
+    });
+  }
+  return entity;
+};
+
 const Resolvers = {
   Query: {
     questionnaires: (_, args, ctx) => ctx.repositories.Questionnaire.findAll(),
@@ -168,7 +181,9 @@ const Resolvers = {
 
   Questionnaire: {
     sections: (questionnaire, args, ctx) =>
-      ctx.repositories.Section.findAll({ questionnaireId: questionnaire.id }),
+      ctx.repositories.Section.findAll({
+        questionnaireId: questionnaire.id
+      }).where(section => filterQueryBuilder(section, args)),
     createdBy: questionnaire => ({ name: questionnaire.createdBy }),
     questionnaireInfo: ({ id }) => id,
     metadata: (questionnaire, args, ctx) =>
@@ -182,7 +197,9 @@ const Resolvers = {
 
   Section: {
     pages: (section, args, ctx) =>
-      ctx.repositories.Page.findAll({ sectionId: section.id }),
+      ctx.repositories.Page.findAll({ sectionId: section.id }).where(page =>
+        filterQueryBuilder(page, args)
+      ),
     questionnaire: (section, args, ctx) =>
       ctx.repositories.Questionnaire.getById(section.questionnaireId),
     displayName: section => getName(section, "Section"),
@@ -210,7 +227,8 @@ const Resolvers = {
     answers: ({ id }, args, ctx) =>
       ctx.repositories.Answer.findAll({
         questionPageId: id
-      }),
+      }).where(answer => filterQueryBuilder(answer, args)),
+
     section: ({ sectionId }, args, ctx) => {
       return ctx.repositories.Section.getById(sectionId);
     },
