@@ -16,6 +16,7 @@ const {
   updateRoutingRule,
   toggleConditionOption,
   getEntireRoutingStructure,
+  updateConditionValue,
   getBasicRoutingQuery,
   updateCondition,
   createSectionMutation,
@@ -248,6 +249,9 @@ const deleteRoutingConditionMutation = async input =>
     },
     ctx
   );
+
+const updateConditionValueMutation = async ({ id, customNumber }) =>
+  executeQuery(updateConditionValue, { input: { id, customNumber } }, ctx);
 
 const toggleConditionOptionMutation = async (
   conditionId,
@@ -1277,7 +1281,7 @@ describe("resolvers", () => {
           Then B's routing condition answer should be null
          */
         const pageA = firstPage;
-        const answer = await createNewAnswer(pageA, "Checkbox");
+        const answer = await createNewAnswer(pageA, "Radio");
 
         const pageB = await createQuestionPage(first(sections).id).then(
           res => res.data.createQuestionPage
@@ -1459,6 +1463,82 @@ describe("resolvers", () => {
         });
 
         expect(res2.errors).toHaveLength(1);
+      });
+    });
+
+    describe("Numeric routing", () => {
+      it("should be able to create a routing rule for numeric answers", async () => {
+        const answer = await createNewAnswer(firstPage, "Currency");
+        await createNewRoutingRuleSet(firstPage.id);
+
+        const routingInfo = await getFullRoutingTree(firstPage);
+        const routingCondition = get(
+          routingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        expect(routingCondition).toMatchObject({
+          comparator: "Equal",
+          questionPage: { id: firstPage.id },
+          answer: { id: answer.id }
+        });
+      });
+
+      it("should be able to insert a value", async () => {
+        const answer = await createNewAnswer(firstPage, "Currency");
+        await createNewRoutingRuleSet(firstPage.id);
+
+        const routingInfo = await getFullRoutingTree(firstPage);
+        const routingCondition = get(
+          routingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        await updateConditionValueMutation({
+          id: routingCondition.routingValue.id,
+          customNumber: 8
+        });
+
+        const updatedRoutingInfo = await getFullRoutingTree(firstPage);
+        const updatedRoutingCondition = get(
+          updatedRoutingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        expect(updatedRoutingCondition).toMatchObject({
+          comparator: "Equal",
+          questionPage: { id: firstPage.id },
+          answer: { id: answer.id },
+          routingValue: { id: routingCondition.routingValue.id, numberValue: 8 }
+        });
+      });
+      it("should be able to change the numeric comparator", async () => {
+        const answer = await createNewAnswer(firstPage, "Currency");
+        await createNewRoutingRuleSet(firstPage.id);
+
+        const routingInfo = await getFullRoutingTree(firstPage);
+        const routingCondition = get(
+          routingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          comparator: "GreaterThan",
+          questionPageId: firstPage.id
+        });
+
+        const updatedRoutingInfo = await getFullRoutingTree(firstPage);
+        const updatedRoutingCondition = get(
+          updatedRoutingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        expect(updatedRoutingCondition).toMatchObject({
+          comparator: "GreaterThan",
+          questionPage: { id: firstPage.id },
+          answer: { id: answer.id }
+        });
       });
     });
   });

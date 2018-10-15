@@ -1,5 +1,5 @@
 const { head } = require("lodash/fp");
-const { parseInt, isNil, find, isEmpty, get } = require("lodash");
+const { parseInt, isNil, find, isEmpty, get, includes } = require("lodash");
 
 const updateAllRoutingConditions = (trx, where, values) =>
   trx("Routing_Conditions")
@@ -7,12 +7,19 @@ const updateAllRoutingConditions = (trx, where, values) =>
     .update(values)
     .returning("*");
 
-const updateRoutingCondition = (trx, id, questionPageId, answerId) =>
+const updateRoutingCondition = (
+  trx,
+  id,
+  questionPageId,
+  answerId,
+  comparator
+) =>
   trx("Routing_Conditions")
     .where({ id })
     .update({
       questionPageId,
-      answerId
+      answerId,
+      comparator
     })
     .returning("*")
     .then(head);
@@ -67,11 +74,27 @@ const getRoutingRuleSetById = (trx, routingRuleSetId) => {
     .first();
 };
 
-const insertRoutingCondition = (trx, routingCondition) =>
-  trx("Routing_Conditions")
+const createSpecificConditionValue = async (trx, conditionId) =>
+  trx("Routing_ConditionValues")
+    .insert({
+      conditionId,
+      customNumber: null
+    })
+    .returning("*")
+    .then(head);
+
+const insertRoutingCondition = async (trx, routingCondition, answer) => {
+  const condition = await trx("Routing_Conditions")
     .insert(routingCondition)
     .returning("*")
     .then(head);
+
+  if (!isNil(answer) && includes(["Currency", "Number"], answer.type)) {
+    await createSpecificConditionValue(trx, condition.id);
+  }
+
+  return condition;
+};
 
 const insertRoutingRule = (trx, routingRule) =>
   trx("Routing_Rules")
@@ -109,17 +132,19 @@ const checkAnswerBelongsToPage = async (trx, answerId, questionPageId) => {
   }
 };
 
-const getAnswerOrFirstAnswerOnPage = async (trx, answerId, questionPageId) => {
+const getAnswerOrFirstAnswerOnPage = (trx, answerId, questionPageId) => {
   if (!isNil(answerId)) {
-    return answerId;
+    return trx("Answers")
+      .select("*")
+      .where({ id: answerId })
+      .then(head);
   }
-  const firstAnswer = await getFirstAnswer(trx, questionPageId);
-  return get(firstAnswer, "id", null);
+  return getFirstAnswer(trx, questionPageId);
 };
 
 const updateRoutingConditionStrategy = async (
   trx,
-  { id: routingConditionId, questionPageId, answerId }
+  { id: routingConditionId, questionPageId, answerId, comparator }
 ) => {
   await checkAnswerBelongsToPage(trx, answerId, questionPageId);
   const routingConditionAnswer = await getAnswerOrFirstAnswerOnPage(
@@ -130,11 +155,19 @@ const updateRoutingConditionStrategy = async (
   await deleteRoutingConditionValues(trx, {
     conditionId: routingConditionId
   });
+
+  if (
+    !isNil(routingConditionAnswer) &&
+    includes(["Currency", "Number"], routingConditionAnswer.type)
+  ) {
+    await createSpecificConditionValue(trx, routingConditionId);
+  }
   return updateRoutingCondition(
     trx,
     routingConditionId,
     questionPageId,
-    routingConditionAnswer
+    get(routingConditionAnswer, "id", null),
+    comparator
   );
 };
 
@@ -206,15 +239,32 @@ const checkRoutingDestinations = async (
 
 async function createRoutingConditionStrategy(trx, routingCondition) {
   const { questionPageId, answerId } = routingCondition;
+
   let firstAnswerOnPage;
   if (isNil(answerId)) {
     firstAnswerOnPage = await getFirstAnswer(trx, questionPageId);
   }
 
-  return insertRoutingCondition(trx, {
-    ...routingCondition,
-    answerId: get(firstAnswerOnPage, "id", answerId)
-  });
+  const targetAnswerId = get(firstAnswerOnPage, "id", answerId);
+
+  let targetAnswer;
+  if (!isNil(targetAnswerId)) {
+    targetAnswer = await trx("Answers")
+      .select()
+      .where({ id: targetAnswerId })
+      .first();
+  } else {
+    targetAnswer = null;
+  }
+
+  return insertRoutingCondition(
+    trx,
+    {
+      ...routingCondition,
+      answerId: targetAnswerId
+    },
+    targetAnswer
+  );
 }
 
 const createRoutingDestination = async trx =>

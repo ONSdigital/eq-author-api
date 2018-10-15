@@ -155,6 +155,10 @@ const Resolvers = {
       ctx.repositories.Routing.removeRoutingCondition(args.input),
     toggleConditionOption: async (_, args, ctx) =>
       ctx.repositories.Routing.toggleConditionOption(args.input),
+    createConditionValue: async (_, args, ctx) =>
+      ctx.repositories.Routing.createConditionValue(args.input),
+    updateConditionValue: async (_, args, ctx) =>
+      ctx.repositories.Routing.updateConditionValue(args.input),
     toggleValidationRule: (_, args, ctx) =>
       ctx.repositories.Validation.toggleValidationRule(args.input),
     updateValidationRule: (_, args, ctx) =>
@@ -250,8 +254,8 @@ const Resolvers = {
   },
 
   RoutingCondition: {
-    routingValue: ({ id }) => {
-      return { conditionId: id };
+    routingValue: ({ id, answerId }) => {
+      return { conditionId: id, answerId };
     },
     questionPage: ({ questionPageId }, args, ctx) => {
       return isNil(questionPageId)
@@ -264,12 +268,43 @@ const Resolvers = {
   },
 
   RoutingConditionValue: {
-    __resolveType: () => "IDArrayValue"
+    __resolveType: async ({ conditionId }, ctx) => {
+      const answerType = await ctx.repositories.Routing.getAnswerTypeByConditionId(
+        conditionId,
+        ctx
+      );
+      if (includes(["Currency", "Number"], answerType)) {
+        return "NumberValue";
+      } else {
+        return "IDArrayValue";
+      }
+    }
   },
 
   IDArrayValue: {
-    value: ({ conditionId }, args, ctx) =>
-      ctx.repositories.Routing.findAllRoutingConditionValues({ conditionId })
+    value: async ({ conditionId }, args, ctx) => {
+      const conditionValues = await ctx.repositories.Routing.findAllRoutingConditionValues(
+        {
+          conditionId
+        }
+      );
+      return conditionValues.map(conditionValue => conditionValue.optionId);
+    }
+  },
+
+  NumberValue: {
+    id: async ({ conditionId }, args, ctx) => {
+      const conditionValues = await ctx.repositories.Routing.findAllRoutingConditionValues(
+        { conditionId }
+      );
+      return conditionValues[0].id;
+    },
+    numberValue: async ({ conditionId }, args, ctx) => {
+      const conditionValues = await ctx.repositories.Routing.findAllRoutingConditionValues(
+        { conditionId }
+      );
+      return conditionValues[0].customNumber;
+    }
   },
 
   RoutingDestination: {
