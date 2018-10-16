@@ -1,3 +1,5 @@
+const fp = require("lodash/fp");
+
 const knex = require("../db");
 const QuestionnaireRepository = require("../repositories/QuestionnaireRepository");
 
@@ -73,5 +75,19 @@ describe("QuestionnaireRepository", () => {
     });
 
     expect(result).toMatchObject({ surveyId: "456" });
+  });
+
+  it("should duplicate a questionnaire", async () => {
+    const { id, ...questionnaire } = await QuestionnaireRepository.insert(
+      buildQuestionnaire()
+    );
+    const duplicatedQuestionnaire = await QuestionnaireRepository.duplicate(id);
+
+    const filterUnwanted = fp.omit(["id", "createdAt", "updatedAt"]);
+
+    expect(filterUnwanted(duplicatedQuestionnaire)).toMatchObject({
+      ...filterUnwanted(questionnaire),
+      title: `Copy of ${questionnaire.title}`
+    });
   });
 });
