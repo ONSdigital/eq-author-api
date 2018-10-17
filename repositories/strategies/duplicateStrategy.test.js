@@ -61,6 +61,15 @@ const buildValidation = validation => ({
   ...validation
 });
 
+const buildMetadata = metadata => ({
+  key: "key",
+  alias: "alias",
+  type: "Text",
+  value: "Some value",
+  questionnaireId: -1,
+  ...metadata
+});
+
 const setup = async () => {
   const questionnaire = await QuestionnaireRepository.insert(
     buildQuestionnaire()
@@ -589,6 +598,54 @@ describe("Duplicate strategy tests", () => {
       );
       expect(filterEntity(duplicatedEntities.pages[0])).toMatchObject(
         filterEntity(page)
+      );
+    });
+
+    it("will duplicate metadata", async () => {
+      const { questionnaire } = await setup();
+      const metadata = await db.transaction(async trx => {
+        const metadata = [];
+        metadata.push(
+          await insertData(
+            trx,
+            "Metadata",
+            buildMetadata({ key: "md1", questionnaireId: questionnaire.id }),
+            head,
+            "*"
+          )
+        );
+        metadata.push(
+          await insertData(
+            trx,
+            "Metadata",
+            buildMetadata({ key: "md2", questionnaireId: questionnaire.id }),
+            head,
+            "*"
+          )
+        );
+        return metadata;
+      });
+
+      const duplicatedMetadata = await db.transaction(async trx => {
+        const dupQuestionnaire = await duplicateQuestionnaireStrategy(
+          trx,
+          questionnaire
+        );
+
+        return selectData(trx, "Metadata", "*", {
+          questionnaireId: dupQuestionnaire.id
+        });
+      });
+
+      const filterEntity = fp.omit([
+        "id",
+        "createdAt",
+        "updatedAt",
+        "questionnaireId"
+      ]);
+
+      expect(duplicatedMetadata.map(filterEntity)).toMatchObject(
+        metadata.map(filterEntity)
       );
     });
   });
