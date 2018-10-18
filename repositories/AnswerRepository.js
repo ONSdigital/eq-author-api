@@ -11,14 +11,25 @@ const {
   flatten
 } = require("lodash/fp");
 const { get, merge } = require("lodash");
+
 const db = require("../db");
 const Answer = require("../db/Answer");
+
 const childAnswerParser = require("../utils/childAnswerParser");
 const getDefaultAnswerProperties = require("../utils/defaultAnswerProperties");
+const { answerTypeMap } = require("../utils/defaultAnswerValidations");
+
+const OptionRepository = require("./OptionRepository");
+
 const {
   createDefaultValidationsForAnswer
-} = require("../repositories/strategies/validationStrategy");
-const { answerTypeMap } = require("../utils/defaultAnswerValidations");
+} = require("./strategies/validationStrategy");
+const {
+  createOtherAnswerStrategy,
+  deleteOtherAnswerStrategy
+} = require("./strategies/multipleChoiceOtherAnswerStrategy");
+
+const { handleAnswerDeleted } = require("./strategies/routingStrategy");
 
 const handleDeprecatedMandatoryFieldFromDb = answer =>
   isObject(answer)
@@ -37,13 +48,6 @@ const toDb = flow(
   omit("mandatory")
 );
 
-const {
-  createOtherAnswerStrategy,
-  deleteOtherAnswerStrategy
-} = require("./strategies/multipleChoiceOtherAnswerStrategy");
-
-const { handleAnswerDeleted } = require("./strategies/routingStrategy");
-
 const findAll = (where = {}, orderBy = "createdAt", direction = "asc") =>
   Answer.findAll()
     .where({ isDeleted: false, parentAnswerId: null })
@@ -55,43 +59,6 @@ const getById = id =>
   Answer.findById(id)
     .where({ isDeleted: false })
     .then(fromDb);
-
-const createAnswer = async (args, ctx) => {
-  return db.transaction(async trx => {
-    const defaultProperties = getDefaultAnswerProperties(args.input.type);
-    const input = merge({}, args.input, { properties: defaultProperties });
-    const answer = await ctx.repositories.Answer.insert(input, trx);
-
-    if (includes(answer.type, flatten(values(answerTypeMap)))) {
-      await createDefaultValidationsForAnswer(answer, trx);
-    }
-
-    if (answer.type === "Checkbox" || answer.type === "Radio") {
-      const defaultOptions = [];
-      const defaultOption = {
-        label: "",
-        description: "",
-        value: "",
-        qCode: "",
-        answerId: answer.id
-      };
-
-      defaultOptions.push(defaultOption);
-
-      if (answer.type === "Radio") {
-        defaultOptions.push(defaultOption);
-      }
-
-      const promises = defaultOptions.map(it =>
-        ctx.repositories.Option.insert(it, trx)
-      );
-
-      await Promise.all(promises);
-    }
-
-    return answer;
-  });
-};
 
 const insert = (
   {
@@ -159,6 +126,45 @@ const update = ({
   )
     .then(head)
     .then(fromDb);
+};
+
+const createAnswer = async answerConfig => {
+  return db.transaction(async trx => {
+    const defaultProperties = getDefaultAnswerProperties(answerConfig.type);
+    const input = merge({}, answerConfig, {
+      properties: defaultProperties
+    });
+    const answer = await insert(input, trx);
+
+    if (includes(answer.type, flatten(values(answerTypeMap)))) {
+      await createDefaultValidationsForAnswer(answer, trx);
+    }
+
+    if (answer.type === "Checkbox" || answer.type === "Radio") {
+      const defaultOptions = [];
+      const defaultOption = {
+        label: "",
+        description: "",
+        value: "",
+        qCode: "",
+        answerId: answer.id
+      };
+
+      defaultOptions.push(defaultOption);
+
+      if (answer.type === "Radio") {
+        defaultOptions.push(defaultOption);
+      }
+
+      const promises = defaultOptions.map(it =>
+        OptionRepository.insert(it, trx)
+      );
+
+      await Promise.all(promises);
+    }
+
+    return answer;
+  });
 };
 
 const deleteAnswer = async (trx, id) => {

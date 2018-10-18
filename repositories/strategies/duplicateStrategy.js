@@ -1,8 +1,33 @@
 const { omit, head, get, isNil } = require("lodash");
+const cheerio = require("cheerio");
 const {
   getOrUpdateOrderForPageInsert,
   getOrUpdateOrderForSectionInsert
 } = require("./spacedOrderStrategy");
+
+const updatePiping = (field, references) => {
+  if (!field || field.indexOf("<span") === -1) {
+    return field;
+  }
+
+  const $ = cheerio.load(field);
+
+  $("span").map((i, el) => {
+    const $el = $(el);
+    const pipeType = $el.data("piped");
+    const id = $el.data("id");
+
+    const newId = references[pipeType][id];
+
+    // Can't use data as it doesn't work
+    // https://github.com/cheeriojs/cheerio/issues/1240
+    $el.attr("data-id", newId);
+
+    return $.html($el);
+  });
+
+  return $("body").html();
+};
 
 const insertData = async (
   trx,
@@ -118,13 +143,20 @@ const duplicateOtherAnswer = async (trx, otherAnswer, duplicateAnswer) => {
   });
 };
 
-const duplicateAnswerStrategy = async (trx, answer, overrides = {}) => {
+const duplicateAnswerStrategy = async (
+  trx,
+  answer,
+  overrides = {},
+  references
+) => {
   const duplicateAnswer = await duplicateRecord(
     trx,
     "Answers",
     answer,
     overrides
   );
+  references.answers[answer.id] = duplicateAnswer.id;
+
   const otherAnswer = await selectData(trx, "Answers", "*", {
     parentAnswerId: answer.id
   }).then(head);
@@ -180,12 +212,26 @@ const duplicateAnswerStrategy = async (trx, answer, overrides = {}) => {
   return selectData(trx, "Answers", "*", { id: duplicateAnswer.id }).then(head);
 };
 
-const duplicatePageStrategy = async (trx, page, position, overrides = {}) => {
+const duplicatePageStrategy = async (
+  trx,
+  page,
+  position,
+  overrides = {},
+  references = { answers: {}, metadata: {} }
+) => {
   const duplicatePage = await duplicateRecord(
     trx,
     "Pages",
     page,
-    overrides,
+    {
+      ...overrides,
+      title: updatePiping(overrides.title || page.title, references),
+      description: updatePiping(
+        overrides.description || page.description,
+        references
+      ),
+      guidance: updatePiping(overrides.guidance || page.guidance, references)
+    },
     position
   );
 
@@ -196,12 +242,17 @@ const duplicatePageStrategy = async (trx, page, position, overrides = {}) => {
 
   await Promise.all(
     answersToDuplicate.map(answer =>
-      duplicateAnswerStrategy(trx, answer, {
-        parentRelation: {
-          id: duplicatePage.id,
-          columnName: "questionPageId"
-        }
-      })
+      duplicateAnswerStrategy(
+        trx,
+        answer,
+        {
+          parentRelation: {
+            id: duplicatePage.id,
+            columnName: "questionPageId"
+          }
+        },
+        references
+      )
     )
   );
 
@@ -212,7 +263,8 @@ const duplicateSectionStrategy = async (
   trx,
   section,
   position,
-  overrides = {}
+  overrides = {},
+  references = { answers: {}, metadata: {} }
 ) => {
   const duplicateSection = await duplicateRecord(
     trx,
@@ -226,22 +278,37 @@ const duplicateSectionStrategy = async (
     sectionId: section.id
   });
 
-  await Promise.all(
-    pagesToDuplicate.map(({ position, ...page }) =>
-      duplicatePageStrategy(trx, page, position, {
+  for (let i = 0; i < pagesToDuplicate.length; ++i) {
+    const { position, ...page } = pagesToDuplicate[i];
+    await duplicatePageStrategy(
+      trx,
+      page,
+      position,
+      {
         parentRelation: {
           id: duplicateSection.id,
           columnName: "sectionId"
         }
-      })
-    )
-  );
+      },
+      references
+    );
+  }
 
   return duplicateSection;
 };
 
-const duplicateMetadata = async (trx, metadata, overrides) =>
-  duplicateRecord(trx, "Metadata", metadata, overrides);
+const duplicateMetadata = async (trx, metadata, overrides, references) => {
+  const duplicatedMetadata = await duplicateRecord(
+    trx,
+    "Metadata",
+    metadata,
+    overrides
+  );
+
+  references.metadata[metadata.id] = duplicatedMetadata.id;
+
+  return duplicatedMetadata;
+};
 
 const duplicateQuestionnaireStrategy = async (
   trx,
@@ -254,20 +321,11 @@ const duplicateQuestionnaireStrategy = async (
     questionnaire,
     overrides
   );
-  const sectionsToDuplicate = await selectData(trx, "SectionsView", "*", {
-    questionnaireId: questionnaire.id
-  });
 
-  await Promise.all(
-    sectionsToDuplicate.map(({ position, ...section }) =>
-      duplicateSectionStrategy(trx, section, position, {
-        parentRelation: {
-          id: duplicateQuestionnaire.id,
-          columnName: "questionnaireId"
-        }
-      })
-    )
-  );
+  const references = {
+    metadata: {},
+    answers: {}
+  };
 
   const metadataToDuplicate = await selectData(trx, "Metadata", "*", {
     questionnaireId: questionnaire.id
@@ -275,24 +333,45 @@ const duplicateQuestionnaireStrategy = async (
 
   await Promise.all(
     metadataToDuplicate.map(metadata =>
-      duplicateMetadata(trx, metadata, {
+      duplicateMetadata(
+        trx,
+        metadata,
+        {
+          parentRelation: {
+            id: duplicateQuestionnaire.id,
+            columnName: "questionnaireId"
+          }
+        },
+        references
+      )
+    )
+  );
+
+  const sectionsToDuplicate = await selectData(trx, "SectionsView", "*", {
+    questionnaireId: questionnaire.id
+  });
+
+  // Need to execute these in order so we can update piping references
+  for (let i = 0; i < sectionsToDuplicate.length; ++i) {
+    const { position, ...section } = sectionsToDuplicate[i];
+    await duplicateSectionStrategy(
+      trx,
+      section,
+      position,
+      {
         parentRelation: {
           id: duplicateQuestionnaire.id,
           columnName: "questionnaireId"
         }
-      })
-    )
-  );
+      },
+      references
+    );
+  }
 
   return duplicateQuestionnaire;
 };
 
 Object.assign(module.exports, {
-  insertData,
-  selectData,
-  duplicateRecord,
-  duplicateOptionStrategy,
-  duplicateAnswerStrategy,
   duplicatePageStrategy,
   duplicateSectionStrategy,
   duplicateQuestionnaireStrategy
