@@ -250,14 +250,14 @@ describe("resolvers", () => {
         const result = await mutateValidationParameters({
           id: currencyValidation.maxValue.id,
           maxValueInput: {
-            entityType: entityType,
+            entityType,
             inclusive: true
           }
         });
 
         expect(result).toMatchObject({
           id: currencyValidation.maxValue.id,
-          entityType: entityType
+          entityType
         });
       });
 
@@ -266,6 +266,19 @@ describe("resolvers", () => {
   });
 
   describe("Date", () => {
+    let params;
+
+    beforeEach(() => {
+      params = {
+        entityType: "Custom",
+        offset: {
+          value: 8,
+          unit: "Months"
+        },
+        relativePosition: "After"
+      };
+    });
+
     it("should create earliest validation db entries for Date answers", async () => {
       const answer = await createNewAnswer(firstPage, "Date");
       const validation = await queryAnswerValidations(answer.id);
@@ -296,58 +309,139 @@ describe("resolvers", () => {
       );
     });
 
-    it("should be able to update earliest date properties", async () => {
-      const answer = await createNewAnswer(firstPage, "Date");
-      const validation = await queryAnswerValidations(answer.id);
-      const result = await mutateValidationParameters({
-        id: validation.earliestDate.id,
-        earliestDateInput: {
-          custom: "2017-01-01",
-          offset: {
-            value: 8,
-            unit: "Months"
-          },
-          relativePosition: "After"
-        }
+    describe("Earliest", () => {
+      it("should be able to update properties", async () => {
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+        const result = await mutateValidationParameters({
+          id: validation.earliestDate.id,
+          earliestDateInput: {
+            ...params,
+            custom: "2017-01-01"
+          }
+        });
+        const expected = {
+          id: validation.earliestDate.id,
+          ...params,
+          customDate: "2017-01-01",
+          previousAnswer: null
+        };
+        expect(result).toEqual(expected);
       });
-      const expected = {
-        id: validation.earliestDate.id,
-        customDate: "2017-01-01",
-        offset: {
-          value: 8,
-          unit: "Months"
-        },
-        relativePosition: "After"
-      };
-      expect(result).toMatchObject(expected);
+
+      it("can update previous answer", async () => {
+        const previousAnswer = await createNewAnswer(firstPage, "Date");
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+
+        const result = await mutateValidationParameters({
+          id: validation.earliestDate.id,
+          earliestDateInput: {
+            ...params,
+            entityType: "PreviousAnswer",
+            previousAnswer: previousAnswer.id
+          }
+        });
+
+        expect(result).toMatchObject({
+          entityType: "PreviousAnswer",
+          previousAnswer: {
+            id: previousAnswer.id
+          }
+        });
+      });
+
+      it("can update entity type", async () => {
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+
+        const entityTypes = ["Custom", "PreviousAnswer"];
+
+        const promises = entityTypes.map(async entityType => {
+          const result = await mutateValidationParameters({
+            id: validation.earliestDate.id,
+            earliestDateInput: {
+              ...params,
+              entityType
+            }
+          });
+
+          expect(result).toMatchObject({
+            id: validation.earliestDate.id,
+            entityType
+          });
+        });
+
+        await Promise.all(promises);
+      });
     });
 
-    it("should be able to update latest date properties", async () => {
-      const answer = await createNewAnswer(firstPage, "Date");
-      const validation = await queryAnswerValidations(answer.id);
-      const result = await mutateValidationParameters({
-        id: validation.latestDate.id,
-        latestDateInput: {
-          custom: "2017-01-01",
-          offset: {
-            value: 8,
-            unit: "Months"
-          },
-          relativePosition: "After"
-        }
+    describe("Latest", () => {
+      it("should be able to update properties", async () => {
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+        const result = await mutateValidationParameters({
+          id: validation.latestDate.id,
+          latestDateInput: {
+            custom: "2017-01-01",
+            ...params
+          }
+        });
+        const expected = {
+          id: validation.latestDate.id,
+          customDate: "2017-01-01",
+          previousAnswer: null,
+          ...params
+        };
+
+        expect(result).toEqual(expected);
       });
-      const expected = {
-        id: validation.latestDate.id,
-        customDate: "2017-01-01",
-        offset: {
-          value: 8,
-          unit: "Months"
-        },
-        relativePosition: "After"
-      };
-      // When the objects don't match it can trigger a jest bug
-      // https://github.com/facebook/jest/issues/6730
-      expect(JSON.parse(JSON.stringify(result))).toMatchObject(expected);
+
+      it("can update previous answer", async () => {
+        const previousAnswer = await createNewAnswer(firstPage, "Date");
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+
+        const result = await mutateValidationParameters({
+          id: validation.latestDate.id,
+          latestDateInput: {
+            ...params,
+            entityType: "PreviousAnswer",
+            previousAnswer: previousAnswer.id
+          }
+        });
+
+        expect(result).toMatchObject({
+          entityType: "PreviousAnswer",
+          previousAnswer: {
+            id: previousAnswer.id
+          }
+        });
+      });
+
+      it("can update entity type", async () => {
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+
+        const entityTypes = ["Custom", "PreviousAnswer"];
+
+        const promises = entityTypes.map(async entityType => {
+          const result = await mutateValidationParameters({
+            id: validation.latestDate.id,
+            latestDateInput: {
+              ...params,
+              entityType
+            }
+          });
+
+          expect(result).toMatchObject({
+            id: validation.latestDate.id,
+            entityType
+          });
+        });
+
+        await Promise.all(promises);
+      });
     });
   });
 });

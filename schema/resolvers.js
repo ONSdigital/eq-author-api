@@ -480,13 +480,23 @@ const Resolvers = {
   EarliestDateValidationRule: {
     custom: ({ custom }) => (custom ? new Date(custom) : null),
     offset: ({ config: { offset } }) => offset,
-    relativePosition: ({ config: { relativePosition } }) => relativePosition
+    relativePosition: ({ config: { relativePosition } }) => relativePosition,
+    entityType: ({ entityType }) => entityType,
+    previousAnswer: ({ previousAnswerId }, args, ctx) =>
+      isNil(previousAnswerId)
+        ? null
+        : ctx.repositories.Answer.getById(previousAnswerId)
   },
 
   LatestDateValidationRule: {
     custom: ({ custom }) => (custom ? new Date(custom) : null),
     offset: ({ config: { offset } }) => offset,
-    relativePosition: ({ config: { relativePosition } }) => relativePosition
+    relativePosition: ({ config: { relativePosition } }) => relativePosition,
+    entityType: ({ entityType }) => entityType,
+    previousAnswer: ({ previousAnswerId }, args, ctx) =>
+      isNil(previousAnswerId)
+        ? null
+        : ctx.repositories.Answer.getById(previousAnswerId)
   },
 
   Metadata: {

@@ -651,6 +651,10 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
         unit
       }
       relativePosition
+      entityType
+      previousAnswer {
+        id
+      }
     }
     ...on LatestDateValidationRule {
       customDate: custom
@@ -659,6 +663,10 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
         unit
       }
       relativePosition
+      entityType
+      previousAnswer {
+        id
+      }
     }
   }
 }
