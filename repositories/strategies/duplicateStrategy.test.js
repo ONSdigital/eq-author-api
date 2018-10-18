@@ -1,5 +1,7 @@
+const { head, omit, flatten } = require("lodash");
+const fp = require("lodash/fp");
+
 const db = require("../../db");
-const { head, omit } = require("lodash");
 const {
   insertData,
   selectData,
@@ -7,7 +9,8 @@ const {
   duplicateOptionStrategy,
   duplicateAnswerStrategy,
   duplicatePageStrategy,
-  duplicateSectionStrategy
+  duplicateSectionStrategy,
+  duplicateQuestionnaireStrategy
 } = require("./duplicateStrategy");
 const QuestionnaireRepository = require("../QuestionnaireRepository");
 const SectionRepository = require("../SectionRepository");
@@ -527,6 +530,66 @@ describe("Duplicate strategy tests", () => {
       });
 
       expect(duplicatedPages.length).toEqual(pages.length - 1);
+    });
+  });
+
+  describe("Questionnaire", () => {
+    it("will duplicate a questionnaire", async () => {
+      const { questionnaire } = await setup();
+
+      const fieldsToOmit = ["id", "createdAt", "updatedAt"];
+
+      const duplicateQuestionnaire = await db.transaction(trx => {
+        return duplicateQuestionnaireStrategy(trx, questionnaire);
+      });
+
+      expect(omit(duplicateQuestionnaire, fieldsToOmit)).toMatchObject(
+        omit(questionnaire, fieldsToOmit)
+      );
+    });
+
+    it("will duplicate child entities", async () => {
+      const { questionnaire, section, page } = await setup();
+
+      // Omit non duplicated fields and parent links
+      const filterEntity = fp.omit([
+        "id",
+        "createdAt",
+        "updatedAt",
+        "questionnaireId",
+        "sectionId"
+      ]);
+
+      const duplicatedEntities = await db.transaction(async trx => {
+        const dupQuestionnaire = await duplicateQuestionnaireStrategy(
+          trx,
+          questionnaire
+        );
+
+        const dupSections = await selectData(trx, "SectionsView", "*", {
+          questionnaireId: dupQuestionnaire.id
+        });
+
+        const dupPages = await Promise.all(
+          dupSections.map(dupSection =>
+            selectData(trx, "PagesView", "*", {
+              sectionId: dupSection.id
+            })
+          )
+        ).then(pages => flatten(pages));
+
+        return {
+          pages: dupPages,
+          sections: dupSections
+        };
+      });
+
+      expect(filterEntity(duplicatedEntities.sections[0])).toMatchObject(
+        filterEntity(section)
+      );
+      expect(filterEntity(duplicatedEntities.pages[0])).toMatchObject(
+        filterEntity(page)
+      );
     });
   });
 });

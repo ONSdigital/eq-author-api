@@ -50,9 +50,8 @@ const Resolvers = {
       ctx.repositories.Questionnaire.remove(args.input.id),
     undeleteQuestionnaire: (_, args, ctx) =>
       ctx.repositories.Questionnaire.undelete(args.input.id),
-    duplicateQuestionnaire: () => {
-      throw new Error("Not implemented");
-    },
+    duplicateQuestionnaire: (_, args, ctx) =>
+      ctx.repositories.Questionnaire.duplicate(args.input.id),
 
     createSection: async (root, args, ctx) => {
       const section = await ctx.repositories.Section.insert(args.input);

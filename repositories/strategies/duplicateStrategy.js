@@ -240,6 +240,35 @@ const duplicateSectionStrategy = async (
   return duplicateSection;
 };
 
+const duplicateQuestionnaireStrategy = async (
+  trx,
+  questionnaire,
+  overrides = {}
+) => {
+  const duplicateQuestionnaire = await duplicateRecord(
+    trx,
+    "Questionnaires",
+    questionnaire,
+    overrides
+  );
+  const sectionsToDuplicate = await selectData(trx, "SectionsView", "*", {
+    questionnaireId: questionnaire.id
+  });
+
+  await Promise.all(
+    sectionsToDuplicate.map(({ position, ...section }) =>
+      duplicateSectionStrategy(trx, section, position, {
+        parentRelation: {
+          id: duplicateQuestionnaire.id,
+          columnName: "questionnaireId"
+        }
+      })
+    )
+  );
+
+  return duplicateQuestionnaire;
+};
+
 Object.assign(module.exports, {
   insertData,
   selectData,
@@ -247,5 +276,6 @@ Object.assign(module.exports, {
   duplicateOptionStrategy,
   duplicateAnswerStrategy,
   duplicatePageStrategy,
-  duplicateSectionStrategy
+  duplicateSectionStrategy,
+  duplicateQuestionnaireStrategy
 });

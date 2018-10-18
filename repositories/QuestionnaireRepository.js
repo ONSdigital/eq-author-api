@@ -1,5 +1,12 @@
 const { head } = require("lodash/fp");
+
 const Questionnaire = require("../db/Questionnaire");
+const db = require("../db");
+const addPrefix = require("../utils/addPrefix");
+
+const {
+  duplicateQuestionnaireStrategy
+} = require("./strategies/duplicateStrategy");
 
 module.exports.getById = function(id) {
   return Questionnaire.findById(id).where({ isDeleted: false });
@@ -67,4 +74,17 @@ module.exports.remove = function(id) {
 
 module.exports.undelete = function(id) {
   return Questionnaire.update(id, { isDeleted: false }).then(head);
+};
+
+module.exports.duplicate = id => {
+  return db.transaction(async trx => {
+    const questionnaire = await trx
+      .select("*")
+      .from("Questionnaires")
+      .where({ id })
+      .then(head);
+    return duplicateQuestionnaireStrategy(trx, questionnaire, {
+      title: addPrefix(questionnaire.title)
+    });
+  });
 };

@@ -66,4 +66,31 @@ describe("Duplication", () => {
       duplicateSection: { id: "2" }
     });
   });
+
+  it("should be able to duplicate a questionnaire", async () => {
+    const ctx = {
+      repositories: {
+        Questionnaire: {
+          duplicate: jest.fn(() => ({
+            id: 2,
+            title: "Duplicate Questionnaire"
+          }))
+        }
+      }
+    };
+    const query = `
+    mutation duplicateQuestionnaire($input: DuplicateQuestionnaireInput!) {
+      duplicateQuestionnaire(input: $input) {
+        id
+      }
+    }
+    `;
+
+    const result = await executeQuery(query, { input: { id: "1" } }, ctx);
+    expect(result.errors).toBeUndefined();
+    expect(ctx.repositories.Questionnaire.duplicate).toHaveBeenCalledWith("1");
+    expect(result.data).toMatchObject({
+      duplicateQuestionnaire: { id: "2" }
+    });
+  });
 });
