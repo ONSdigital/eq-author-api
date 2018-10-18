@@ -240,6 +240,9 @@ const duplicateSectionStrategy = async (
   return duplicateSection;
 };
 
+const duplicateMetadata = async (trx, metadata, overrides) =>
+  duplicateRecord(trx, "Metadata", metadata, overrides);
+
 const duplicateQuestionnaireStrategy = async (
   trx,
   questionnaire,
@@ -258,6 +261,21 @@ const duplicateQuestionnaireStrategy = async (
   await Promise.all(
     sectionsToDuplicate.map(({ position, ...section }) =>
       duplicateSectionStrategy(trx, section, position, {
+        parentRelation: {
+          id: duplicateQuestionnaire.id,
+          columnName: "questionnaireId"
+        }
+      })
+    )
+  );
+
+  const metadataToDuplicate = await selectData(trx, "Metadata", "*", {
+    questionnaireId: questionnaire.id
+  });
+
+  await Promise.all(
+    metadataToDuplicate.map(metadata =>
+      duplicateMetadata(trx, metadata, {
         parentRelation: {
           id: duplicateQuestionnaire.id,
           columnName: "questionnaireId"
