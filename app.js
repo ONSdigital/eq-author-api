@@ -11,7 +11,7 @@ const pinoMiddleware = require("express-pino-logger");
 const { PORT } = require("./config/settings");
 const createLogger = require("./utils/createLogger");
 const status = require("./middleware/status");
-const getLaunchUrl = require("./middleware/launch");
+const { getLaunchUrl } = require("./middleware/launch");
 
 const app = express();
 const pino = pinoMiddleware();

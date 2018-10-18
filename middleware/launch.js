@@ -2,21 +2,36 @@ const { generateToken } = require("../utils/jwtHelper");
 const { assign, isNil, isEmpty } = require("lodash");
 const { sanitiseMetadata } = require("../utils/sanitiseMetadata");
 
-module.exports = ctx => async (req, res, next) => {
+const buildClaims = metadata => {
+  const result = {
+    claims: {},
+    errors: []
+  };
+
+  metadata.map(({ key, value, id, type }) => {
+    if (isNil(key) || key.trim() === "") {
+      result.errors.push(id);
+    }
+
+    return assign(result.claims, {
+      [key]:
+        type === "Date" ? new Date(value).toISOString().split("T")[0] : value
+    });
+  });
+
+  return result;
+};
+
+module.exports.buildClaims = buildClaims;
+
+module.exports.getLaunchUrl = ctx => async (req, res, next) => {
   const questionnaireId = req.params.questionnaireId;
-  const errors = [];
 
   const result = await ctx.repositories.Metadata.findAll({
     questionnaireId
   });
 
-  const metadataValues = {};
-  result.map(({ key, value, id }) => {
-    if (isNil(key) || key.trim() === "") {
-      errors.push(id);
-    }
-    return assign(metadataValues, { [key]: value });
-  });
+  const { errors, claims: metadataValues } = buildClaims(result);
 
   if (!isEmpty(errors)) {
     next(

@@ -1,4 +1,4 @@
-const getLaunchUrl = require("./launch");
+const { buildClaims, getLaunchUrl } = require("./launch");
 const mockRepository = require("../tests/utils/mockRepository");
 
 let repositories;
@@ -84,5 +84,32 @@ describe("launcher middleware", () => {
     await getLaunchUrl(ctx)(req, res, next);
 
     expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it("should convert date values to ISO string dates when building claims", () => {
+    expect(
+      buildClaims([{ id: 1, key: "hello", type: "Date", value: "01/01/2018" }])
+    ).toMatchObject({
+      claims: {
+        hello: "2018-01-01"
+      }
+    });
+  });
+
+  it("should convert date values to ISO string even if ISO format already", () => {
+    expect(
+      buildClaims([
+        {
+          id: 1,
+          key: "hello",
+          type: "Date",
+          value: "2018-01-01T00:00:00+00:00"
+        }
+      ])
+    ).toMatchObject({
+      claims: {
+        hello: "2018-01-01"
+      }
+    });
   });
 });
