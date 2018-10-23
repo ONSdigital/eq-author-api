@@ -1,6 +1,7 @@
-const { head, map } = require("lodash/fp");
+const { head } = require("lodash/fp");
 const { get, isNil, parseInt } = require("lodash");
 const db = require("../db");
+const Answer = require("../repositories/AnswerRepository");
 
 const {
   updateRoutingConditionStrategy,
@@ -81,9 +82,7 @@ function findAllRoutingConditions(where = {}) {
 }
 
 function findAllRoutingConditionValues(where = {}) {
-  return Routing.findAllRoutingConditionValues()
-    .where(where)
-    .then(map("optionId"));
+  return Routing.findAllRoutingConditionValues().where(where);
 }
 
 function createRoutingRuleSet({ questionPageId }) {
@@ -118,6 +117,15 @@ const toggleConditionOption = async ({ conditionId, optionId, checked }) =>
     })
   );
 
+const createConditionValue = async ({ conditionId }) =>
+  Routing.createRoutingConditionValue({
+    conditionId,
+    customNumber: null
+  }).then(head);
+
+const updateConditionValue = async ({ id, customNumber }) =>
+  Routing.updateRoutingConditionValue(id, { customNumber }).then(head);
+
 const updateDestination = async (id, destination) => {
   const { logicalDestination, absoluteDestination } = destination;
 
@@ -150,6 +158,16 @@ async function updateRoutingRuleSet({ id, else: destination }) {
   return routingRuleSet;
 }
 
+async function getAnswerTypeByConditionId(id) {
+  const { answerId } = await findAllRoutingConditions({ id }).then(head);
+  if (isNil(answerId)) {
+    return null;
+  } else {
+    const { type } = await Answer.getById(answerId);
+    return type;
+  }
+}
+
 async function updateRoutingRule({ id, goto: destination }) {
   const routingRule = await getRoutingRuleById(id);
   const routingRuleSet = await getRoutingRuleSetById(
@@ -165,9 +183,14 @@ async function updateRoutingRule({ id, goto: destination }) {
   return routingRule;
 }
 
-function updateRoutingCondition({ id, questionPageId, answerId }) {
+function updateRoutingCondition({ id, questionPageId, answerId, comparator }) {
   return db.transaction(trx =>
-    updateRoutingConditionStrategy(trx, { id, questionPageId, answerId })
+    updateRoutingConditionStrategy(trx, {
+      id,
+      questionPageId,
+      answerId,
+      comparator
+    })
   );
 }
 
@@ -231,9 +254,12 @@ Object.assign(module.exports, {
   createRoutingRule,
   createRoutingCondition,
   toggleConditionOption,
+  createConditionValue,
+  updateConditionValue,
   updateRoutingRuleSet,
   getRoutingDestinations,
   resolveRoutingDestination,
   deleteRoutingRuleSet,
-  getRoutingDestination
+  getRoutingDestination,
+  getAnswerTypeByConditionId
 });

@@ -238,6 +238,10 @@ query GetPage($id: ID!){
               ...on IDArrayValue{
                 value
               }
+              ...on NumberValue {
+                id
+                numberValue
+              }
             }
           }
         }
@@ -314,6 +318,9 @@ const createRoutingCondition = `
         ... on IDArrayValue {
           value
         }
+        ...on NumberValue{
+          numberValue
+        }
       }
     }
   }
@@ -387,6 +394,7 @@ mutation($input: UpdateRoutingConditionInput!){
   updateRoutingCondition (input: $input)
   {
     id
+    comparator
   }
 }
 `;
@@ -403,6 +411,17 @@ const deleteRoutingCondition = `
   mutation($input: DeleteRoutingConditionInput!) {
     deleteRoutingCondition(input: $input) {
       id
+    }
+  }
+`;
+
+const updateConditionValue = `
+  mutation($input: UpdateConditionValueInput!) {
+    updateConditionValue(input: $input) {
+      ...on NumberValue {
+        id
+        numberValue
+      }
     }
   }
 `;
@@ -477,6 +496,10 @@ query QuestionPage($id: ID!) {
           routingValue {
             ...on IDArrayValue {
               value
+            }
+            ...on NumberValue {
+              id
+              numberValue
             }
           }
         }
@@ -674,6 +697,7 @@ module.exports = {
   moveSectionMutation,
   getAnswerValidations,
   toggleAnswerValidation,
+  updateConditionValue,
   updateAnswerValidation,
   createExclusiveMutation
 };
