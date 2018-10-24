@@ -33,16 +33,16 @@ const sanitize = omit([
 ]);
 const removeChildren = omit([
   "answers",
-  "validations",
+  "validation",
   "options",
   "sections",
   "otherAnswer",
   "pages",
   "metadata",
   "ruleSet",
-  "values",
+  "routingValue",
   "conditions",
-  "goTo"
+  "goto"
 ]);
 
 const sanitizeAllProperties = obj =>
@@ -136,7 +136,7 @@ describe("Duplicate strategy tests", () => {
 
     it("will duplicate piping references in a page", async () => {
       const questionnaire = await buildTestQuestionnaire({
-        metadata: [{ key: "foo", refId: "m1" }],
+        metadata: [{ key: "foo", id: "m1" }],
         sections: [
           {
             pages: [
@@ -169,36 +169,41 @@ describe("Duplicate strategy tests", () => {
           {
             pages: [
               {
-                refId: "page1",
+                id: "page1",
                 answers: [
                   {
-                    refId: "answer1",
+                    id: "answer1",
                     type: "Radio",
                     options: [
                       {
-                        refId: "yes",
+                        id: "yes",
                         label: "Yes"
                       },
                       {
-                        refId: "no",
+                        id: "no",
                         label: "No"
                       }
                     ]
                   }
                 ],
-                ruleSet: {
+                routingRuleSet: {
                   else: {
                     logicalDestination: "EndOfQuestionnaire"
                   },
-                  rules: [
+                  routingRules: [
                     {
-                      goTo: {
-                        sectionId: "section2"
+                      goto: {
+                        absoluteDestination: {
+                          id: "section2",
+                          __typename: "Section"
+                        }
                       },
                       conditions: [
                         {
-                          answerId: "answer1",
-                          values: [{ optionId: "yes" }]
+                          answer: { id: "answer1" },
+                          routingValue: {
+                            value: ["yes"]
+                          }
                         }
                       ]
                     }
@@ -208,7 +213,7 @@ describe("Duplicate strategy tests", () => {
             ]
           },
           {
-            refId: "section2",
+            id: "section2",
             pages: [{}]
           }
         ]
@@ -268,7 +273,9 @@ describe("Duplicate strategy tests", () => {
 
       expect(duplicateValues).toMatchObject([
         {
-          ...sanitize(page.ruleSet.rules[0].conditions[0].values[0]),
+          ...sanitize(
+            page.ruleSet.rules[0].conditions[0].routingValue.value[0]
+          ),
           optionId: duplicateOptions[0].id
         }
       ]);
@@ -280,31 +287,32 @@ describe("Duplicate strategy tests", () => {
           {
             pages: [
               {
-                refId: "page1",
+                id: "page1",
                 answers: [
                   {
-                    refId: "answer1",
+                    id: "answer1",
                     type: "Number"
                   }
                 ],
-                ruleSet: {
+                routingRuleSet: {
                   else: {
                     logicalDestination: "EndOfQuestionnaire"
                   },
-                  rules: [
+                  routingRules: [
                     {
-                      goTo: {
-                        sectionId: "section2"
+                      goto: {
+                        absoluteDestination: {
+                          __typename: "Section",
+                          id: "section2"
+                        }
                       },
                       conditions: [
                         {
                           comparator: "Equal",
-                          answerId: "answer1",
-                          values: [
-                            {
-                              customNumber: 2
-                            }
-                          ]
+                          answer: { id: "answer1" },
+                          routingValue: {
+                            numberValue: 2
+                          }
                         }
                       ]
                     }
@@ -314,7 +322,7 @@ describe("Duplicate strategy tests", () => {
             ]
           },
           {
-            refId: "section2",
+            id: "section2",
             pages: [{}]
           }
         ]
@@ -443,8 +451,13 @@ describe("Duplicate strategy tests", () => {
                     {
                       type: "Radio",
                       options: [{ label: "1" }, { label: "2" }],
-                      otherAnswer: {
-                        label: "Other"
+                      other: {
+                        answer: {
+                          label: "Other answer label"
+                        },
+                        option: {
+                          label: "Other option label"
+                        }
                       }
                     }
                   ]
@@ -475,11 +488,52 @@ describe("Duplicate strategy tests", () => {
         );
 
         expect(sanitize(duplicateAnswer)).toMatchObject(sanitizeParent(answer));
-        expect(sanitize(duplicateOtherAnswer)).toMatchObject(
-          sanitizeParent(otherAnswer)
+        expect(duplicateOtherAnswer.parentAnswerId).toEqual(duplicateAnswer.id);
+        expect(sanitize(duplicateOtherAnswer)).toMatchObject({
+          ...sanitizeParent(otherAnswer),
+          label: "Other answer label"
+        });
+        expect(sanitize(duplicateOtherOption)).toMatchObject({
+          ...sanitize(otherOption),
+          label: "Other option label"
+        });
+      });
+
+      it("will duplicate a mutually exclusive option", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Radio",
+                      options: [{ label: "1" }, { label: "2" }],
+                      mutuallyExclusiveOption: {
+                        label: "3"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
         );
-        expect(sanitize(duplicateOtherOption)).toMatchObject(
-          sanitize(otherOption)
+        const dupAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+        const duplicateAnswer = dupAnswers[0];
+        const duplicateMutuallyExclusiveOption = await OptionRepository.findExclusiveOptionByAnswerId(
+          duplicateAnswer.id
+        );
+
+        expect(sanitize(duplicateMutuallyExclusiveOption)).toMatchObject(
+          sanitize(page.answers[0].mutuallyExclusiveOption)
         );
       });
 
@@ -492,7 +546,7 @@ describe("Duplicate strategy tests", () => {
                   answers: [
                     {
                       type: "Number",
-                      validations: {
+                      validation: {
                         minValue: {
                           enabled: true,
                           custom: 5,
@@ -532,7 +586,7 @@ describe("Duplicate strategy tests", () => {
         };
 
         expect(sanitizeAllProperties(duplicatedValidations)).toMatchObject(
-          sanitizeAllProperties(answer.validations)
+          sanitizeAllProperties(answer.validation)
         );
       });
     });
@@ -610,7 +664,7 @@ describe("Duplicate strategy tests", () => {
             pages: [
               {
                 title: "Question 1",
-                answers: [{ refId: "a1", label: "Answer 1" }]
+                answers: [{ id: "a1", label: "Answer 1" }]
               },
               {
                 title:
@@ -657,7 +711,7 @@ describe("Duplicate strategy tests", () => {
       const questionnaire = await buildTestQuestionnaire({
         metadata: [
           {
-            refId: "m1",
+            id: "m1",
             key: "foo",
             type: "Text",
             textValue: "Hello world"
@@ -669,7 +723,7 @@ describe("Duplicate strategy tests", () => {
             pages: [
               {
                 title: "Question 1",
-                answers: [{ refId: "s1q1a1", label: "S1Q1A1" }]
+                answers: [{ id: "s1q1a1", label: "S1Q1A1" }]
               }
             ]
           },
@@ -715,36 +769,44 @@ describe("Duplicate strategy tests", () => {
           {
             pages: [
               {
-                refId: "page1",
+                id: "page1",
                 answers: [
                   {
-                    refId: "answer1",
+                    id: "answer1",
                     type: "Radio",
                     options: [
                       {
-                        refId: "yes",
+                        id: "yes",
                         label: "Yes"
                       },
                       {
-                        refId: "no",
+                        id: "no",
                         label: "No"
                       }
                     ]
                   }
                 ],
-                ruleSet: {
+                routingRuleSet: {
                   else: {
-                    pageId: "page2"
+                    absoluteDestination: {
+                      id: "page2",
+                      __typename: "QuestionPage"
+                    }
                   },
-                  rules: [
+                  routingRules: [
                     {
-                      goTo: {
-                        sectionId: "section2"
+                      goto: {
+                        absoluteDestination: {
+                          id: "section2",
+                          __typename: "Section"
+                        }
                       },
                       conditions: [
                         {
-                          answerId: "answer1",
-                          values: [{ optionId: "yes" }]
+                          answer: { id: "answer1" },
+                          routingValue: {
+                            value: ["yes"]
+                          }
                         }
                       ]
                     }
@@ -752,12 +814,12 @@ describe("Duplicate strategy tests", () => {
                 }
               },
               {
-                refId: "page2"
+                id: "page2"
               }
             ]
           },
           {
-            refId: "section2",
+            id: "section2",
             pages: [{}]
           }
         ]
@@ -877,7 +939,7 @@ describe("Duplicate strategy tests", () => {
       const questionnaire = await buildTestQuestionnaire({
         metadata: [
           {
-            refId: "m1",
+            id: "m1",
             key: "foo",
             type: "Text",
             textValue: "Hello world"
@@ -892,7 +954,7 @@ describe("Duplicate strategy tests", () => {
                   'Page title <span data-piped="metadata" data-id="m1" data-type="TextField">{{foo}}</span>',
                 answers: [
                   {
-                    refId: "a1",
+                    id: "a1",
                     label: "Answer 1"
                   }
                 ]
@@ -958,36 +1020,44 @@ describe("Duplicate strategy tests", () => {
           {
             pages: [
               {
-                refId: "page1",
+                id: "page1",
                 answers: [
                   {
-                    refId: "answer1",
+                    id: "answer1",
                     type: "Radio",
                     options: [
                       {
-                        refId: "yes",
+                        id: "yes",
                         label: "Yes"
                       },
                       {
-                        refId: "no",
+                        id: "no",
                         label: "No"
                       }
                     ]
                   }
                 ],
-                ruleSet: {
+                routingRuleSet: {
                   else: {
-                    pageId: "page2"
+                    absoluteDestination: {
+                      id: "page2",
+                      __typename: "QuestionPage"
+                    }
                   },
-                  rules: [
+                  routingRules: [
                     {
-                      goTo: {
-                        sectionId: "section2"
+                      goto: {
+                        absoluteDestination: {
+                          id: "section2",
+                          __typename: "Section"
+                        }
                       },
                       conditions: [
                         {
-                          answerId: "answer1",
-                          values: [{ optionId: "yes" }]
+                          answer: { id: "answer1" },
+                          routingValue: {
+                            value: ["yes"]
+                          }
                         }
                       ]
                     }
@@ -995,12 +1065,12 @@ describe("Duplicate strategy tests", () => {
                 }
               },
               {
-                refId: "page2"
+                id: "page2"
               }
             ]
           },
           {
-            refId: "section2",
+            id: "section2",
             pages: [{}]
           }
         ]

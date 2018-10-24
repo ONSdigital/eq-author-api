@@ -12,6 +12,7 @@ const { PORT } = require("./config/settings");
 const createLogger = require("./utils/createLogger");
 const status = require("./middleware/status");
 const { getLaunchUrl } = require("./middleware/launch");
+const importAction = require("./middleware/import");
 
 const app = express();
 const pino = pinoMiddleware();
@@ -36,6 +37,9 @@ app.use(
 app.get("/status", status);
 
 app.get("/launch/:questionnaireId", getLaunchUrl(context));
+if (process.env.NODE_ENV === "development") {
+  app.post("/import", bodyParser.json({ limit: "50mb" }), importAction);
+}
 
 if (process.env.NODE_ENV === "development") {
   app.use(
