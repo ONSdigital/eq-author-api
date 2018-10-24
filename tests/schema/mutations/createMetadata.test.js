@@ -1,15 +1,8 @@
 const executeQuery = require("../../utils/executeQuery");
 const mockRepository = require("../../utils/mockRepository");
+const { createMetadataMutation } = require("../../utils/graphql");
 
 describe("createMetadata", () => {
-  const createMetadata = `
-    mutation CreateMetadata($input: CreateMetadataInput!) {
-      createMetadata(input: $input) {
-        id
-      }
-    }
-  `;
-
   const METADATA_ID = "100";
   const QUESTIONNAIRE_ID = "101";
   let repositories;
@@ -28,7 +21,7 @@ describe("createMetadata", () => {
     };
 
     const result = await executeQuery(
-      createMetadata,
+      createMetadataMutation,
       { input },
       { repositories }
     );

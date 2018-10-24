@@ -655,6 +655,9 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
       previousAnswer {
         id
       }
+      metadata {
+        id
+      }
     }
     ...on LatestDateValidationRule {
       customDate: custom
@@ -667,9 +670,20 @@ mutation updateValidation($input: UpdateValidationRuleInput!){
       previousAnswer {
         id
       }
+      metadata {
+        id
+      }
     }
   }
 }
+`;
+
+const createMetadataMutation = `
+  mutation CreateMetadata($input: CreateMetadataInput!) {
+    createMetadata(input: $input) {
+      id
+    }
+  }
 `;
 
 module.exports = {
@@ -707,5 +721,6 @@ module.exports = {
   toggleAnswerValidation,
   updateConditionValue,
   updateAnswerValidation,
-  createExclusiveMutation
+  createExclusiveMutation,
+  createMetadataMutation
 };
