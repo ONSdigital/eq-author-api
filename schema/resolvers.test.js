@@ -1244,6 +1244,7 @@ describe("resolvers", () => {
           Then B's routing condition page should be null
          */
         const pageA = firstPage;
+        await createNewAnswer(pageA, "Radio");
         const pageB = await createQuestionPage(first(sections).id).then(
           res => res.data.createQuestionPage
         );
@@ -1414,6 +1415,8 @@ describe("resolvers", () => {
 
         const newPage = await addPage(section.id);
 
+        await createNewAnswer(newPage, "Radio");
+
         await changeRoutingConditionMutation({
           id: routingCondition.id,
           questionPageId: newPage.id
@@ -1464,6 +1467,57 @@ describe("resolvers", () => {
 
         expect(res2.errors).toHaveLength(1);
       });
+
+      it("returns the conditions in a deterministic order", async () => {
+        const section = first(sections);
+
+        await createNewAnswer(firstPage, "Currency");
+
+        const pageB = await addPage(section.id);
+        await createNewAnswer(pageB, "Radio");
+
+        const pageC = await addPage(section.id);
+        await createNewAnswer(pageC, "Number");
+
+        const pageD = await addPage(section.id);
+        await createNewAnswer(pageD, "Radio");
+
+        const finalPageRoutingRuleSet = await createNewRoutingRuleSet(
+          pageD.id
+        ).then(res => res.data.createRoutingRuleSet);
+
+        const conditionInput = pageId => ({
+          comparator: "Equal",
+          questionPageId: pageId,
+          routingRuleId: get(finalPageRoutingRuleSet, "routingRules[0].id")
+        });
+
+        const routingInfo = await getRoutingDataForPage(pageD);
+        const routingCondition = get(
+          routingInfo,
+          "routingRuleSet.routingRules[0].conditions[0]"
+        );
+        await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          questionPageId: pageD.id
+        });
+        await newCondition(conditionInput(pageC.id));
+        await newCondition(conditionInput(pageB.id));
+        await newCondition(conditionInput(firstPage.id));
+
+        const updatedRoutingInfo = await getFullRoutingTree(pageD);
+        const updatedRoutingCondition = get(
+          updatedRoutingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions"
+        );
+
+        expect(updatedRoutingCondition[0].questionPage.id).toEqual(pageD.id);
+        expect(updatedRoutingCondition[1].questionPage.id).toEqual(pageC.id);
+        expect(updatedRoutingCondition[2].questionPage.id).toEqual(pageB.id);
+        expect(updatedRoutingCondition[3].questionPage.id).toEqual(
+          firstPage.id
+        );
+      });
     });
 
     describe("Numeric routing", () => {
@@ -1512,6 +1566,7 @@ describe("resolvers", () => {
           routingValue: { id: routingCondition.routingValue.id, numberValue: 8 }
         });
       });
+
       it("should be able to change the numeric comparator", async () => {
         const answer = await createNewAnswer(firstPage, "Currency");
         await createNewRoutingRuleSet(firstPage.id);
@@ -1538,6 +1593,39 @@ describe("resolvers", () => {
           comparator: "GreaterThan",
           questionPage: { id: firstPage.id },
           answer: { id: answer.id }
+        });
+      });
+
+      it("doesn't wipe out the condition value on a comparator change", async () => {
+        await createNewAnswer(firstPage, "Currency");
+        await createNewRoutingRuleSet(firstPage.id);
+
+        const routingInfo = await getFullRoutingTree(firstPage);
+        const routingCondition = get(
+          routingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        await updateConditionValueMutation({
+          id: routingCondition.routingValue.id,
+          customNumber: 8
+        });
+
+        await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          comparator: "GreaterThan",
+          questionPageId: firstPage.id
+        });
+
+        const updatedRoutingInfo = await getFullRoutingTree(firstPage);
+        const updatedRoutingConditionValue = get(
+          updatedRoutingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue"
+        );
+
+        expect(updatedRoutingConditionValue).toMatchObject({
+          id: routingCondition.routingValue.id,
+          numberValue: 8
         });
       });
     });

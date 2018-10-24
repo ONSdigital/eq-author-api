@@ -142,6 +142,15 @@ const getAnswerOrFirstAnswerOnPage = (trx, answerId, questionPageId) => {
   return getFirstAnswer(trx, questionPageId);
 };
 
+const checkIfPageChange = async (trx, routingConditionId, newAnswerId) => {
+  const routingCondition = await trx("Routing_Conditions")
+    .select("*")
+    .where({ id: routingConditionId })
+    .then(head);
+
+  return routingCondition.answerId !== newAnswerId;
+};
+
 const updateRoutingConditionStrategy = async (
   trx,
   { id: routingConditionId, questionPageId, answerId, comparator }
@@ -152,9 +161,19 @@ const updateRoutingConditionStrategy = async (
     answerId,
     questionPageId
   );
-  await deleteRoutingConditionValues(trx, {
-    conditionId: routingConditionId
-  });
+
+  const hasPageChanged = await checkIfPageChange(
+    trx,
+    routingConditionId,
+    routingConditionAnswer.id
+  );
+
+  if (hasPageChanged) {
+    await deleteRoutingConditionValues(trx, {
+      conditionId: routingConditionId
+    });
+    comparator = "Equal";
+  }
 
   if (
     !isNil(routingConditionAnswer) &&
