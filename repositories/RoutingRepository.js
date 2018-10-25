@@ -78,7 +78,9 @@ function getRoutingRuleSetById(id) {
 }
 
 function findAllRoutingConditions(where = {}) {
-  return Routing.findAllRoutingConditions().where(where);
+  return Routing.findAllRoutingConditions()
+    .where(where)
+    .orderBy("id");
 }
 
 function findAllRoutingConditionValues(where = {}) {
