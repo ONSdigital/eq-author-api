@@ -173,14 +173,14 @@ const updateRoutingConditionStrategy = async (
       conditionId: routingConditionId
     });
     comparator = "Equal";
+    if (
+      !isNil(routingConditionAnswer) &&
+      includes(["Currency", "Number"], routingConditionAnswer.type)
+    ) {
+      await createSpecificConditionValue(trx, routingConditionId);
+    }
   }
 
-  if (
-    !isNil(routingConditionAnswer) &&
-    includes(["Currency", "Number"], routingConditionAnswer.type)
-  ) {
-    await createSpecificConditionValue(trx, routingConditionId);
-  }
   return updateRoutingCondition(
     trx,
     routingConditionId,
