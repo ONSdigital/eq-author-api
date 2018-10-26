@@ -1,4 +1,4 @@
-const { omit, head, get, isNil } = require("lodash");
+const { omit, head, get, isNil, isFunction } = require("lodash");
 const {
   getOrUpdateOrderForPageInsert,
   getOrUpdateOrderForSectionInsert
@@ -86,7 +86,14 @@ const duplicateTree = async (trx, tree, references) => {
     return duplicateTree(trx, restOfTree, references);
   }
 
-  const { name, links, table, where } = entityTypeToDuplicate;
+  const {
+    name,
+    links,
+    table,
+    where,
+    noIsDeleted,
+    transform
+  } = entityTypeToDuplicate;
 
   const selectQuery = trx
     .select("*")
@@ -101,14 +108,13 @@ const duplicateTree = async (trx, tree, references) => {
       if (where) {
         builder.andWhereRaw(where);
       }
+      if (!noIsDeleted) {
+        builder.andWhere({ isDeleted: false });
+      }
     })
     .orderBy("id");
 
   const originalEntities = await selectQuery;
-
-  if (where && where.indexOf("not null") > -1) {
-    console.log(originalEntities);
-  }
 
   if (originalEntities.length === 0) {
     return duplicateTree(trx, restOfTree, references);
@@ -118,15 +124,19 @@ const duplicateTree = async (trx, tree, references) => {
     links.reduce(
       (e, { column, entityName }) => ({
         ...e,
-        [column]: (references[entityName] || {})[e[column]]
+        [column]: (references[entityName] || {})[e[column]] || e[column]
       }),
       omit(entity, FIELDS_TO_NEVER_DUPLICATE)
     );
 
   const transformedEntities = originalEntities.map(transformReferences);
 
+  const transformed = isFunction(transform)
+    ? transformedEntities.map(transform)
+    : transformedEntities;
+
   const newEntities = await trx
-    .insert(transformedEntities)
+    .insert(transformed)
     .into(table)
     .returning("id");
 

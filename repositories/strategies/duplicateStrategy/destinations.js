@@ -1,44 +1,33 @@
-const { omit, get } = require("lodash/fp");
+const { flatten, omit, get } = require("lodash/fp");
 
-const getRuleSetDestinations = async (trx, references) => {
-  if (!references.routingRuleSets) {
+const DESTINATION_CONFIG = [
+  { table: "Routing_RuleSets", name: "routingRuleSets" },
+  { table: "Routing_Rules", name: "routingRules" }
+];
+
+const getDestinationEntities = async (trx, references, { table, name }) => {
+  const duplicatedEntities = references[name];
+  if (!duplicatedEntities) {
     return [];
   }
+
   return trx
     .select("id", "routingDestinationId")
-    .from("Routing_RuleSets")
-    .whereIn("id", Object.values(references.routingRuleSets))
+    .from(table)
+    .whereIn("id", Object.values(references[name]))
     .andWhere("isDeleted", false);
 };
 
-const updateRuleSets = async (trx, ruleSets, destLookup) => {
-  for (let i = 0; i < ruleSets.length; ++i) {
-    const { id, routingDestinationId } = ruleSets[i];
+const updateDestinationEntities = async (
+  trx,
+  destLookup,
+  entities,
+  { table }
+) => {
+  for (let i = 0; i < entities.length; ++i) {
+    const { id, routingDestinationId } = entities[i];
     await trx
-      .table("Routing_RuleSets")
-      .where({ id })
-      .update({
-        routingDestinationId: destLookup[routingDestinationId]
-      });
-  }
-};
-
-const getRuleDestinations = async (trx, references) => {
-  if (!references.rules) {
-    return [];
-  }
-  return trx
-    .select("id", "routingDestinationId")
-    .from("Routing_Rules")
-    .whereIn("id", Object.values(references.routingRules))
-    .andWhere("isDeleted", false);
-};
-
-const updateRules = async (trx, rules, destLookup) => {
-  for (let i = 0; i < rules.length; ++i) {
-    const { id, routingDestinationId } = rules[i];
-    await trx
-      .table("Routing_Rules")
+      .table(table)
       .where({ id })
       .update({
         routingDestinationId: destLookup[routingDestinationId]
@@ -47,12 +36,13 @@ const updateRules = async (trx, rules, destLookup) => {
 };
 
 const duplicateDestinations = async (trx, references) => {
-  const [ruleSets, rules] = await Promise.all([
-    getRuleSetDestinations(trx, references),
-    getRuleDestinations(trx, references)
-  ]);
+  const destinationEntities = await Promise.all(
+    DESTINATION_CONFIG.map(config =>
+      getDestinationEntities(trx, references, config)
+    )
+  );
 
-  const allIds = [...ruleSets, ...rules].map(get("routingDestinationId"));
+  const allIds = flatten(destinationEntities).map(get("routingDestinationId"));
 
   const destinations = await trx
     .select("*")
@@ -75,10 +65,16 @@ const duplicateDestinations = async (trx, references) => {
     {}
   );
 
-  return Promise.all([
-    updateRuleSets(trx, ruleSets, oldDestIdToNewDestId),
-    updateRules(trx, rules, oldDestIdToNewDestId)
-  ]);
+  return Promise.all(
+    DESTINATION_CONFIG.map((config, idx) =>
+      updateDestinationEntities(
+        trx,
+        oldDestIdToNewDestId,
+        destinationEntities[idx],
+        config
+      )
+    )
+  );
 };
 
 module.exports = duplicateDestinations;

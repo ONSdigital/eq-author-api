@@ -38,7 +38,7 @@ const replacePiping = (field, references) => {
   return $("body").html();
 };
 
-const buildValidations = async (validationConfigs = {}, answer) => {
+const buildValidations = async (validationConfigs = {}, answer, references) => {
   const validationEntityType = getValidationEntity(answer.type);
   const validationTypes = validationRuleMap[validationEntityType] || [];
 
@@ -53,20 +53,27 @@ const buildValidations = async (validationConfigs = {}, answer) => {
     let validation = existingValidation;
     const validationConfig = validationConfigs[validationType];
     if (validationConfig) {
-      const { enabled, previousAnswer, ...restOfConfig } = validationConfig;
+      const {
+        enabled,
+        previousAnswer,
+        metadata,
+        ...restOfConfig
+      } = validationConfig;
       if (enabled) {
         await ValidationRepository.toggleValidationRule({
           id: validation.id,
           enabled
         });
       }
-      validation = await ValidationRepository.updateValidationRule({
+      const update = {
         id: validation.id,
         [`${validationType}Input`]: {
           ...restOfConfig,
-          previousAnswer: (previousAnswer || {}).id
+          previousAnswer: references.answers[(previousAnswer || {}).id],
+          metadata: references.metadata[(metadata || {}).id]
         }
-      });
+      };
+      validation = await ValidationRepository.updateValidationRule(update);
     }
 
     validations[validationType] = validation;
@@ -188,7 +195,7 @@ const buildAnswers = async (answerConfigs = [], page, references) => {
       );
     }
 
-    answer.validation = await buildValidations(validation, answer);
+    answer.validation = await buildValidations(validation, answer, references);
     if (other) {
       answer.otherAnswer = await buildOtherAnswer(other, answer);
     }

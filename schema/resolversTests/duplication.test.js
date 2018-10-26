@@ -86,9 +86,16 @@ describe("Duplication", () => {
     }
     `;
 
-    const result = await executeQuery(query, { input: { id: "1" } }, ctx);
+    const result = await executeQuery(
+      query,
+      { input: { id: "1", createdBy: "foo" } },
+      ctx
+    );
     expect(result.errors).toBeUndefined();
-    expect(ctx.repositories.Questionnaire.duplicate).toHaveBeenCalledWith("1");
+    expect(ctx.repositories.Questionnaire.duplicate).toHaveBeenCalledWith(
+      "1",
+      "foo"
+    );
     expect(result.data).toMatchObject({
       duplicateQuestionnaire: { id: "2" }
     });

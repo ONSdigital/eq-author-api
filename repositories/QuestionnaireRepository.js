@@ -76,7 +76,7 @@ module.exports.undelete = function(id) {
   return Questionnaire.update(id, { isDeleted: false }).then(head);
 };
 
-module.exports.duplicate = id => {
+module.exports.duplicate = (id, createdBy) => {
   return db.transaction(async trx => {
     const questionnaire = await trx
       .select("*")
@@ -84,7 +84,8 @@ module.exports.duplicate = id => {
       .where({ id })
       .then(head);
     return duplicateQuestionnaireStrategy(trx, questionnaire, {
-      title: addPrefix(questionnaire.title)
+      title: addPrefix(questionnaire.title),
+      createdBy
     });
   });
 };
