@@ -1,94 +1,55 @@
-const { head, omit, flatten } = require("lodash");
 const fp = require("lodash/fp");
 
 const db = require("../../db");
 const {
-  insertData,
-  selectData,
-  duplicateRecord,
-  duplicateOptionStrategy,
-  duplicateAnswerStrategy,
   duplicatePageStrategy,
   duplicateSectionStrategy,
   duplicateQuestionnaireStrategy
 } = require("./duplicateStrategy");
-const QuestionnaireRepository = require("../QuestionnaireRepository");
 const SectionRepository = require("../SectionRepository");
 const PageRepository = require("../PageRepository");
+const AnswerRepository = require("../AnswerRepository");
+const OptionRepository = require("../OptionRepository");
+const ValidationRepository = require("../ValidationRepository");
+const MetadataRepository = require("../MetadataRepository");
 
-const buildQuestionnaire = questionnaire => ({
-  title: "Test questionnaire",
-  surveyId: "1",
-  theme: "default",
-  legalBasis: "Voluntary",
-  navigation: false,
-  createdBy: "foo",
-  ...questionnaire
-});
+const buildTestQuestionnaire = require("../../tests/utils/buildTestQuestionnaire");
 
-const buildSection = section => ({
-  title: "Test section",
-  description: "section description",
-  ...section
-});
+const sanitize = fp.omit([
+  "id",
+  "createdAt",
+  "updatedAt",
+  "answerId",
+  "otherAnswerId",
+  "parentAnswerId",
+  "questionPageId",
+  "sectionId",
+  "position",
+  "questionnaireId"
+]);
+const removeChildren = fp.omit([
+  "answers",
+  "validations",
+  "options",
+  "sections",
+  "otherAnswer",
+  "pages",
+  "metadata"
+]);
 
-const buildPage = page => ({
-  title: "Test page",
-  description: "page description",
-  guidance: "page description",
-  pageType: "QuestionPage",
-  ...page
-});
-
-const buildOption = option => ({
-  label: "Test label",
-  description: "Option description",
-  ...option
-});
-
-const buildAnswer = answer => ({
-  label: "Test label",
-  description: "Answer description",
-  guidance: "Answer guidance",
-  type: "Radio",
-  ...answer
-});
-
-const buildValidation = validation => ({
-  validationType: "minValue",
-  enabled: false,
-  config: '{"inclusive": false}',
-  ...validation
-});
-
-const buildMetadata = metadata => ({
-  key: "key",
-  alias: "alias",
-  type: "Text",
-  value: "Some value",
-  questionnaireId: -1,
-  ...metadata
-});
-
-const setup = async () => {
-  const questionnaire = await QuestionnaireRepository.insert(
-    buildQuestionnaire()
+const sanitizeAllProperties = obj =>
+  Object.keys(obj).reduce(
+    (struct, key) => ({
+      ...struct,
+      [key]: sanitize(obj[key])
+    }),
+    {}
   );
 
-  const section = await SectionRepository.insert(
-    buildSection({
-      questionnaireId: questionnaire.id
-    })
-  );
-
-  const page = await PageRepository.insert(
-    buildPage({
-      sectionId: section.id
-    })
-  );
-
-  return { questionnaire, section, page };
-};
+const sanitizeParent = fp.flow(
+  removeChildren,
+  sanitize
+);
 
 describe("Duplicate strategy tests", () => {
   beforeAll(() => db.migrate.latest());
@@ -96,556 +57,612 @@ describe("Duplicate strategy tests", () => {
   afterEach(async () => {
     await db.transaction(async trx => {
       await trx.table("Questionnaires").delete();
-      await trx.table("Sections").delete();
-      await trx.table("Pages").delete();
-      await trx.table("Answers").delete();
-      await trx.table("Options").delete();
     });
   });
 
-  it("will insert data into the db correctly, given some data", async () => {
-    const { section } = await setup();
+  describe("Page", () => {
+    it("will duplicate a page", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [
+              {
+                title: "My page"
+              }
+            ]
+          }
+        ]
+      });
 
-    const dataToInsert = await buildPage({ sectionId: section.id });
+      const page = questionnaire.sections[0].pages[0];
 
-    const dataReturnedFromInsert = await db.transaction(trx => {
-      return insertData(trx, "Pages", dataToInsert, head, "*");
-    });
-
-    const dataReturnedFromSelect = await db
-      .select("*")
-      .from("Pages")
-      .where({ id: dataReturnedFromInsert.id })
-      .then(head);
-
-    expect({
-      ...dataReturnedFromInsert,
-      ...dataToInsert
-    }).toMatchObject(dataReturnedFromSelect);
-  });
-
-  it("will select data from the db correctly, given some previously inserted data", async () => {
-    const { section } = await setup();
-
-    const dataToInsert = buildPage({ sectionId: section.id });
-
-    const dataReturnedFromInsert = await db.transaction(trx => {
-      return insertData(trx, "Pages", dataToInsert, head, "*");
-    });
-
-    const dataReturnedFromSelect = await db.transaction(trx => {
-      return selectData(trx, "Pages", "*", {
-        id: dataReturnedFromInsert.id
-      }).then(head);
-    });
-
-    expect(dataReturnedFromSelect).toMatchObject({
-      ...dataReturnedFromInsert,
-      ...dataToInsert
-    });
-  });
-
-  it("will duplicate a record", async () => {
-    const fieldsToOmit = ["id", "createdAt", "updatedAt"];
-    const { section } = await setup();
-
-    const dataToInsert = buildPage({ sectionId: section.id });
-
-    const dataReturnedFromInsert = await db.transaction(trx => {
-      return insertData(trx, "Pages", dataToInsert, head, "*");
-    });
-
-    const duplicatedRecord = await db.transaction(trx => {
-      return duplicateRecord(
-        trx,
-        "Pages",
-        omit(dataReturnedFromInsert, fieldsToOmit)
+      const duplicatePage = await db.transaction(trx =>
+        duplicatePageStrategy(trx, removeChildren(page))
       );
+      expect(sanitize(duplicatePage)).toMatchObject({
+        ...sanitize(removeChildren(page)),
+        order: page.order + 1000
+      });
     });
 
-    expect(omit(dataReturnedFromInsert, fieldsToOmit)).toMatchObject(
-      omit(duplicatedRecord, fieldsToOmit)
-    );
-  });
+    it("will not duplicate deleted answers", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [
+              {
+                title: "MyPage",
+                answers: [
+                  {
+                    label: "Is deleted",
+                    isDeleted: true
+                  },
+                  {
+                    label: "Is not deleted",
+                    isDeleted: false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
 
-  it("will duplicate an option", async () => {
-    const fieldsToOmit = ["id", "createdAt", "updatedAt"];
+      const page = questionnaire.sections[0].pages[0];
 
-    const originalOption = await db.transaction(trx => {
-      return insertData(trx, "Options", buildOption(), head, "*");
-    });
-
-    const duplicateOption = await db.transaction(trx => {
-      return duplicateOptionStrategy(trx, omit(originalOption, fieldsToOmit));
-    });
-
-    expect(omit(duplicateOption, fieldsToOmit)).toMatchObject(
-      omit(originalOption, fieldsToOmit)
-    );
-  });
-
-  it("will duplicate an answer", async () => {
-    const fieldsToOmit = ["createdAt", "updatedAt"];
-
-    const originalAnswer = await db.transaction(trx => {
-      return insertData(trx, "Answers", buildAnswer(), head, "*");
-    });
-
-    const duplicateAnswer = await db.transaction(trx => {
-      return duplicateAnswerStrategy(trx, omit(originalAnswer, fieldsToOmit));
-    });
-
-    const fieldsToOmitIncludingId = [...fieldsToOmit, "id"];
-    expect(omit(duplicateAnswer, fieldsToOmitIncludingId)).toMatchObject(
-      omit(originalAnswer, fieldsToOmitIncludingId)
-    );
-  });
-
-  it("will duplicate an answer with an option", async () => {
-    const { page } = await setup();
-    const { answer, option } = await db.transaction(async trx => {
-      const answer = await insertData(
-        trx,
-        "Answers",
-        buildAnswer({ questionPageId: page.id }),
-        head,
-        "*"
-      );
-      const option = await insertData(
-        trx,
-        "Options",
-        buildOption({
-          answerId: answer.id
-        }),
-        head,
-        "*"
-      );
-      return { answer, option };
-    });
-
-    const duplicateOption = await db.transaction(async trx => {
-      const duplicateAnswer = await duplicateAnswerStrategy(trx, answer);
-      return selectData(trx, "Options", "*", {
-        answerId: duplicateAnswer.id
-      }).then(head);
-    });
-    const fieldsToIgnore = ["id", "createdAt", "updatedAt"];
-    expect(omit(fieldsToIgnore, duplicateOption)).toMatchObject(
-      omit(fieldsToIgnore, option)
-    );
-  });
-
-  const insertOption = (trx, answer, label) =>
-    insertData(
-      trx,
-      "Options",
-      buildOption({
-        answerId: answer.id,
-        label
-      }),
-      head,
-      "*"
-    );
-
-  it("will ensure the option order is maintained", async () => {
-    const { page } = await setup();
-    const { answer } = await db.transaction(async trx => {
-      const answer = await insertData(
-        trx,
-        "Answers",
-        buildAnswer({ questionPageId: page.id }),
-        head,
-        "*"
+      const duplicatePage = await db.transaction(trx =>
+        duplicatePageStrategy(trx, removeChildren(page))
       );
 
-      await insertOption(trx, answer, "1");
-      await insertOption(trx, answer, "2");
-      await insertOption(trx, answer, "3");
-      await insertOption(trx, answer, "4");
-
-      return { answer };
-    });
-
-    const duplicateOptions = await db.transaction(async trx => {
-      const duplicateAnswer = await duplicateAnswerStrategy(trx, answer);
-      return selectData(
-        trx,
-        "Options",
-        "*",
-        {
-          answerId: duplicateAnswer.id
-        },
-        {
-          column: "id",
-          direction: "asc"
-        }
-      );
-    });
-    expect(duplicateOptions.map(o => o.label)).toMatchObject([
-      "1",
-      "2",
-      "3",
-      "4"
-    ]);
-  });
-
-  it("will duplicate an answer with an other option", async () => {
-    const fieldsToOmit = ["createdAt", "updatedAt"];
-    const originalAnswer = await db.transaction(trx => {
-      return insertData(trx, "Answers", buildAnswer(), head, "*");
-    });
-    const originalOtherAnswer = await db.transaction(trx => {
-      return insertData(
-        trx,
-        "Answers",
-        buildAnswer({
-          type: "TextField",
-          parentAnswerId: originalAnswer.id
-        }),
-        head,
-        "*"
-      );
-    });
-    const originalOption = await db.transaction(trx => {
-      return insertData(
-        trx,
-        "Options",
-        buildOption({
-          answerId: originalAnswer.id,
-          otherAnswerId: originalOtherAnswer.id
-        }),
-        head,
-        "*"
-      );
-    });
-
-    const duplicateAnswer = await db.transaction(trx => {
-      return duplicateAnswerStrategy(trx, omit(originalAnswer, fieldsToOmit));
-    });
-    const { duplicateOption, duplicateOtherAnswer } = await db.transaction(
-      async trx => {
-        const duplicateOtherAnswer = await selectData(trx, "Answers", "*", {
-          parentAnswerId: duplicateAnswer.id
-        }).then(head);
-        const duplicateOption = await selectData(trx, "Options", "*", {
-          answerId: duplicateAnswer.id,
-          otherAnswerId: duplicateOtherAnswer.id
-        }).then(head);
-        return { duplicateOtherAnswer, duplicateOption };
-      }
-    );
-
-    const fieldsToOmitIncludingId = [...fieldsToOmit, "id"];
-    expect(omit(duplicateAnswer, fieldsToOmitIncludingId)).toMatchObject(
-      omit(originalAnswer, fieldsToOmitIncludingId)
-    );
-    expect(
-      omit(duplicateOption, [
-        ...fieldsToOmitIncludingId,
-        "answerId",
-        "otherAnswerId"
-      ])
-    ).toMatchObject(
-      omit(originalOption, [
-        ...fieldsToOmitIncludingId,
-        "answerId",
-        "otherAnswerId"
-      ])
-    );
-    expect(
-      omit(duplicateOtherAnswer, [...fieldsToOmitIncludingId, "parentAnswerId"])
-    ).toMatchObject(
-      omit(originalOtherAnswer, [...fieldsToOmitIncludingId, "parentAnswerId"])
-    );
-  });
-
-  it("will duplicate a page", async () => {
-    const notDuplicatedFields = ["createdAt", "updatedAt"];
-    const { section } = await setup();
-    const originalPage = await db.transaction(trx =>
-      insertData(trx, "Pages", buildPage({ sectionId: section.id }), head, "*")
-    );
-    const duplicatePage = await db.transaction(trx =>
-      duplicatePageStrategy(trx, omit(originalPage, notDuplicatedFields))
-    );
-    expect(omit(duplicatePage, [...notDuplicatedFields, "id"])).toMatchObject(
-      omit(originalPage, [...notDuplicatedFields, "id"])
-    );
-  });
-
-  it("will duplicate the answers on the page but not deleted ones", async () => {
-    const notDuplicatedFields = ["createdAt", "updatedAt"];
-    const { section } = await setup();
-    const { originalPage, originalAnswer } = await db.transaction(async trx => {
-      const originalPage = await insertData(
-        trx,
-        "Pages",
-        buildPage({ sectionId: section.id }),
-        head,
-        "*"
-      );
-      const originalAnswer = await insertData(
-        trx,
-        "Answers",
-        buildAnswer({ questionPageId: originalPage.id }),
-        head,
-        "*"
-      );
-      await insertData(
-        trx,
-        "Answers",
-        buildAnswer({ questionPageId: originalPage.id, isDeleted: true }),
-        head,
-        "*"
-      );
-      return { originalPage, originalAnswer };
-    });
-    const duplicatePage = await db.transaction(trx =>
-      duplicatePageStrategy(trx, omit(originalPage, notDuplicatedFields))
-    );
-
-    const duplicateAnswers = await db.transaction(trx =>
-      selectData(trx, "Answers", "*", {
+      const duplicateAnswers = await AnswerRepository.findAll({
         questionPageId: duplicatePage.id
-      })
-    );
-    expect(duplicateAnswers).toHaveLength(1);
-    const firstAnswer = head(duplicateAnswers);
-    expect(
-      omit(firstAnswer, [...notDuplicatedFields, "id", "questionPageId"])
-    ).toMatchObject(
-      omit(originalAnswer, [...notDuplicatedFields, "id", "questionPageId"])
-    );
-  });
+      });
 
-  it("will duplicate the validations for an answer", async () => {
-    const { section } = await setup();
-    const { duplicatedAnswer, originalValidation } = await db.transaction(
-      async trx => {
-        const originalPage = await insertData(
-          trx,
-          "Pages",
-          buildPage({ sectionId: section.id }),
-          head,
-          "*"
-        );
-        const originalAnswer = await insertData(
-          trx,
-          "Answers",
-          buildAnswer({ questionPageId: originalPage.id }),
-          head,
-          "*"
-        );
-        const originalValidation = await insertData(
-          trx,
-          "Validation_AnswerRules",
-          buildValidation({ answerId: originalAnswer.id }),
-          head,
-          "*"
-        );
-        const duplicatedAnswer = await duplicateAnswerStrategy(
-          trx,
-          originalAnswer
-        );
-        return { duplicatedAnswer, originalValidation };
-      }
-    );
+      expect(duplicateAnswers).toHaveLength(1);
+      expect(duplicateAnswers.map(sanitize)).toMatchObject(
+        page.answers
+          .filter(a => !a.isDeleted)
+          .map(a => sanitize(removeChildren(a)))
+      );
+    });
 
-    const duplicatedValidation = await db.transaction(trx =>
-      selectData(trx, "Validation_AnswerRules", "*", {
-        answerId: duplicatedAnswer.id
-      }).then(head)
-    );
-    const fieldsToIgnore = ["id", "createdAt", "updatedAt", "answerId"];
+    it("will duplicate piping references in a page", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        metadata: [{ key: "foo", pipeId: "m1" }],
+        sections: [
+          {
+            pages: [
+              {
+                title:
+                  'MyPage <span data-piped="metadata" data-id="m1" data-type="Text">{{foo}}</span>',
+                answers: []
+              }
+            ]
+          }
+        ]
+      });
 
-    expect(omit(duplicatedValidation, fieldsToIgnore)).toMatchObject(
-      omit(originalValidation, fieldsToIgnore)
-    );
+      const page = questionnaire.sections[0].pages[0];
+
+      const duplicatePage = await db.transaction(trx =>
+        duplicatePageStrategy(trx, removeChildren(page))
+      );
+
+      expect(duplicatePage.title).toEqual(
+        `MyPage <span data-piped="metadata" data-id="${
+          questionnaire.metadata[0].id
+        }" data-type="Text">{{foo}}</span>`
+      );
+    });
+
+    describe("Answer", () => {
+      it("will duplicate an answer with an option", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Radio",
+                      options: [{}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+        const option = page.answers[0].options[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+
+        const duplicateAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+        const duplicateOptions = await OptionRepository.findAll({
+          answerId: duplicateAnswers[0].id
+        });
+
+        expect(sanitize(duplicateOptions[0])).toMatchObject(sanitize(option));
+      });
+
+      it("will ensure the option order is maintained", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Radio",
+                      options: [
+                        { label: "1" },
+                        { label: "2" },
+                        { label: "3" },
+                        { label: "4" }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+
+        const duplicateAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+        const duplicateOptions = await OptionRepository.findAll({
+          answerId: duplicateAnswers[0].id
+        });
+
+        const optionLabels = fp.map(o => o.label);
+
+        expect(optionLabels(duplicateOptions)).toMatchObject([
+          "1",
+          "2",
+          "3",
+          "4"
+        ]);
+      });
+
+      it("will duplicate an answer with an other option", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Radio",
+                      options: [{ label: "1" }, { label: "2" }],
+                      otherAnswer: {
+                        label: "Other"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+
+        const answer = page.answers[0];
+        const otherAnswer = answer.otherAnswer;
+        const otherOption = otherAnswer.options[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+        const dupAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+        const duplicateAnswer = dupAnswers[0];
+        const duplicateOtherAnswer = await AnswerRepository.getOtherAnswer(
+          duplicateAnswer.id
+        );
+        const duplicateOtherOption = await OptionRepository.getOtherOption(
+          duplicateOtherAnswer.id
+        );
+
+        expect(sanitize(duplicateAnswer)).toMatchObject(sanitizeParent(answer));
+        expect(sanitize(duplicateOtherAnswer)).toMatchObject(
+          sanitizeParent(otherAnswer)
+        );
+        expect(sanitize(duplicateOtherOption)).toMatchObject(
+          sanitize(otherOption)
+        );
+      });
+
+      it("will duplicate the validations for an answer", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Number",
+                      validations: {
+                        minValue: {
+                          enabled: true,
+                          custom: 5,
+                          inclusive: true
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+
+        const answer = page.answers[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+
+        const dupAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+        const duplicatedAnswer = dupAnswers[0];
+
+        const duplicatedValidations = {
+          minValue: await ValidationRepository.findByAnswerIdAndValidationType(
+            duplicatedAnswer,
+            "minValue"
+          ),
+          maxValue: await ValidationRepository.findByAnswerIdAndValidationType(
+            duplicatedAnswer,
+            "maxValue"
+          )
+        };
+
+        expect(sanitizeAllProperties(duplicatedValidations)).toMatchObject(
+          sanitizeAllProperties(answer.validations)
+        );
+      });
+    });
   });
 
   describe("Section", () => {
-    const extractDuplicatedFields = pages =>
-      pages.map(page =>
-        omit(page, ["sectionId", "id", "createdAt", "updatedAt"])
-      );
-
     it("will duplicate a section to the position specified", async () => {
-      const { section } = await setup();
-
-      const fieldsToOmit = ["createdAt", "updatedAt"];
-
-      const duplicateSection = await db.transaction(trx => {
-        return duplicateSectionStrategy(trx, section, 1);
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            title: "My section",
+            pages: [{}]
+          }
+        ]
       });
 
-      const fieldsToOmitIncludingId = [...fieldsToOmit, "id"];
-      expect(omit(duplicateSection, fieldsToOmitIncludingId)).toMatchObject(
-        omit(section, fieldsToOmitIncludingId)
-      );
+      const section = questionnaire.sections[0];
+
+      const duplicateSection = await db.transaction(trx => {
+        return duplicateSectionStrategy(trx, removeChildren(section), 1);
+      });
+
+      expect(sanitize(duplicateSection)).toMatchObject(sanitizeParent(section));
 
       const position = await SectionRepository.getPosition(duplicateSection);
       expect(position).toEqual(1);
     });
 
-    it("will duplicate pages for a section", async () => {
-      const { section } = await setup();
-
-      const pages = await db.transaction(trx => {
-        return selectData(trx, "Pages", "*", {
-          sectionId: section.id
-        });
+    it("will duplicate pages for a section but not deleted ones", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            title: "My section",
+            pages: [
+              {
+                title: "Question 1",
+                isDeleted: false
+              },
+              {
+                title: "Question 2",
+                isDeleted: true
+              },
+              {
+                title: "Question 3",
+                isDeleted: false
+              }
+            ]
+          }
+        ]
       });
 
-      const duplicateSection = await db.transaction(trx => {
-        return duplicateSectionStrategy(trx, section, 1);
+      const section = questionnaire.sections[0];
+
+      const duplicateSection = await db.transaction(trx =>
+        duplicateSectionStrategy(trx, removeChildren(section), 1)
+      );
+
+      const duplicatePages = await PageRepository.findAll({
+        sectionId: duplicateSection.id
       });
 
-      const duplicatedPages = await db.transaction(trx => {
-        return selectData(trx, "Pages", "*", {
-          sectionId: duplicateSection.id
-        });
-      });
-
-      expect(extractDuplicatedFields(duplicatedPages)).toEqual(
-        extractDuplicatedFields(pages)
+      expect(duplicatePages).toHaveLength(2);
+      expect(duplicatePages.map(sanitize)).toEqual(
+        section.pages
+          .filter(p => !p.isDeleted)
+          .map(p => sanitize(removeChildren(p)))
       );
     });
 
-    it("will not duplicate deleted pages", async () => {
-      const { section } = await setup();
-
-      const pages = await db.transaction(async trx => {
-        await insertData(
-          trx,
-          "Pages",
-          buildPage({ sectionId: section.id, isDeleted: true }),
-          head,
-          "*"
-        );
-
-        return selectData(trx, "Pages", "*", {
-          sectionId: section.id
-        });
+    it("will update piping to references within the section", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            title: "My section",
+            pages: [
+              {
+                title: "Question 1",
+                answers: [{ pipeId: "a1", label: "Answer 1" }]
+              },
+              {
+                title:
+                  'Title <span data-piped="answers" data-id="a1" data-type="TextField">{{Answer 1}}</span>',
+                description:
+                  'Description <span data-piped="answers" data-id="a1" data-type="TextField">{{Answer 1}}</span>',
+                guidance:
+                  'Guidance <span data-piped="answers" data-id="a1" data-type="TextField">{{Answer 1}}</span>'
+              }
+            ]
+          }
+        ]
       });
 
-      const duplicateSection = await db.transaction(trx => {
-        return duplicateSectionStrategy(trx, section, 1);
+      const section = questionnaire.sections[0];
+
+      const duplicateSection = await db.transaction(trx =>
+        duplicateSectionStrategy(trx, removeChildren(section), 1)
+      );
+
+      const duplicatePages = await PageRepository.findAll({
+        sectionId: duplicateSection.id
       });
 
-      const duplicatedPages = await db.transaction(trx => {
-        return selectData(trx, "Pages", "*", {
-          sectionId: duplicateSection.id
-        });
+      const duplicateFirstPageAnswers = await AnswerRepository.findAll({
+        questionPageId: duplicatePages[0].id
+      });
+      const newPipedAnswerId = duplicateFirstPageAnswers[0].id;
+
+      const secondPage = duplicatePages[1];
+
+      expect(secondPage.title).toEqual(
+        `Title <span data-piped="answers" data-id="${newPipedAnswerId}" data-type="TextField">{{Answer 1}}</span>`
+      );
+      expect(secondPage.description).toEqual(
+        `Description <span data-piped="answers" data-id="${newPipedAnswerId}" data-type="TextField">{{Answer 1}}</span>`
+      );
+      expect(secondPage.guidance).toEqual(
+        `Guidance <span data-piped="answers" data-id="${newPipedAnswerId}" data-type="TextField">{{Answer 1}}</span>`
+      );
+    });
+
+    it("will not update piping with references outside of the secontion", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        metadata: [
+          {
+            pipeId: "m1",
+            key: "foo",
+            type: "Text",
+            textValue: "Hello world"
+          }
+        ],
+        sections: [
+          {
+            title: "My section 1",
+            pages: [
+              {
+                title: "Question 1",
+                answers: [{ pipeId: "s1q1a1", label: "S1Q1A1" }]
+              }
+            ]
+          },
+          {
+            title: "My section 2",
+            pages: [
+              {
+                title:
+                  'Question <span data-piped="answers" data-id="s1q1a1" data-type="TextField">{{S1Q1A1}}</span>',
+                description:
+                  'Description <span data-piped="metadata" data-id="m1" data-type="Text">{{foo}}</span>'
+              }
+            ]
+          }
+        ]
       });
 
-      expect(duplicatedPages.length).toEqual(pages.length - 1);
+      const section = questionnaire.sections[1];
+
+      const duplicateSection = await db.transaction(trx =>
+        duplicateSectionStrategy(trx, removeChildren(section), 1)
+      );
+
+      const duplicatePages = await PageRepository.findAll({
+        sectionId: duplicateSection.id
+      });
+      const referencedAnswerId =
+        questionnaire.sections[0].pages[0].answers[0].id;
+
+      expect(duplicatePages[0].title).toEqual(
+        `Question <span data-piped="answers" data-id="${referencedAnswerId}" data-type="TextField">{{S1Q1A1}}</span>`
+      );
+      expect(duplicatePages[0].description).toEqual(
+        `Description <span data-piped="metadata" data-id="${
+          questionnaire.metadata[0].id
+        }" data-type="Text">{{foo}}</span>`
+      );
     });
   });
 
   describe("Questionnaire", () => {
     it("will duplicate a questionnaire", async () => {
-      const { questionnaire } = await setup();
-
-      const fieldsToOmit = ["id", "createdAt", "updatedAt"];
-
-      const duplicateQuestionnaire = await db.transaction(trx => {
-        return duplicateQuestionnaireStrategy(trx, questionnaire);
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [{}]
+          }
+        ]
       });
 
-      expect(omit(duplicateQuestionnaire, fieldsToOmit)).toMatchObject(
-        omit(questionnaire, fieldsToOmit)
+      const duplicateQuestionnaire = await db.transaction(trx => {
+        return duplicateQuestionnaireStrategy(
+          trx,
+          removeChildren(questionnaire)
+        );
+      });
+
+      expect(sanitize(duplicateQuestionnaire)).toMatchObject(
+        sanitizeParent(questionnaire)
       );
     });
 
     it("will duplicate child entities", async () => {
-      const { questionnaire, section, page } = await setup();
-
-      // Omit non duplicated fields and parent links
-      const filterEntity = fp.omit([
-        "id",
-        "createdAt",
-        "updatedAt",
-        "questionnaireId",
-        "sectionId"
-      ]);
-
-      const duplicatedEntities = await db.transaction(async trx => {
-        const dupQuestionnaire = await duplicateQuestionnaireStrategy(
-          trx,
-          questionnaire
-        );
-
-        const dupSections = await selectData(trx, "SectionsView", "*", {
-          questionnaireId: dupQuestionnaire.id
-        });
-
-        const dupPages = await Promise.all(
-          dupSections.map(dupSection =>
-            selectData(trx, "PagesView", "*", {
-              sectionId: dupSection.id
-            })
-          )
-        ).then(pages => flatten(pages));
-
-        return {
-          pages: dupPages,
-          sections: dupSections
-        };
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [{}]
+          }
+        ]
       });
 
-      expect(filterEntity(duplicatedEntities.sections[0])).toMatchObject(
-        filterEntity(section)
+      const duplicateQuestionnaire = await db.transaction(trx =>
+        duplicateQuestionnaireStrategy(trx, removeChildren(questionnaire))
       );
-      expect(filterEntity(duplicatedEntities.pages[0])).toMatchObject(
-        filterEntity(page)
+
+      const duplicateSections = await SectionRepository.findAll({
+        questionnaireId: duplicateQuestionnaire.id
+      });
+      const duplicatePages = await PageRepository.findAll({
+        sectionId: duplicateSections[0].id
+      });
+
+      expect(sanitize(duplicateSections[0])).toMatchObject(
+        sanitizeParent(questionnaire.sections[0])
+      );
+      expect(sanitize(duplicatePages[0])).toMatchObject(
+        sanitizeParent(questionnaire.sections[0].pages[0])
       );
     });
 
     it("will duplicate metadata", async () => {
-      const { questionnaire } = await setup();
-      const metadata = await db.transaction(async trx => {
-        const metadata = [];
-        metadata.push(
-          await insertData(
-            trx,
-            "Metadata",
-            buildMetadata({ key: "md1", questionnaireId: questionnaire.id }),
-            head,
-            "*"
-          )
-        );
-        metadata.push(
-          await insertData(
-            trx,
-            "Metadata",
-            buildMetadata({ key: "md2", questionnaireId: questionnaire.id }),
-            head,
-            "*"
-          )
-        );
-        return metadata;
+      const questionnaire = await buildTestQuestionnaire({
+        metadata: [{ key: "foo", type: "Text", textValue: "Hello world" }],
+        sections: [
+          {
+            pages: [{}]
+          }
+        ]
       });
 
-      const duplicatedMetadata = await db.transaction(async trx => {
-        const dupQuestionnaire = await duplicateQuestionnaireStrategy(
-          trx,
-          questionnaire
-        );
+      const duplicateQuestionnaire = await db.transaction(trx =>
+        duplicateQuestionnaireStrategy(trx, removeChildren(questionnaire))
+      );
 
-        return selectData(trx, "Metadata", "*", {
-          questionnaireId: dupQuestionnaire.id
-        });
+      const duplicateMetadata = await MetadataRepository.findAll({
+        questionnaireId: duplicateQuestionnaire.id
       });
 
-      const filterEntity = fp.omit([
-        "id",
-        "createdAt",
-        "updatedAt",
-        "questionnaireId"
-      ]);
+      expect(duplicateMetadata.map(sanitize)).toMatchObject(
+        questionnaire.metadata.map(sanitize)
+      );
+    });
 
-      expect(duplicatedMetadata.map(filterEntity)).toMatchObject(
-        metadata.map(filterEntity)
+    it("will update all piping references", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        metadata: [
+          {
+            pipeId: "m1",
+            key: "foo",
+            type: "Text",
+            textValue: "Hello world"
+          }
+        ],
+        sections: [
+          {
+            title: "Section 1",
+            pages: [
+              {
+                title:
+                  'Page title <span data-piped="metadata" data-id="m1" data-type="TextField">{{foo}}</span>',
+                answers: [
+                  {
+                    pipeId: "a1",
+                    label: "Answer 1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            title: "Section 2",
+            pages: [
+              {
+                guidance:
+                  'Section 2 title <span data-piped="answers" data-id="a1" data-type="TextField">{{Answer 1}}</span>'
+              }
+            ]
+          }
+        ]
+      });
+
+      const duplicateQuestionnaire = await db.transaction(trx =>
+        duplicateQuestionnaireStrategy(trx, removeChildren(questionnaire))
+      );
+
+      const duplicateMetadata = await MetadataRepository.findAll({
+        questionnaireId: duplicateQuestionnaire.id
+      });
+      const duplicateSections = await SectionRepository.findAll({
+        questionnaireId: duplicateQuestionnaire.id
+      });
+
+      const dupSection1 = duplicateSections[0];
+      const dupSection1Pages = await PageRepository.findAll({
+        sectionId: dupSection1.id
+      });
+      const dupSection1Page1 = dupSection1Pages[0];
+
+      expect(dupSection1Page1.title).toEqual(
+        `Page title <span data-piped="metadata" data-id="${
+          duplicateMetadata[0].id
+        }" data-type="TextField">{{foo}}</span>`
+      );
+
+      const dupSection1Page1Answers = await AnswerRepository.findAll({
+        questionPageId: dupSection1Page1.id
+      });
+      const dupSection1Page1Answer1 = dupSection1Page1Answers[0];
+
+      const dupSection2 = duplicateSections[1];
+      const dupSection2Pages = await PageRepository.findAll({
+        sectionId: dupSection2.id
+      });
+      const dupSection2Page1 = dupSection2Pages[0];
+
+      expect(dupSection2Page1.guidance).toEqual(
+        `Section 2 title <span data-piped="answers" data-id="${
+          dupSection1Page1Answer1.id
+        }" data-type="TextField">{{Answer 1}}</span>`
       );
     });
   });

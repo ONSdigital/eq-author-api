@@ -100,7 +100,7 @@ const Resolvers = {
       ctx.repositories.QuestionPage.undelete(args.input.id),
 
     createAnswer: (root, args, ctx) =>
-      ctx.repositories.Answer.createAnswer(args, ctx),
+      ctx.repositories.Answer.createAnswer(args.input),
     updateAnswer: (_, args, ctx) => ctx.repositories.Answer.update(args.input),
     deleteAnswer: (_, args, ctx) =>
       ctx.repositories.Answer.remove(args.input.id),
