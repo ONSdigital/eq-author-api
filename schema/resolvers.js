@@ -485,7 +485,9 @@ const Resolvers = {
     previousAnswer: ({ previousAnswerId }, args, ctx) =>
       isNil(previousAnswerId)
         ? null
-        : ctx.repositories.Answer.getById(previousAnswerId)
+        : ctx.repositories.Answer.getById(previousAnswerId),
+    metadata: ({ metadataId }, args, ctx) =>
+      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId)
   },
 
   LatestDateValidationRule: {
@@ -496,7 +498,9 @@ const Resolvers = {
     previousAnswer: ({ previousAnswerId }, args, ctx) =>
       isNil(previousAnswerId)
         ? null
-        : ctx.repositories.Answer.getById(previousAnswerId)
+        : ctx.repositories.Answer.getById(previousAnswerId),
+    metadata: ({ metadataId }, args, ctx) =>
+      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId)
   },
 
   Metadata: {

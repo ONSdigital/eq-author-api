@@ -20,6 +20,7 @@ const updateValidationRule = input => {
     custom,
     entityType,
     previousAnswer: previousAnswerId,
+    metadata: metadataId,
     ...config
   } = input[getInputType(input)];
 
@@ -27,7 +28,8 @@ const updateValidationRule = input => {
     custom: JSON.stringify(custom),
     config: JSON.stringify(config),
     entityType,
-    previousAnswerId
+    previousAnswerId,
+    metadataId
   }).then(head);
 };
 

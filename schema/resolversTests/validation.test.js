@@ -7,8 +7,15 @@ const {
   createAnswerMutation,
   getAnswerValidations,
   toggleAnswerValidation,
-  updateAnswerValidation
+  updateAnswerValidation,
+  createMetadataMutation
 } = require("../../tests/utils/graphql");
+
+const {
+  CUSTOM,
+  PREVIOUS_ANSWER,
+  METADATA
+} = require("../../constants/validation-entity-types");
 
 const ctx = { repositories };
 
@@ -47,6 +54,19 @@ const createNewAnswer = async ({ id: pageId }, type) => {
     throw new Error(result.errors[0]);
   }
   return result.data.createAnswer;
+};
+
+const createMetadata = async questionnaireId => {
+  const input = {
+    questionnaireId
+  };
+
+  const result = await executeQuery(createMetadataMutation, { input }, ctx);
+
+  if (result.errors) {
+    throw new Error(result.errors[0]);
+  }
+  return result.data.createMetadata;
 };
 
 const queryAnswerValidations = async id => {
@@ -155,10 +175,9 @@ describe("resolvers", () => {
           enabled: false,
           inclusive: false,
           custom: null,
-          entityType: "Custom"
+          entityType: CUSTOM
         }
       });
-
       expect(currencyValidation).toEqual(
         validationObject(
           currencyValidation.minValue.id,
@@ -244,7 +263,7 @@ describe("resolvers", () => {
         currencyAnswer.id
       );
 
-      const entityTypes = ["Custom", "PreviousAnswer"];
+      const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA];
 
       const promises = entityTypes.map(async entityType => {
         const result = await mutateValidationParameters({
@@ -270,7 +289,7 @@ describe("resolvers", () => {
 
     beforeEach(() => {
       params = {
-        entityType: "Custom",
+        entityType: CUSTOM,
         offset: {
           value: 8,
           unit: "Months"
@@ -324,7 +343,8 @@ describe("resolvers", () => {
           id: validation.earliestDate.id,
           ...params,
           customDate: "2017-01-01",
-          previousAnswer: null
+          previousAnswer: null,
+          metadata: null
         };
         expect(result).toEqual(expected);
       });
@@ -338,15 +358,37 @@ describe("resolvers", () => {
           id: validation.earliestDate.id,
           earliestDateInput: {
             ...params,
-            entityType: "PreviousAnswer",
+            entityType: PREVIOUS_ANSWER,
             previousAnswer: previousAnswer.id
           }
         });
 
         expect(result).toMatchObject({
-          entityType: "PreviousAnswer",
+          entityType: PREVIOUS_ANSWER,
           previousAnswer: {
             id: previousAnswer.id
+          }
+        });
+      });
+
+      it("can update metadata", async () => {
+        const metadata = await createMetadata(questionnaire.id);
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+
+        const result = await mutateValidationParameters({
+          id: validation.earliestDate.id,
+          earliestDateInput: {
+            ...params,
+            entityType: METADATA,
+            metadata: metadata.id
+          }
+        });
+
+        expect(result).toMatchObject({
+          entityType: METADATA,
+          metadata: {
+            id: metadata.id
           }
         });
       });
@@ -355,7 +397,7 @@ describe("resolvers", () => {
         const answer = await createNewAnswer(firstPage, "Date");
         const validation = await queryAnswerValidations(answer.id);
 
-        const entityTypes = ["Custom", "PreviousAnswer"];
+        const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA];
 
         const promises = entityTypes.map(async entityType => {
           const result = await mutateValidationParameters({
@@ -391,6 +433,7 @@ describe("resolvers", () => {
           id: validation.latestDate.id,
           customDate: "2017-01-01",
           previousAnswer: null,
+          metadata: null,
           ...params
         };
 
@@ -406,15 +449,37 @@ describe("resolvers", () => {
           id: validation.latestDate.id,
           latestDateInput: {
             ...params,
-            entityType: "PreviousAnswer",
+            entityType: PREVIOUS_ANSWER,
             previousAnswer: previousAnswer.id
           }
         });
 
         expect(result).toMatchObject({
-          entityType: "PreviousAnswer",
+          entityType: PREVIOUS_ANSWER,
           previousAnswer: {
             id: previousAnswer.id
+          }
+        });
+      });
+
+      it("can update metadata", async () => {
+        const metadata = await createMetadata(questionnaire.id);
+        const answer = await createNewAnswer(firstPage, "Date");
+        const validation = await queryAnswerValidations(answer.id);
+
+        const result = await mutateValidationParameters({
+          id: validation.latestDate.id,
+          latestDateInput: {
+            ...params,
+            entityType: METADATA,
+            metadata: metadata.id
+          }
+        });
+
+        expect(result).toMatchObject({
+          entityType: METADATA,
+          metadata: {
+            id: metadata.id
           }
         });
       });
@@ -423,7 +488,7 @@ describe("resolvers", () => {
         const answer = await createNewAnswer(firstPage, "Date");
         const validation = await queryAnswerValidations(answer.id);
 
-        const entityTypes = ["Custom", "PreviousAnswer"];
+        const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA];
 
         const promises = entityTypes.map(async entityType => {
           const result = await mutateValidationParameters({
