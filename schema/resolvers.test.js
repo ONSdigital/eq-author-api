@@ -1538,6 +1538,35 @@ describe("resolvers", () => {
         });
       });
 
+      it("should create a condition value when routing answer is changed from multiple choice to number", async () => {
+        const section = first(sections);
+        await createNewAnswer(firstPage, "Currency");
+
+        const pageB = await addPage(section.id);
+        await createNewAnswer(pageB, "Radio");
+
+        await createNewRoutingRuleSet(pageB.id);
+
+        const routingInfo = await getFullRoutingTree(pageB);
+        const routingCondition = get(
+          routingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          questionPageId: firstPage.id
+        });
+
+        const updatedRoutingInfo = await getFullRoutingTree(pageB);
+        const updatedRoutingCondition = get(
+          updatedRoutingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue"
+        );
+
+        expect(updatedRoutingCondition).toHaveProperty("numberValue");
+      });
+
       it("should be able to insert a value", async () => {
         const answer = await createNewAnswer(firstPage, "Currency");
         await createNewRoutingRuleSet(firstPage.id);
@@ -1593,6 +1622,39 @@ describe("resolvers", () => {
           comparator: "GreaterThan",
           questionPage: { id: firstPage.id },
           answer: { id: answer.id }
+        });
+      });
+
+      it("should not create new condition values on comparator change", async () => {
+        await createNewAnswer(firstPage, "Currency");
+        await createNewRoutingRuleSet(firstPage.id);
+
+        const routingInfo = await getFullRoutingTree(firstPage);
+        const routingCondition = get(
+          routingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0]"
+        );
+
+        await changeRoutingConditionMutation({
+          id: routingCondition.id,
+          comparator: "GreaterThan",
+          questionPageId: firstPage.id
+        });
+
+        await updateConditionValueMutation({
+          id: routingCondition.routingValue.id,
+          customNumber: 8
+        });
+
+        const updatedRoutingInfo = await getFullRoutingTree(firstPage);
+        const updatedRoutingConditionValue = get(
+          updatedRoutingInfo,
+          "data.questionPage.routingRuleSet.routingRules[0].conditions[0].routingValue"
+        );
+
+        expect(updatedRoutingConditionValue).toMatchObject({
+          id: routingCondition.routingValue.id,
+          numberValue: 8
         });
       });
 
