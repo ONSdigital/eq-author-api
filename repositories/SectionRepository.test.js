@@ -18,6 +18,9 @@ const buildQuestionnaire = questionnaire => ({
 const buildSection = section => ({
   title: "Test section",
   alias: "Test alias",
+  introductionContent: null,
+  introductionEnabled: false,
+  introductionTitle: null,
   ...section
 });
 

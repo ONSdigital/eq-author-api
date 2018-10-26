@@ -34,17 +34,38 @@ module.exports.insert = function insert(args) {
       position
     )
       .then(order => Object.assign(args, { order }))
-      .then(pick(["title", "alias", "questionnaireId", "order"]))
+      .then(
+        pick([
+          "title",
+          "alias",
+          "questionnaireId",
+          "order",
+          "introductionContent",
+          "introductionEnabled",
+          "introductionTitle"
+        ])
+      )
       .then(section => Section.create(section, trx))
       .then(head);
   });
 };
 
-module.exports.update = function update({ id, title, alias, isDeleted }) {
+module.exports.update = function update({
+  id,
+  title,
+  alias,
+  isDeleted,
+  introductionContent,
+  introductionEnabled,
+  introductionTitle
+}) {
   return Section.update(id, {
     title,
     alias,
-    isDeleted
+    isDeleted,
+    introductionContent,
+    introductionEnabled,
+    introductionTitle
   }).then(head);
 };
 
