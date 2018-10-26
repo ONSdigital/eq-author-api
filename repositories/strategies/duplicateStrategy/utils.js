@@ -70,8 +70,75 @@ const duplicateRecord = async (
   return insertData(trx, tableName, newRecord, head, "*", position);
 };
 
+const FIELDS_TO_NEVER_DUPLICATE = ["id", "createdAt", "updatedAt"];
+
+const duplicateTree = async (trx, tree, references) => {
+  if (tree.length === 0) {
+    return;
+  }
+
+  const [entityTypeToDuplicate, ...restOfTree] = tree;
+
+  if (Array.isArray(entityTypeToDuplicate)) {
+    await Promise.all(
+      entityTypeToDuplicate.map(type => duplicateTree(trx, [type], references))
+    );
+    return duplicateTree(trx, restOfTree, references);
+  }
+
+  const { name, links, table, where } = entityTypeToDuplicate;
+
+  const selectQuery = trx
+    .select("*")
+    .from(table)
+    .where(builder => {
+      const parentLinks = links.filter(l => l.parent);
+      parentLinks.forEach(({ column, entityName }) => {
+        const ids = Object.keys(references[entityName] || {});
+        builder.orWhereIn(column, ids);
+      });
+
+      if (where) {
+        builder.andWhereRaw(where);
+      }
+    })
+    .orderBy("id");
+
+  const originalEntities = await selectQuery;
+
+  if (originalEntities.length === 0) {
+    return duplicateTree(trx, restOfTree, references);
+  }
+
+  const transformReferences = entity =>
+    links.reduce(
+      (e, { column, entityName }) => ({
+        ...e,
+        [column]: (references[entityName] || {})[e[column]]
+      }),
+      omit(entity, FIELDS_TO_NEVER_DUPLICATE)
+    );
+
+  const transformedEntities = originalEntities.map(transformReferences);
+
+  const newEntities = await trx
+    .insert(transformedEntities)
+    .into(table)
+    .returning("id");
+
+  references[name] = references[name] || {};
+
+  newEntities.forEach((newId, index) => {
+    const original = originalEntities[index];
+    references[name][original.id] = newId;
+  });
+
+  return duplicateTree(trx, restOfTree, references);
+};
+
 module.exports = {
   insertData,
   selectData,
-  duplicateRecord
+  duplicateRecord,
+  duplicateTree
 };

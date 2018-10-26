@@ -68,7 +68,7 @@ describe("Duplicate strategy tests", () => {
     });
   });
 
-  describe("Page", () => {
+  describe.only("Page", () => {
     it("will duplicate a page", async () => {
       const questionnaire = await buildTestQuestionnaire({
         sections: [
