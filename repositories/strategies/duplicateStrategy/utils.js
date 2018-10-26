@@ -106,6 +106,10 @@ const duplicateTree = async (trx, tree, references) => {
 
   const originalEntities = await selectQuery;
 
+  if (where && where.indexOf("not null") > -1) {
+    console.log(originalEntities);
+  }
+
   if (originalEntities.length === 0) {
     return duplicateTree(trx, restOfTree, references);
   }

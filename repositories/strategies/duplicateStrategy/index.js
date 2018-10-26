@@ -40,16 +40,12 @@ const ENTITY_TREE = [
       table: "Answers",
       links: [
         {
-          column: "questionPageId",
-          entityName: "pages",
-          parent: true
-        },
-        {
           column: "parentAnswerId",
-          entityName: "answers"
+          entityName: "answers",
+          parent: true
         }
       ],
-      where: '"parentAnswerId" is not null AND "isDeleted" = false'
+      where: '"isDeleted" = false'
     },
     {
       name: "validations",
