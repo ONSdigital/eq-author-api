@@ -56,12 +56,11 @@ const getPageDestinations = (trx, { sectionId, order }) =>
     .where({ sectionId })
     .where("order", ">", order);
 
-const getSectionDestinations = (trx, { id, questionnaireId }) =>
-  trx("Sections")
+const getSectionDestinations = (trx, { order, questionnaireId }) =>
+  trx("SectionsView")
     .select("*")
-    .where({ questionnaireId, isDeleted: false })
-    .where("id", ">", id)
-    .orderBy("createdAt", "asc");
+    .where({ questionnaireId })
+    .where("order", ">", order);
 
 const findRoutingRuleSet = (trx, questionPageId) =>
   trx("Routing_RuleSets")

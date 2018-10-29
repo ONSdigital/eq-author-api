@@ -7,6 +7,7 @@ const AnswerRepository = require("../../repositories/AnswerRepository");
 const OptionRepository = require("../../repositories/OptionRepository");
 const ValidationRepository = require("../../repositories/ValidationRepository");
 const MetadataRepository = require("../../repositories/MetadataRepository");
+const RoutingRepository = require("../../repositories/RoutingRepository");
 
 const {
   getValidationEntity
@@ -71,14 +72,15 @@ const buildValidations = async (validationConfigs = {}, answer) => {
   return validations;
 };
 
-const buildOptions = async (optionConfigs = [], answer) => {
+const buildOptions = async (optionConfigs = [], answer, references) => {
   let options = [];
+
   const existingOptions = await OptionRepository.findAll({
     answerId: answer.id
   });
   for (let i = 0; i < optionConfigs.length; ++i) {
     const existingOption = existingOptions[i];
-    const optionConfig = optionConfigs[i];
+    const { refId, ...optionConfig } = optionConfigs[i];
 
     const optionDetails = {
       label: "Test label",
@@ -97,6 +99,10 @@ const buildOptions = async (optionConfigs = [], answer) => {
       option = await OptionRepository.insert(optionDetails);
     }
     options.push(option);
+
+    if (refId) {
+      references.options[refId] = option.id;
+    }
   }
 
   return options;
@@ -123,7 +129,7 @@ const buildAnswers = async (answerConfigs = [], page, references) => {
       options,
       validations,
       otherAnswer,
-      pipeId,
+      refId,
       ...answerConfig
     } = answerConfigs[i];
 
@@ -140,11 +146,11 @@ const buildAnswers = async (answerConfigs = [], page, references) => {
       answer = await AnswerRepository.remove(answer.id);
     }
 
-    if (pipeId) {
-      references.answers[pipeId] = answer.id;
+    if (refId) {
+      references.answers[refId] = answer.id;
     }
 
-    answer.options = await buildOptions(options, answer);
+    answer.options = await buildOptions(options, answer, references);
     answer.validations = await buildValidations(validations, answer);
     if (otherAnswer) {
       answer.otherAnswer = await buildOtherAnswer(otherAnswer, answer);
@@ -159,7 +165,7 @@ const buildAnswers = async (answerConfigs = [], page, references) => {
 const buildPages = async (pageConfigs, section, references) => {
   let pages = [];
   for (let i = 0; i < pageConfigs.length; ++i) {
-    const { answers, ...pageConfig } = pageConfigs[i];
+    const { answers, refId, ...pageConfig } = pageConfigs[i];
     let page = await PageRepository.insert({
       pageType: "QuestionPage",
       ...pageConfig,
@@ -178,6 +184,12 @@ const buildPages = async (pageConfigs, section, references) => {
     if (pageConfig.isDeleted) {
       page = await PageRepository.remove(page.id);
     }
+    if (pageConfig.ruleSet) {
+      references.pagesWithRouting.push({ page, pageConfig });
+    }
+    if (refId) {
+      references.pages[refId] = page.id;
+    }
 
     page.answers = await buildAnswers(answers, page, references);
 
@@ -189,14 +201,19 @@ const buildPages = async (pageConfigs, section, references) => {
 
 const buildSections = async (sectionConfigs, questionnaire, references) => {
   let sections = [];
+
   for (let i = 0; i < sectionConfigs.length; ++i) {
-    const { pages, ...sectionConfig } = sectionConfigs[i];
+    const { pages, refId, ...sectionConfig } = sectionConfigs[i];
     const section = await SectionRepository.insert({
       title: "Test section",
       description: "section description",
       ...sectionConfig,
       questionnaireId: questionnaire.id
     });
+
+    if (refId) {
+      references.sections[refId] = section.id;
+    }
 
     section.pages = await buildPages(pages, section, references);
 
@@ -216,7 +233,7 @@ const buildMetadata = async (
   references.metadata = {};
 
   for (let i = 0; i < metadataConfigs.length; ++i) {
-    const { pipeId, ...metadataConfig } = metadataConfigs[i];
+    const { refId, ...metadataConfig } = metadataConfigs[i];
     let metadata = await MetadataRepository.insert({
       questionnaireId: questionnaire.id
     });
@@ -225,14 +242,178 @@ const buildMetadata = async (
       id: metadata.id
     });
 
-    if (pipeId) {
-      references.metadata[pipeId] = metadata.id;
+    if (refId) {
+      references.metadata[refId] = metadata.id;
     }
 
     metadatas.push(metadata);
   }
 
   return metadatas;
+};
+
+const buildConditionValues = async (valueConfigs, conditionId, references) => {
+  let values = [];
+  const existingValues = await RoutingRepository.findAllRoutingConditionValues({
+    conditionId
+  });
+
+  for (let i = 0; i < valueConfigs.length; ++i) {
+    const { optionId, customNumber } = valueConfigs[i];
+    const existingValue = existingValues[i];
+    let value;
+    if (optionId) {
+      value = await RoutingRepository.toggleConditionOption({
+        conditionId,
+        optionId: references.options[optionId],
+        checked: true
+      });
+    } else {
+      let valueToUpdate = existingValue;
+      if (!existingValue) {
+        valueToUpdate = await RoutingRepository.createConditionValue({
+          conditionId
+        });
+      }
+      value = await RoutingRepository.updateConditionValue({
+        ...valueToUpdate,
+        customNumber
+      });
+    }
+    values.push(value);
+  }
+  return values;
+};
+
+const buildConditions = async (
+  conditionConfigs,
+  ruleId,
+  pageId,
+  references
+) => {
+  let conditions = [];
+
+  const existingConditions = await RoutingRepository.findAllRoutingConditions({
+    routingRuleId: ruleId
+  });
+  for (let i = 0; i < conditionConfigs.length; ++i) {
+    const { answerId, values, ...rest } = conditionConfigs[i];
+    const existingCondition = existingConditions[i];
+
+    if (existingCondition) {
+      await RoutingRepository.removeRoutingCondition(existingCondition);
+    }
+
+    const condition = await RoutingRepository.createRoutingCondition({
+      answerId: references.answers[answerId],
+      questionPageId: pageId,
+      routingRuleId: ruleId,
+      comparator: rest.comparator || "Equal"
+    });
+
+    condition.values = await buildConditionValues(
+      values,
+      condition.id,
+      references
+    );
+
+    conditions.push(condition);
+  }
+
+  return conditions;
+};
+
+const transformDestinationConfig = (
+  { logicalDestination, sectionId, pageId },
+  references
+) => {
+  if (logicalDestination) {
+    return {
+      logicalDestination: {
+        destinationType: logicalDestination
+      }
+    };
+  }
+
+  let destinationType, destinationId;
+  if (sectionId) {
+    destinationType = "Section";
+    destinationId = references.sections[sectionId];
+  } else if (pageId) {
+    destinationType = "QuestionPage";
+    destinationId = references.pages[pageId];
+  }
+
+  return {
+    absoluteDestination: {
+      destinationType,
+      destinationId
+    }
+  };
+};
+
+const buildRules = async (ruleConfigs, ruleSetId, pageId, references) => {
+  let rules = [];
+  const existingRules = await RoutingRepository.findAllRoutingRules({
+    routingRuleSetId: ruleSetId
+  });
+
+  for (let i = 0; i < ruleConfigs.length; ++i) {
+    const { goTo, conditions } = ruleConfigs[i];
+    let existingRule = existingRules[i];
+    if (!existingRule) {
+      existingRule = await RoutingRepository.createRoutingRule({
+        routingRuleSetId: ruleSetId
+      });
+    }
+
+    const rule = await RoutingRepository.updateRoutingRule({
+      id: existingRule.id,
+      goto: {
+        id: existingRule.routingDestinationId,
+        ...transformDestinationConfig(goTo, references)
+      }
+    });
+
+    rule.goTo = await RoutingRepository.getRoutingDestination(
+      rule.routingDestinationId
+    );
+
+    rule.conditions = await buildConditions(
+      conditions,
+      rule.id,
+      pageId,
+      references
+    );
+
+    rules.push(rule);
+  }
+
+  return rules;
+};
+
+const buildRuleSet = async (ruleSetConfig, pageId, references) => {
+  const ruleSet = await RoutingRepository.createRoutingRuleSet({
+    questionPageId: pageId
+  });
+
+  const { else: elseConfig, rules } = ruleSetConfig;
+
+  await RoutingRepository.updateRoutingRuleSet({
+    id: ruleSet.id,
+    else: {
+      id: ruleSet.routingDestinationId,
+      ...transformDestinationConfig(elseConfig, references)
+    }
+  });
+
+  ruleSet.else = await RoutingRepository.getRoutingDestination(
+    ruleSet.routingDestinationId
+  );
+
+  ruleSet.rules = await buildRules(rules, ruleSet.id, pageId, references);
+
+  return ruleSet;
 };
 
 const buildQuestionnaire = async questionnaireConfig => {
@@ -249,8 +430,12 @@ const buildQuestionnaire = async questionnaireConfig => {
   });
 
   const references = {
+    options: {},
     answers: {},
-    metadata: {}
+    pages: {},
+    sections: {},
+    metadata: {},
+    pagesWithRouting: []
   };
 
   questionnaire.metadata = await buildMetadata(
@@ -263,6 +448,18 @@ const buildQuestionnaire = async questionnaireConfig => {
     questionnaire,
     references
   );
+
+  const buildRoutingActions = references.pagesWithRouting.map(
+    async ({ page, pageConfig }) => {
+      page.ruleSet = await buildRuleSet(
+        pageConfig.ruleSet,
+        page.id,
+        references
+      );
+    }
+  );
+
+  await Promise.all(buildRoutingActions);
 
   return questionnaire;
 };

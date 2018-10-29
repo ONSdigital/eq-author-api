@@ -10,8 +10,7 @@ const {
   checkRoutingDestinations,
   createRoutingRuleSetStrategy,
   createRoutingRuleStrategy,
-  createRoutingConditionStrategy,
-  resolveRoutingDestinationStrategy
+  createRoutingConditionStrategy
 } = require("./strategies/routingStrategy");
 
 const Routing = require("../db/Routing");
@@ -208,16 +207,6 @@ function undeleteRoutingRule(id) {
   return Routing.updateRoutingRule(id, { isDeleted: false }).then(head);
 }
 
-function resolveRoutingDestination(sectionId, pageId) {
-  if (isNil(sectionId)) {
-    return null;
-  }
-
-  return db.transaction(trx =>
-    resolveRoutingDestinationStrategy(trx, sectionId, pageId)
-  );
-}
-
 const getRoutingDestination = async routingDestinationId => {
   const destination = await Routing.findRoutingDestinationById(
     routingDestinationId
@@ -260,7 +249,6 @@ Object.assign(module.exports, {
   updateConditionValue,
   updateRoutingRuleSet,
   getRoutingDestinations,
-  resolveRoutingDestination,
   deleteRoutingRuleSet,
   getRoutingDestination,
   getAnswerTypeByConditionId

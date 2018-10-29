@@ -1,4 +1,4 @@
-const fp = require("lodash/fp");
+const { flow, map, omit } = require("lodash/fp");
 
 const db = require("../../db");
 const {
@@ -12,10 +12,11 @@ const AnswerRepository = require("../AnswerRepository");
 const OptionRepository = require("../OptionRepository");
 const ValidationRepository = require("../ValidationRepository");
 const MetadataRepository = require("../MetadataRepository");
+const RoutingRepository = require("../RoutingRepository");
 
 const buildTestQuestionnaire = require("../../tests/utils/buildTestQuestionnaire");
 
-const sanitize = fp.omit([
+const sanitize = omit([
   "id",
   "createdAt",
   "updatedAt",
@@ -25,16 +26,23 @@ const sanitize = fp.omit([
   "questionPageId",
   "sectionId",
   "position",
-  "questionnaireId"
+  "questionnaireId",
+  "routingDestinationId",
+  "routingRuleSetId",
+  "conditionId"
 ]);
-const removeChildren = fp.omit([
+const removeChildren = omit([
   "answers",
   "validations",
   "options",
   "sections",
   "otherAnswer",
   "pages",
-  "metadata"
+  "metadata",
+  "ruleSet",
+  "values",
+  "conditions",
+  "goTo"
 ]);
 
 const sanitizeAllProperties = obj =>
@@ -46,7 +54,7 @@ const sanitizeAllProperties = obj =>
     {}
   );
 
-const sanitizeParent = fp.flow(
+const sanitizeParent = flow(
   removeChildren,
   sanitize
 );
@@ -128,7 +136,7 @@ describe("Duplicate strategy tests", () => {
 
     it("will duplicate piping references in a page", async () => {
       const questionnaire = await buildTestQuestionnaire({
-        metadata: [{ key: "foo", pipeId: "m1" }],
+        metadata: [{ key: "foo", refId: "m1" }],
         sections: [
           {
             pages: [
@@ -153,6 +161,194 @@ describe("Duplicate strategy tests", () => {
           questionnaire.metadata[0].id
         }" data-type="Text">{{foo}}</span>`
       );
+    });
+
+    it("will duplicate routing from the page - checkbox answers", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [
+              {
+                refId: "page1",
+                answers: [
+                  {
+                    refId: "answer1",
+                    type: "Radio",
+                    options: [
+                      {
+                        refId: "yes",
+                        label: "Yes"
+                      },
+                      {
+                        refId: "no",
+                        label: "No"
+                      }
+                    ]
+                  }
+                ],
+                ruleSet: {
+                  else: {
+                    logicalDestination: "EndOfQuestionnaire"
+                  },
+                  rules: [
+                    {
+                      goTo: {
+                        sectionId: "section2"
+                      },
+                      conditions: [
+                        {
+                          answerId: "answer1",
+                          values: [{ optionId: "yes" }]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            refId: "section2",
+            pages: [{}]
+          }
+        ]
+      });
+
+      const page = questionnaire.sections[0].pages[0];
+
+      const duplicatePage = await db.transaction(trx =>
+        duplicatePageStrategy(trx, removeChildren(page))
+      );
+
+      const duplicateRuleSet = await RoutingRepository.findRoutingRuleSetByQuestionPageId(
+        { questionPageId: duplicatePage.id }
+      );
+      const duplicateRuleSetDestination = await RoutingRepository.getRoutingDestination(
+        duplicateRuleSet.routingDestinationId
+      );
+      expect(duplicateRuleSetDestination.logicalDestination).toEqual(
+        "EndOfQuestionnaire"
+      );
+
+      const duplicateRules = await RoutingRepository.findAllRoutingRules({
+        routingRuleSetId: duplicateRuleSet.id
+      });
+      const duplicateRuleDestination = await RoutingRepository.getRoutingDestination(
+        duplicateRules[0].routingDestinationId
+      );
+      expect(duplicateRuleDestination.absoluteDestination.id).toEqual(
+        questionnaire.sections[1].id
+      );
+      expect(duplicateRules[0]).toMatchObject({
+        ...sanitizeParent(page.ruleSet.rules[0])
+      });
+
+      const duplicateConditions = await RoutingRepository.findAllRoutingConditions(
+        {
+          routingRuleId: duplicateRules[0].id
+        }
+      );
+      const duplicateAnswers = await AnswerRepository.findAll({
+        questionPageId: duplicatePage.id
+      });
+      expect(duplicateConditions[0]).toMatchObject({
+        ...sanitizeParent(page.ruleSet.rules[0].conditions[0]),
+        routingRuleId: duplicateRules[0].id,
+        answerId: duplicateAnswers[0].id
+      });
+
+      const duplicateValues = await RoutingRepository.findAllRoutingConditionValues(
+        {
+          conditionId: duplicateConditions[0].id
+        }
+      );
+      const duplicateOptions = await OptionRepository.findAll({
+        answerId: duplicateAnswers[0].id
+      });
+
+      expect(duplicateValues).toMatchObject([
+        {
+          ...sanitize(page.ruleSet.rules[0].conditions[0].values[0]),
+          optionId: duplicateOptions[0].id
+        }
+      ]);
+    });
+
+    it("will duplicate routing based on a number", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [
+              {
+                refId: "page1",
+                answers: [
+                  {
+                    refId: "answer1",
+                    type: "Number"
+                  }
+                ],
+                ruleSet: {
+                  else: {
+                    logicalDestination: "EndOfQuestionnaire"
+                  },
+                  rules: [
+                    {
+                      goTo: {
+                        sectionId: "section2"
+                      },
+                      conditions: [
+                        {
+                          comparator: "Equal",
+                          answerId: "answer1",
+                          values: [
+                            {
+                              customNumber: 2
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            refId: "section2",
+            pages: [{}]
+          }
+        ]
+      });
+
+      const page = questionnaire.sections[0].pages[0];
+
+      const duplicatePage = await db.transaction(trx =>
+        duplicatePageStrategy(trx, removeChildren(page))
+      );
+
+      const duplicateRuleSet = await RoutingRepository.findRoutingRuleSetByQuestionPageId(
+        { questionPageId: duplicatePage.id }
+      );
+      const duplicateRules = await RoutingRepository.findAllRoutingRules({
+        routingRuleSetId: duplicateRuleSet.id
+      });
+      const duplicateConditions = await RoutingRepository.findAllRoutingConditions(
+        {
+          routingRuleId: duplicateRules[0].id
+        }
+      );
+
+      expect(duplicateConditions[0].comparator).toEqual("Equal");
+
+      const duplicateConditionValues = await RoutingRepository.findAllRoutingConditionValues(
+        {
+          conditionId: duplicateConditions[0].id
+        }
+      );
+
+      expect(duplicateConditionValues[0]).toMatchObject({
+        customNumber: 2
+      });
     });
 
     describe("Answer", () => {
@@ -227,7 +423,7 @@ describe("Duplicate strategy tests", () => {
           answerId: duplicateAnswers[0].id
         });
 
-        const optionLabels = fp.map(o => o.label);
+        const optionLabels = map(o => o.label);
 
         expect(optionLabels(duplicateOptions)).toMatchObject([
           "1",
@@ -414,7 +610,7 @@ describe("Duplicate strategy tests", () => {
             pages: [
               {
                 title: "Question 1",
-                answers: [{ pipeId: "a1", label: "Answer 1" }]
+                answers: [{ refId: "a1", label: "Answer 1" }]
               },
               {
                 title:
@@ -461,7 +657,7 @@ describe("Duplicate strategy tests", () => {
       const questionnaire = await buildTestQuestionnaire({
         metadata: [
           {
-            pipeId: "m1",
+            refId: "m1",
             key: "foo",
             type: "Text",
             textValue: "Hello world"
@@ -473,7 +669,7 @@ describe("Duplicate strategy tests", () => {
             pages: [
               {
                 title: "Question 1",
-                answers: [{ pipeId: "s1q1a1", label: "S1Q1A1" }]
+                answers: [{ refId: "s1q1a1", label: "S1Q1A1" }]
               }
             ]
           },
@@ -510,6 +706,96 @@ describe("Duplicate strategy tests", () => {
         `Description <span data-piped="metadata" data-id="${
           questionnaire.metadata[0].id
         }" data-type="Text">{{foo}}</span>`
+      );
+    });
+
+    it("will duplicate routing and keep references inside a section and update those outside", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [
+              {
+                refId: "page1",
+                answers: [
+                  {
+                    refId: "answer1",
+                    type: "Radio",
+                    options: [
+                      {
+                        refId: "yes",
+                        label: "Yes"
+                      },
+                      {
+                        refId: "no",
+                        label: "No"
+                      }
+                    ]
+                  }
+                ],
+                ruleSet: {
+                  else: {
+                    pageId: "page2"
+                  },
+                  rules: [
+                    {
+                      goTo: {
+                        sectionId: "section2"
+                      },
+                      conditions: [
+                        {
+                          answerId: "answer1",
+                          values: [{ optionId: "yes" }]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                refId: "page2"
+              }
+            ]
+          },
+          {
+            refId: "section2",
+            pages: [{}]
+          }
+        ]
+      });
+
+      const section = questionnaire.sections[0];
+
+      const duplicateSection = await db.transaction(trx =>
+        duplicateSectionStrategy(trx, removeChildren(section), 1)
+      );
+
+      const duplicatePages = await PageRepository.findAll({
+        sectionId: duplicateSection.id
+      });
+
+      const duplicatedPage = duplicatePages[0];
+      const duplicatedPageRuleSet = await RoutingRepository.findRoutingRuleSetByQuestionPageId(
+        { questionPageId: duplicatedPage.id }
+      );
+      const duplicateRuleSetDestination = await RoutingRepository.getRoutingDestination(
+        duplicatedPageRuleSet.routingDestinationId
+      );
+      // Internal reference updated
+      expect(duplicateRuleSetDestination).toMatchObject({
+        absoluteDestination: {
+          id: duplicatePages[1].id
+        }
+      });
+
+      const duplicateRules = await RoutingRepository.findAllRoutingRules({
+        routingRuleSetId: duplicatedPageRuleSet.id
+      });
+      const duplicateRuleDestination = await RoutingRepository.getRoutingDestination(
+        duplicateRules[0].routingDestinationId
+      );
+      // External reference still pointing to section
+      expect(duplicateRuleDestination.absoluteDestination.id).toEqual(
+        questionnaire.sections[1].id
       );
     });
   });
@@ -591,7 +877,7 @@ describe("Duplicate strategy tests", () => {
       const questionnaire = await buildTestQuestionnaire({
         metadata: [
           {
-            pipeId: "m1",
+            refId: "m1",
             key: "foo",
             type: "Text",
             textValue: "Hello world"
@@ -606,7 +892,7 @@ describe("Duplicate strategy tests", () => {
                   'Page title <span data-piped="metadata" data-id="m1" data-type="TextField">{{foo}}</span>',
                 answers: [
                   {
-                    pipeId: "a1",
+                    refId: "a1",
                     label: "Answer 1"
                   }
                 ]
@@ -663,6 +949,98 @@ describe("Duplicate strategy tests", () => {
         `Section 2 title <span data-piped="answers" data-id="${
           dupSection1Page1Answer1.id
         }" data-type="TextField">{{Answer 1}}</span>`
+      );
+    });
+
+    it("will update all routing references", async () => {
+      const questionnaire = await buildTestQuestionnaire({
+        sections: [
+          {
+            pages: [
+              {
+                refId: "page1",
+                answers: [
+                  {
+                    refId: "answer1",
+                    type: "Radio",
+                    options: [
+                      {
+                        refId: "yes",
+                        label: "Yes"
+                      },
+                      {
+                        refId: "no",
+                        label: "No"
+                      }
+                    ]
+                  }
+                ],
+                ruleSet: {
+                  else: {
+                    pageId: "page2"
+                  },
+                  rules: [
+                    {
+                      goTo: {
+                        sectionId: "section2"
+                      },
+                      conditions: [
+                        {
+                          answerId: "answer1",
+                          values: [{ optionId: "yes" }]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                refId: "page2"
+              }
+            ]
+          },
+          {
+            refId: "section2",
+            pages: [{}]
+          }
+        ]
+      });
+
+      const duplicateQuestionnaire = await db.transaction(trx =>
+        duplicateQuestionnaireStrategy(trx, removeChildren(questionnaire))
+      );
+
+      const duplicateSections = await SectionRepository.findAll({
+        questionnaireId: duplicateQuestionnaire.id
+      });
+
+      const duplicatePages = await PageRepository.findAll({
+        sectionId: duplicateSections[0].id
+      });
+
+      const duplicatedPage = duplicatePages[0];
+      const duplicatedPageRuleSet = await RoutingRepository.findRoutingRuleSetByQuestionPageId(
+        { questionPageId: duplicatedPage.id }
+      );
+      const duplicateRuleSetDestination = await RoutingRepository.getRoutingDestination(
+        duplicatedPageRuleSet.routingDestinationId
+      );
+      // Internal reference updated
+      expect(duplicateRuleSetDestination).toMatchObject({
+        absoluteDestination: {
+          id: duplicatePages[1].id
+        }
+      });
+
+      const duplicateRules = await RoutingRepository.findAllRoutingRules({
+        routingRuleSetId: duplicatedPageRuleSet.id
+      });
+      const duplicateRuleDestination = await RoutingRepository.getRoutingDestination(
+        duplicateRules[0].routingDestinationId
+      );
+      // Internal reference updated
+      expect(duplicateRuleDestination.absoluteDestination.id).toEqual(
+        duplicateSections[1].id
       );
     });
   });
