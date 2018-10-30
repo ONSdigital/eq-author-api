@@ -32,10 +32,60 @@ const {
   deleteAnswerMutation,
   deleteOptionMutation,
   moveSectionMutation,
-  createExclusiveMutation
+  createExclusiveMutation,
+  createSectionIntroMutation,
+  updateSectionIntroMutation,
+  deleteSectionIntroMutation,
+  undeleteIntroductionMutation
 } = require("../tests/utils/graphql");
 
 const ctx = { repositories };
+
+const createIntroduction = async sectionId =>
+  executeQuery(
+    createSectionIntroMutation,
+    {
+      input: {
+        sectionId
+      }
+    },
+    ctx
+  );
+
+const updateIntroduction = async (sectionId, title, content) =>
+  executeQuery(
+    updateSectionIntroMutation,
+    {
+      input: {
+        sectionId,
+        title,
+        content
+      }
+    },
+    ctx
+  );
+
+const deleteIntroduction = async sectionId =>
+  executeQuery(
+    deleteSectionIntroMutation,
+    {
+      input: {
+        sectionId
+      }
+    },
+    ctx
+  );
+
+const undeleteIntroduction = async sectionId =>
+  executeQuery(
+    undeleteIntroductionMutation,
+    {
+      input: {
+        sectionId
+      }
+    },
+    ctx
+  );
 
 const createNewQuestionnaire = async () => {
   const input = {
@@ -1690,6 +1740,46 @@ describe("resolvers", () => {
           numberValue: 8
         });
       });
+    });
+  });
+
+  describe("section introduction pages", () => {
+    let sectionId;
+
+    beforeEach(async () => {
+      sectionId = first(sections).id;
+    });
+
+    it("should create a section introduction", async () => {
+      const intro = await createIntroduction(sectionId);
+
+      expect(intro.data.createIntroduction).toEqual({
+        title: null,
+        content: null
+      });
+    });
+
+    it("should update a section introduction", async () => {
+      const intro = await updateIntroduction(sectionId, "Foo", "bar");
+
+      expect(intro.data.updateIntroduction).toEqual({
+        title: "Foo",
+        content: "bar"
+      });
+    });
+
+    it("should delete a section introduction", async () => {
+      const intro = await deleteIntroduction(sectionId);
+      expect(intro.data.deleteIntroduction).toEqual({
+        title: null,
+        content: null
+      });
+    });
+
+    it("should undelete a section introduction", async () => {
+      const intro = await undeleteIntroduction(sectionId);
+
+      expect(intro).toBeTruthy();
     });
   });
 });

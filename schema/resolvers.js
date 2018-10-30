@@ -1,5 +1,5 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes, isNil } = require("lodash");
+const { includes, isNil, get } = require("lodash");
 const GraphQLJSON = require("graphql-type-json");
 const { getName } = require("../utils/getName");
 const formatRichText = require("../utils/formatRichText");
@@ -168,7 +168,30 @@ const Resolvers = {
     updateMetadata: (_, args, ctx) =>
       ctx.repositories.Metadata.update(args.input),
     deleteMetadata: (_, args, ctx) =>
-      ctx.repositories.Metadata.remove(args.input.id)
+      ctx.repositories.Metadata.remove(args.input.id),
+    createIntroduction: (_, args, ctx) =>
+      ctx.repositories.Section.update({
+        id: args.input.sectionId,
+        introductionEnabled: true,
+        introductionTitle: get(args, "input.title", null),
+        introductionContent: get(args, "input.content", null)
+      }),
+    updateIntroduction: (_, args, ctx) =>
+      ctx.repositories.Section.update({
+        id: args.input.sectionId,
+        introductionTitle: get(args, "input.title", null),
+        introductionContent: get(args, "input.content", null)
+      }),
+    deleteIntroduction: (_, args, ctx) =>
+      ctx.repositories.Section.update({
+        id: args.input.sectionId,
+        introductionEnabled: false
+      }),
+    undeleteIntroduction: (_, args, ctx) =>
+      ctx.repositories.Section.update({
+        id: args.input.sectionId,
+        introductionEnabled: true
+      })
   },
 
   Questionnaire: {
@@ -197,7 +220,21 @@ const Resolvers = {
         return position;
       }
       return ctx.repositories.Section.getPosition({ id });
+    },
+    introduction: section => {
+      const {
+        introductionEnabled,
+        introductionContent: content,
+        introductionTitle: title
+      } = section;
+
+      return introductionEnabled ? { title, content } : null;
     }
+  },
+
+  Introduction: {
+    title: ({ introductionTitle }) => introductionTitle,
+    content: ({ introductionContent }) => introductionContent
   },
 
   Page: {

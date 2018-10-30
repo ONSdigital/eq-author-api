@@ -16,6 +16,42 @@ const createQuestionnaireMutation = `mutation CreateQuestionnaire($input: Create
   }
 `;
 
+const createSectionIntroMutation = `
+  mutation CreateIntroduction($input: CreateIntroductionInput!){
+    createIntroduction(input: $input){
+      title
+      content
+    }
+  }
+`;
+
+const updateSectionIntroMutation = `
+  mutation UpdateIntroduction($input: UpdateIntroductionInput!){
+    updateIntroduction(input: $input){
+      title
+      content
+    }
+  }
+`;
+
+const deleteSectionIntroMutation = `
+  mutation DeleteIntroduction($input: DeleteIntroductionInput!){
+    deleteIntroduction(input: $input){
+      title
+      content
+    }
+  }
+`;
+
+const undeleteSectionIntroMutation = `
+  mutation UndeleteIntroduction($input: UndeleteIntroductionInput!){
+    undeleteIntroduction(input: $input){
+      title
+      content
+    }
+  }
+`;
+
 const createSectionMutation = `
   mutation CreateSection($input: CreateSectionInput!){
     createSection(input: $input){
@@ -722,5 +758,9 @@ module.exports = {
   updateConditionValue,
   updateAnswerValidation,
   createExclusiveMutation,
-  createMetadataMutation
+  createMetadataMutation,
+  createSectionIntroMutation,
+  updateSectionIntroMutation,
+  deleteSectionIntroMutation,
+  undeleteSectionIntroMutation
 };
