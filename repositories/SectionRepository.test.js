@@ -18,9 +18,9 @@ const buildQuestionnaire = questionnaire => ({
 const buildSection = section => ({
   title: "Test section",
   alias: "Test alias",
+  introductionTitle: null,
   introductionContent: null,
   introductionEnabled: false,
-  introductionTitle: null,
   ...section
 });
 
@@ -67,7 +67,10 @@ describe("SectionRepository", () => {
     const update = {
       id: section.id,
       title: "updated title",
-      alias: "updated alias"
+      alias: "updated alias",
+      introductionTitle: "updated intro title",
+      introductionContent: "updated intro content",
+      introductionEnabled: true
     };
 
     await SectionRepository.update(update);
