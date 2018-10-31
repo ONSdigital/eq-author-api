@@ -1,7 +1,15 @@
+const knex = require("../db");
 const { head } = require("lodash/fp");
 const QuestionPage = require("../db/QuestionPage");
+const { getPreviousAnswers } = require("./strategies/previousAnswersStrategy");
 
-const knex = require("../db");
+const {
+  TEXTAREA,
+  TEXTFIELD,
+  NUMBER,
+  CURRENCY,
+  DATE_RANGE
+} = require("../constants/answer-types");
 
 module.exports.findAll = function findAll(
   where = {},
@@ -59,3 +67,26 @@ module.exports.remove = function remove(id) {
 module.exports.undelete = function(id) {
   return QuestionPage.update(id, { isDeleted: false }).then(head);
 };
+
+module.exports.getPipingAnswersForQuestionPage = id =>
+  knex("PagesView")
+    .select("SectionsView.position as sectionPosition")
+    .select("PagesView.position as pagePosition")
+    .select("SectionsView.questionnaireId")
+    .join("SectionsView", "PagesView.sectionId", "SectionsView.id")
+    .where("PagesView.id", id)
+    .then(head)
+    .then(({ ...rest }) =>
+      getPreviousAnswers({
+        answerTypes: [TEXTAREA, TEXTFIELD, NUMBER, CURRENCY, DATE_RANGE],
+        ...rest
+      })
+    );
+
+module.exports.getPipingMetadataForQuestionPage = id =>
+  knex("Metadata")
+    .select("Metadata.*")
+    .join("Questionnaires", "Metadata.questionnaireId", "Questionnaires.id")
+    .join("SectionsView", "SectionsView.questionnaireId", "Questionnaires.id")
+    .join("PagesView", "PagesView.sectionId", "SectionsView.id")
+    .where("PagesView.id", id);

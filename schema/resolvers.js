@@ -227,7 +227,11 @@ const Resolvers = {
         questionPageId
       }),
     displayName: page => getName(page, "QuestionPage"),
-    title: (page, args) => formatRichText(page.title, args.format)
+    title: (page, args) => formatRichText(page.title, args.format),
+    availablePipingAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.QuestionPage.getPipingAnswersForQuestionPage(id),
+    availablePipingMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.QuestionPage.getPipingMetadataForQuestionPage(id)
   },
 
   RoutingRuleSet: {
@@ -476,7 +480,9 @@ const Resolvers = {
     previousAnswer: ({ previousAnswerId }, args, ctx) =>
       isNil(previousAnswerId)
         ? null
-        : ctx.repositories.Answer.getById(previousAnswerId)
+        : ctx.repositories.Answer.getById(previousAnswerId),
+    availablePreviousAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getPreviousAnswersForValidation(id)
   },
 
   EarliestDateValidationRule: {
@@ -489,7 +495,11 @@ const Resolvers = {
         ? null
         : ctx.repositories.Answer.getById(previousAnswerId),
     metadata: ({ metadataId }, args, ctx) =>
-      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId)
+      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId),
+    availablePreviousAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getPreviousAnswersForValidation(id),
+    availableMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getMetadataForValidation(id)
   },
 
   LatestDateValidationRule: {
@@ -502,7 +512,11 @@ const Resolvers = {
         ? null
         : ctx.repositories.Answer.getById(previousAnswerId),
     metadata: ({ metadataId }, args, ctx) =>
-      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId)
+      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId),
+    availablePreviousAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getPreviousAnswersForValidation(id),
+    availableMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getMetadataForValidation(id)
   },
 
   Metadata: {
