@@ -222,7 +222,11 @@ const Resolvers = {
         return position;
       }
       return ctx.repositories.Section.getPosition({ id });
-    }
+    },
+    availablePipingAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Section.getPipingAnswersForSection(id),
+    availablePipingMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.Section.getPipingMetadataForSection(id)
   },
   Page: {
     __resolveType: ({ pageType }) => pageType,
@@ -251,7 +255,11 @@ const Resolvers = {
     displayName: page => getName(page, "QuestionPage"),
     title: (page, args) => formatRichText(page.title, args.format),
     confirmation: async (page, args, ctx) =>
-      ctx.repositories.QuestionConfirmation.findByPageId(page.id)
+      ctx.repositories.QuestionConfirmation.findByPageId(page.id),
+    availablePipingAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.QuestionPage.getPipingAnswersForQuestionPage(id),
+    availablePipingMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.QuestionPage.getPipingMetadataForQuestionPage(id)
   },
 
   RoutingRuleSet: {
@@ -500,7 +508,9 @@ const Resolvers = {
     previousAnswer: ({ previousAnswerId }, args, ctx) =>
       isNil(previousAnswerId)
         ? null
-        : ctx.repositories.Answer.getById(previousAnswerId)
+        : ctx.repositories.Answer.getById(previousAnswerId),
+    availablePreviousAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getPreviousAnswersForValidation(id)
   },
 
   EarliestDateValidationRule: {
@@ -513,7 +523,11 @@ const Resolvers = {
         ? null
         : ctx.repositories.Answer.getById(previousAnswerId),
     metadata: ({ metadataId }, args, ctx) =>
-      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId)
+      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId),
+    availablePreviousAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getPreviousAnswersForValidation(id),
+    availableMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getMetadataForValidation(id)
   },
 
   LatestDateValidationRule: {
@@ -526,7 +540,11 @@ const Resolvers = {
         ? null
         : ctx.repositories.Answer.getById(previousAnswerId),
     metadata: ({ metadataId }, args, ctx) =>
-      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId)
+      isNil(metadataId) ? null : ctx.repositories.Metadata.getById(metadataId),
+    availablePreviousAnswers: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getPreviousAnswersForValidation(id),
+    availableMetadata: ({ id }, args, ctx) =>
+      ctx.repositories.Validation.getMetadataForValidation(id)
   },
 
   Metadata: {
