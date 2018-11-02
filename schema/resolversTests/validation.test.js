@@ -14,7 +14,8 @@ const {
 const {
   CUSTOM,
   PREVIOUS_ANSWER,
-  METADATA
+  METADATA,
+  NOW
 } = require("../../constants/validation-entity-types");
 
 const ctx = { repositories };
@@ -397,7 +398,7 @@ describe("resolvers", () => {
         const answer = await createNewAnswer(firstPage, "Date");
         const validation = await queryAnswerValidations(answer.id);
 
-        const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA];
+        const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA, NOW];
 
         const promises = entityTypes.map(async entityType => {
           const result = await mutateValidationParameters({
@@ -488,7 +489,7 @@ describe("resolvers", () => {
         const answer = await createNewAnswer(firstPage, "Date");
         const validation = await queryAnswerValidations(answer.id);
 
-        const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA];
+        const entityTypes = [CUSTOM, PREVIOUS_ANSWER, METADATA, NOW];
 
         const promises = entityTypes.map(async entityType => {
           const result = await mutateValidationParameters({
