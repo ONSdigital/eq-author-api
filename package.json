@@ -39,7 +39,7 @@
     "knex": "^0.15.2",
     "lodash": "^4.17.4",
     "node-jose": "^1.0.0",
-    "nodemon": "^1.11.0",
+    "nodemon": "1.18.5",
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
     "wait-for-postgres": "^1.5.3"
