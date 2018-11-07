@@ -51,7 +51,10 @@ const Resolvers = {
     undeleteQuestionnaire: (_, args, ctx) =>
       ctx.repositories.Questionnaire.undelete(args.input.id),
     duplicateQuestionnaire: (_, args, ctx) =>
-      ctx.repositories.Questionnaire.duplicate(args.input.id),
+      ctx.repositories.Questionnaire.duplicate(
+        args.input.id,
+        args.input.createdBy
+      ),
 
     createSection: async (root, args, ctx) => {
       const section = await ctx.repositories.Section.insert(args.input);

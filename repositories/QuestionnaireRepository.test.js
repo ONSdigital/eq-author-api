@@ -79,15 +79,19 @@ describe("QuestionnaireRepository", () => {
 
   it("should duplicate a questionnaire", async () => {
     const { id, ...questionnaire } = await QuestionnaireRepository.insert(
-      buildQuestionnaire()
+      buildQuestionnaire({ createdBy: "Foo Bar" })
     );
-    const duplicatedQuestionnaire = await QuestionnaireRepository.duplicate(id);
+    const duplicatedQuestionnaire = await QuestionnaireRepository.duplicate(
+      id,
+      "Test Person"
+    );
 
     const filterUnwanted = fp.omit(["id", "createdAt", "updatedAt"]);
 
     expect(filterUnwanted(duplicatedQuestionnaire)).toMatchObject({
       ...filterUnwanted(questionnaire),
-      title: `Copy of ${questionnaire.title}`
+      title: `Copy of ${questionnaire.title}`,
+      createdBy: "Test Person"
     });
   });
 });

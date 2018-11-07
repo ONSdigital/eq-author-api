@@ -1,9 +1,8 @@
-const { head } = require("lodash");
+const { head, isString } = require("lodash");
 
-const { selectData, duplicateRecord } = require("./utils");
+const { selectData, duplicateRecord, duplicateTree } = require("./utils");
 const updatePiping = require("./piping");
-const duplicateRouting = require("./routing");
-const duplicateAnswerStrategy = require("./answers");
+const duplicateDestinations = require("./destinations");
 
 const getDefaultReferenceStructure = () => ({
   options: {},
@@ -11,72 +10,187 @@ const getDefaultReferenceStructure = () => ({
   pages: {},
   sections: {},
   metadata: {},
-  pagesWithRouting: []
+  questionnaires: {}
 });
+
+const ENTITY_TREE = [
+  [
+    {
+      name: "sections",
+      table: "Sections",
+      links: [
+        {
+          column: "questionnaireId",
+          entityName: "questionnaires",
+          parent: true
+        }
+      ]
+    },
+    {
+      name: "metadata",
+      table: "Metadata",
+      links: [
+        {
+          column: "questionnaireId",
+          entityName: "questionnaires",
+          parent: true
+        }
+      ]
+    }
+  ],
+  {
+    name: "pages",
+    table: "Pages",
+    links: [{ column: "sectionId", entityName: "sections", parent: true }]
+  },
+  {
+    name: "answers",
+    table: "Answers",
+    links: [
+      {
+        column: "questionPageId",
+        entityName: "pages",
+        parent: true
+      }
+    ],
+    where: '"parentAnswerId" is null'
+  },
+  [
+    // Other answers
+    {
+      name: "answers",
+      table: "Answers",
+      links: [
+        {
+          column: "parentAnswerId",
+          entityName: "answers",
+          parent: true
+        }
+      ]
+    },
+    {
+      name: "validations",
+      table: "Validation_AnswerRules",
+      links: [
+        {
+          column: "answerId",
+          entityName: "answers",
+          parent: true
+        },
+        {
+          column: "previousAnswerId",
+          entityName: "answers"
+        },
+        {
+          column: "metadataId",
+          entityName: "metadata"
+        }
+      ],
+      transform: ({ custom, ...rest }) => ({
+        ...rest,
+        //Required as it's stored as JSONB
+        custom: isString(custom) ? `"${custom}"` : custom
+      }),
+      noIsDeleted: true
+    }
+  ],
+  {
+    name: "options",
+    table: "Options",
+    links: [
+      {
+        column: "answerId",
+        entityName: "answers",
+        parent: true
+      },
+      {
+        column: "otherAnswerId",
+        entityName: "answers",
+        parent: true
+      }
+    ]
+  },
+  {
+    name: "routingRuleSets",
+    table: "Routing_RuleSets",
+    links: [
+      {
+        column: "questionPageId",
+        entityName: "pages",
+        parent: true
+      }
+    ]
+  },
+  {
+    name: "routingRules",
+    table: "Routing_Rules",
+    links: [
+      {
+        column: "routingRuleSetId",
+        entityName: "routingRuleSets",
+        parent: true
+      }
+    ]
+  },
+  {
+    name: "routingConditions",
+    table: "Routing_Conditions",
+    links: [
+      {
+        column: "routingRuleId",
+        entityName: "routingRules",
+        parent: true
+      },
+      {
+        column: "questionPageId",
+        entityName: "pages"
+      },
+      {
+        column: "answerId",
+        entityName: "answers"
+      }
+    ],
+    noIsDeleted: true
+  },
+  {
+    name: "routingConditionValues",
+    table: "Routing_ConditionValues",
+    links: [
+      {
+        column: "conditionId",
+        entityName: "routingConditions",
+        parent: true
+      },
+      {
+        column: "optionId",
+        entityName: "options"
+      }
+    ],
+    noIsDeleted: true
+  }
+];
 
 const duplicatePageStrategy = async (
   trx,
   page,
   position,
   overrides = {},
-  references = getDefaultReferenceStructure(),
-  shouldDuplicateRouting = true
+  references = getDefaultReferenceStructure()
 ) => {
   const duplicatePage = await duplicateRecord(
     trx,
     "Pages",
     page,
     {
-      ...overrides,
-      title: updatePiping(overrides.title || page.title, references),
-      description: updatePiping(
-        overrides.description || page.description,
-        references
-      ),
-      guidance: updatePiping(overrides.guidance || page.guidance, references)
+      ...overrides
     },
     position
   );
 
   references.pages[page.id] = duplicatePage.id;
 
-  const answersToDuplicate = await selectData(trx, "Answers", "*", {
-    questionPageId: page.id,
-    isDeleted: false
-  });
-
-  await Promise.all(
-    answersToDuplicate.map(answer =>
-      duplicateAnswerStrategy(
-        trx,
-        answer,
-        {
-          parentRelation: {
-            id: duplicatePage.id,
-            columnName: "questionPageId"
-          }
-        },
-        references
-      )
-    )
-  );
-
-  const ruleSet = await selectData(trx, "Routing_RuleSets", "*", {
-    questionPageId: page.id,
-    isDeleted: false
-  }).then(head);
-
-  if (ruleSet) {
-    references.pagesWithRouting.push({
-      page,
-      duplicatePage,
-      ruleSet
-    });
-  }
-
-  if (shouldDuplicateRouting) {
-    await duplicateRouting(trx, references.pagesWithRouting, references);
-  }
+  await duplicateTree(trx, ENTITY_TREE, references);
+  await duplicateDestinations(trx, references);
 
   return selectData(trx, "Pages", "*", { id: duplicatePage.id }).then(head);
 };
@@ -86,8 +200,7 @@ const duplicateSectionStrategy = async (
   section,
   position,
   overrides = {},
-  references = getDefaultReferenceStructure(),
-  shouldDuplicateRouting = true
+  references = getDefaultReferenceStructure()
 ) => {
   const duplicateSection = await duplicateRecord(
     trx,
@@ -99,45 +212,13 @@ const duplicateSectionStrategy = async (
 
   references.sections[section.id] = duplicateSection.id;
 
-  const pagesToDuplicate = await selectData(trx, "PagesView", "*", {
-    sectionId: section.id
-  });
-
-  for (let i = 0; i < pagesToDuplicate.length; ++i) {
-    const { position, ...page } = pagesToDuplicate[i];
-    await duplicatePageStrategy(
-      trx,
-      page,
-      position,
-      {
-        parentRelation: {
-          id: duplicateSection.id,
-          columnName: "sectionId"
-        }
-      },
-      references,
-      false
-    );
-  }
-
-  if (shouldDuplicateRouting) {
-    await duplicateRouting(trx, references.pagesWithRouting, references);
-  }
+  await duplicateTree(trx, ENTITY_TREE, references);
+  await Promise.all([
+    duplicateDestinations(trx, references),
+    updatePiping(trx, references)
+  ]);
 
   return duplicateSection;
-};
-
-const duplicateMetadata = async (trx, metadata, overrides, references) => {
-  const duplicatedMetadata = await duplicateRecord(
-    trx,
-    "Metadata",
-    metadata,
-    overrides
-  );
-
-  references.metadata[metadata.id] = duplicatedMetadata.id;
-
-  return duplicatedMetadata;
 };
 
 const duplicateQuestionnaireStrategy = async (
@@ -154,49 +235,13 @@ const duplicateQuestionnaireStrategy = async (
 
   const references = getDefaultReferenceStructure();
 
-  const metadataToDuplicate = await selectData(trx, "Metadata", "*", {
-    questionnaireId: questionnaire.id
-  });
+  references.questionnaires[questionnaire.id] = duplicateQuestionnaire.id;
 
-  await Promise.all(
-    metadataToDuplicate.map(metadata =>
-      duplicateMetadata(
-        trx,
-        metadata,
-        {
-          parentRelation: {
-            id: duplicateQuestionnaire.id,
-            columnName: "questionnaireId"
-          }
-        },
-        references
-      )
-    )
-  );
-
-  const sectionsToDuplicate = await selectData(trx, "SectionsView", "*", {
-    questionnaireId: questionnaire.id
-  });
-
-  // Need to execute these in order so we can update piping references
-  for (let i = 0; i < sectionsToDuplicate.length; ++i) {
-    const { position, ...section } = sectionsToDuplicate[i];
-    await duplicateSectionStrategy(
-      trx,
-      section,
-      position,
-      {
-        parentRelation: {
-          id: duplicateQuestionnaire.id,
-          columnName: "questionnaireId"
-        }
-      },
-      references,
-      false
-    );
-  }
-
-  await duplicateRouting(trx, references.pagesWithRouting, references);
+  await duplicateTree(trx, ENTITY_TREE, references);
+  await Promise.all([
+    duplicateDestinations(trx, references),
+    updatePiping(trx, references)
+  ]);
 
   return duplicateQuestionnaire;
 };

@@ -537,7 +537,7 @@ describe("Duplicate strategy tests", () => {
         );
       });
 
-      it("will duplicate the validations for an answer", async () => {
+      it("will duplicate the validations for a number answer", async () => {
         const questionnaire = await buildTestQuestionnaire({
           sections: [
             {
@@ -572,6 +572,7 @@ describe("Duplicate strategy tests", () => {
         const dupAnswers = await AnswerRepository.findAll({
           questionPageId: duplicatePage.id
         });
+
         const duplicatedAnswer = dupAnswers[0];
 
         const duplicatedValidations = {
@@ -588,6 +589,185 @@ describe("Duplicate strategy tests", () => {
         expect(sanitizeAllProperties(duplicatedValidations)).toMatchObject(
           sanitizeAllProperties(answer.validation)
         );
+      });
+
+      it("will duplicate the validations for date answer", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Date",
+                      validation: {
+                        earliestDate: {
+                          enabled: true,
+                          offset: { unit: "Days", value: 0 },
+                          relativePosition: "Before",
+                          custom: "2018-10-10T00:00:00.000Z",
+                          entityType: "Custom",
+                          previousAnswerId: null,
+                          metadataId: null
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+
+        const answer = page.answers[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+
+        const dupAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+
+        const duplicatedAnswer = dupAnswers[0];
+
+        const duplicatedValidations = {
+          earliestDate: await ValidationRepository.findByAnswerIdAndValidationType(
+            duplicatedAnswer,
+            "earliestDate"
+          ),
+          latestDate: await ValidationRepository.findByAnswerIdAndValidationType(
+            duplicatedAnswer,
+            "latestDate"
+          )
+        };
+
+        expect(sanitizeAllProperties(duplicatedValidations)).toMatchObject(
+          sanitizeAllProperties(answer.validation)
+        );
+        expect(duplicatedValidations.earliestDate).toMatchObject({
+          entityType: "Custom",
+          custom: "2018-10-10T00:00:00.000Z"
+        });
+      });
+
+      it("will duplicate the validations associated with metadata", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          metadata: [{ id: "metadata1" }],
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      type: "Date",
+                      validation: {
+                        earliestDate: {
+                          enabled: true,
+                          offset: { unit: "Days", value: 0 },
+                          relativePosition: "Before",
+                          custom: null,
+                          entityType: "Metadata",
+                          previousAnswer: null,
+                          metadata: {
+                            id: "metadata1"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+
+        const dupAnswers = await AnswerRepository.findAll({
+          questionPageId: duplicatePage.id
+        });
+
+        const duplicatedAnswer = dupAnswers[0];
+
+        const duplicatedValidations = {
+          earliestDate: await ValidationRepository.findByAnswerIdAndValidationType(
+            duplicatedAnswer,
+            "earliestDate"
+          )
+        };
+
+        expect(duplicatedValidations.earliestDate).toMatchObject({
+          entityType: "Metadata",
+          metadataId: questionnaire.metadata[0].id
+        });
+      });
+
+      it("will duplicate the validations associated with previous answer", async () => {
+        const questionnaire = await buildTestQuestionnaire({
+          sections: [
+            {
+              pages: [
+                {
+                  answers: [
+                    {
+                      id: "answer1",
+                      type: "Date"
+                    },
+                    {
+                      type: "Date",
+                      validation: {
+                        earliestDate: {
+                          enabled: true,
+                          offset: { unit: "Days", value: 0 },
+                          relativePosition: "Before",
+                          custom: null,
+                          entityType: "PreviousAnswer",
+                          previousAnswer: { id: "answer1" },
+                          metadataId: null
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
+        const page = questionnaire.sections[0].pages[0];
+
+        const duplicatePage = await db.transaction(trx =>
+          duplicatePageStrategy(trx, removeChildren(page))
+        );
+
+        // Returns answers on page in reverse order if created at the same time
+        const dupAnswers = await AnswerRepository.findAll(
+          {
+            questionPageId: duplicatePage.id
+          },
+          "id",
+          "asc"
+        );
+
+        const duplicatedAnswer = dupAnswers[1];
+
+        const duplicatedValidations = {
+          earliestDate: await ValidationRepository.findByAnswerIdAndValidationType(
+            duplicatedAnswer,
+            "earliestDate"
+          )
+        };
+        expect(duplicatedValidations.earliestDate).toMatchObject({
+          entityType: "PreviousAnswer",
+          previousAnswerId: dupAnswers[0].id
+        });
       });
     });
   });
