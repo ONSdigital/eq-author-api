@@ -5,6 +5,11 @@ const PIPING_LOCATIONS = [
     entityName: "pages",
     table: "Pages",
     fields: ["title", "description", "guidance"]
+  },
+  {
+    entityName: "sections",
+    table: "Sections",
+    fields: ["introductionTitle", "introductionContent"]
   }
 ];
 

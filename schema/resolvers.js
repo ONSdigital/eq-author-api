@@ -1,5 +1,5 @@
 const { GraphQLDate } = require("graphql-iso-date");
-const { includes, isNil, get } = require("lodash");
+const { includes, isNil } = require("lodash");
 const GraphQLJSON = require("graphql-type-json");
 const { getName } = require("../utils/getName");
 const formatRichText = require("../utils/formatRichText");
@@ -68,8 +68,8 @@ const Resolvers = {
       await Resolvers.Mutation.createPage(root, { input: page }, ctx);
       return section;
     },
-    updateSection: (_, args, ctx) =>
-      ctx.repositories.Section.update(args.input),
+    updateSection: (_, { input }, ctx) =>
+      ctx.repositories.Section.update(input),
     deleteSection: (_, args, ctx) =>
       ctx.repositories.Section.remove(args.input.id),
     undeleteSection: (_, args, ctx) =>
@@ -171,30 +171,7 @@ const Resolvers = {
     updateMetadata: (_, args, ctx) =>
       ctx.repositories.Metadata.update(args.input),
     deleteMetadata: (_, args, ctx) =>
-      ctx.repositories.Metadata.remove(args.input.id),
-    createIntroduction: (_, args, ctx) =>
-      ctx.repositories.Section.update({
-        id: args.input.sectionId,
-        introductionEnabled: true,
-        introductionTitle: get(args, "input.title", null),
-        introductionContent: get(args, "input.content", null)
-      }),
-    updateIntroduction: (_, args, ctx) =>
-      ctx.repositories.Section.update({
-        id: args.input.sectionId,
-        introductionTitle: get(args, "input.title", null),
-        introductionContent: get(args, "input.content", null)
-      }),
-    deleteIntroduction: (_, args, ctx) =>
-      ctx.repositories.Section.update({
-        id: args.input.sectionId,
-        introductionEnabled: false
-      }),
-    undeleteIntroduction: (_, args, ctx) =>
-      ctx.repositories.Section.update({
-        id: args.input.sectionId,
-        introductionEnabled: true
-      })
+      ctx.repositories.Metadata.remove(args.input.id)
   },
 
   Questionnaire: {
@@ -223,23 +200,8 @@ const Resolvers = {
         return position;
       }
       return ctx.repositories.Section.getPosition({ id });
-    },
-    introduction: section => {
-      const {
-        introductionEnabled,
-        introductionContent: content,
-        introductionTitle: title
-      } = section;
-
-      return introductionEnabled ? { title, content } : null;
     }
   },
-
-  Introduction: {
-    title: ({ introductionTitle }) => introductionTitle,
-    content: ({ introductionContent }) => introductionContent
-  },
-
   Page: {
     __resolveType: ({ pageType }) => pageType,
     position: ({ position, id }, args, ctx) => {

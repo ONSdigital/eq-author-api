@@ -16,40 +16,21 @@ const createQuestionnaireMutation = `mutation CreateQuestionnaire($input: Create
   }
 `;
 
-const createSectionIntroMutation = `
-  mutation CreateIntroduction($input: CreateIntroductionInput!){
-    createIntroduction(input: $input){
-      title
-      content
+const getSectionQuery = `
+query getSection($id: ID!) {
+  section(id: $id) {
+    id
+    title
+    alias
+    displayName
+    pages{
+      id
     }
+    introductionTitle
+    introductionContent
+    introductionEnabled
   }
-`;
-
-const updateSectionIntroMutation = `
-  mutation UpdateIntroduction($input: UpdateIntroductionInput!){
-    updateIntroduction(input: $input){
-      title
-      content
-    }
-  }
-`;
-
-const deleteSectionIntroMutation = `
-  mutation DeleteIntroduction($input: DeleteIntroductionInput!){
-    deleteIntroduction(input: $input){
-      title
-      content
-    }
-  }
-`;
-
-const undeleteSectionIntroMutation = `
-  mutation UndeleteIntroduction($input: UndeleteIntroductionInput!){
-    undeleteIntroduction(input: $input){
-      title
-      content
-    }
-  }
+}
 `;
 
 const createSectionMutation = `
@@ -725,6 +706,7 @@ const createMetadataMutation = `
 module.exports = {
   getPipableAnswersQuery,
   createQuestionnaireMutation,
+  getSectionQuery,
   createAnswerMutation,
   createOtherMutation,
   deleteOtherMutation,
@@ -758,9 +740,5 @@ module.exports = {
   updateConditionValue,
   updateAnswerValidation,
   createExclusiveMutation,
-  createMetadataMutation,
-  createSectionIntroMutation,
-  updateSectionIntroMutation,
-  deleteSectionIntroMutation,
-  undeleteSectionIntroMutation
+  createMetadataMutation
 };
