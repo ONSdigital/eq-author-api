@@ -28,7 +28,9 @@ const Resolvers = {
       ctx.repositories.Answer.getAnswers(ids),
     option: (root, { id }, ctx) => ctx.repositories.Option.getById(id),
     availableRoutingDestinations: (root, { pageId }, ctx) =>
-      ctx.repositories.Routing.getRoutingDestinations(pageId)
+      ctx.repositories.Routing.getRoutingDestinations(pageId),
+    questionConfirmation: (root, { id }, ctx) =>
+      ctx.repositories.QuestionConfirmation.findById(id)
   },
 
   Mutation: {
@@ -171,7 +173,27 @@ const Resolvers = {
     updateMetadata: (_, args, ctx) =>
       ctx.repositories.Metadata.update(args.input),
     deleteMetadata: (_, args, ctx) =>
-      ctx.repositories.Metadata.remove(args.input.id)
+      ctx.repositories.Metadata.remove(args.input.id),
+
+    createQuestionConfirmation: (_, args, ctx) =>
+      ctx.repositories.QuestionConfirmation.create(args.input),
+    updateQuestionConfirmation: (
+      _,
+      { input: { positive, negative, id, title } },
+      ctx
+    ) =>
+      ctx.repositories.QuestionConfirmation.update({
+        id,
+        title,
+        positiveLabel: positive.label,
+        positiveDescription: positive.description,
+        negativeLabel: negative.label,
+        negativeDescription: negative.description
+      }),
+    deleteQuestionConfirmation: (_, { input }, ctx) =>
+      ctx.repositories.QuestionConfirmation.delete(input),
+    undeleteQuestionConfirmation: (_, { input }, ctx) =>
+      ctx.repositories.QuestionConfirmation.restore(input.id)
   },
 
   Questionnaire: {
@@ -227,7 +249,9 @@ const Resolvers = {
         questionPageId
       }),
     displayName: page => getName(page, "QuestionPage"),
-    title: (page, args) => formatRichText(page.title, args.format)
+    title: (page, args) => formatRichText(page.title, args.format),
+    confirmation: async (page, args, ctx) =>
+      ctx.repositories.QuestionConfirmation.findByPageId(page.id)
   },
 
   RoutingRuleSet: {
@@ -516,6 +540,19 @@ const Resolvers = {
       return new Date(value);
     },
     displayName: metadata => getName(metadata, "Metadata")
+  },
+
+  QuestionConfirmation: {
+    displayName: confirmation => getName(confirmation, "QuestionConfirmation"),
+    page: ({ pageId }, args, ctx) => ctx.repositories.Page.getById(pageId),
+    positive: ({ positiveLabel, positiveDescription }) => ({
+      label: positiveLabel,
+      description: positiveDescription
+    }),
+    negative: ({ negativeLabel, negativeDescription }) => ({
+      label: negativeLabel,
+      description: negativeDescription
+    })
   },
 
   Date: GraphQLDate,
