@@ -34,7 +34,7 @@
     "graphql-type-json": "^0.2.1",
     "jest": "^23.0.0",
     "js-yaml": "^3.12.0",
-    "json-web-key": "^0.3.0",
+    "json-web-key": "^0.4.0",
     "jsrsasign": "^8.0.12",
     "knex": "^0.15.2",
     "lodash": "^4.17.4",
