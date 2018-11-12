@@ -492,7 +492,7 @@ describe("resolvers", () => {
     const parentAnswer = await createNewAnswer(firstPage, "Checkbox");
     const other = await createOther(parentAnswer);
 
-    expect(createOther(parentAnswer)).resolves.toBeNull();
+    await expect(createOther(parentAnswer)).resolves.toBeNull();
 
     const updatedParent = await refreshAnswerDetails(parentAnswer);
     expect(updatedParent.other).toMatchObject(other);
@@ -588,7 +588,7 @@ describe("resolvers", () => {
       }
     });
 
-    expect(
+    return expect(
       executeQuery(getBasicRoutingQuery, { id: firstPage.id }, ctx)
     ).resolves.toMatchObject({
       data: {
