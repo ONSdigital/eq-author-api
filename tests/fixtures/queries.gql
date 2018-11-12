@@ -11,7 +11,6 @@ query GetQuestionnaire {
     surveyId
     sections {
       title
-      description
       pages {
         id
         title
@@ -80,20 +79,18 @@ mutation DeleteQuestionnaire($id: Int = 2) {
 
 mutation CreateSection(
   $title: String!
-  $description: String!
   $questionnaireId: Int!
 ) {
   createSection(
     title: $title
-    description: $description
     questionnaireId: $questionnaireId
   ) {
     id
   }
 }
 
-mutation UpdateSection($id: Int!, $title: String!, $description: String!) {
-  updateSection(id: $id, title: $title, description: $description) {
+mutation UpdateSection($id: Int!, $title: String!) {
+  updateSection(id: $id, title: $title) {
     id
   }
 }

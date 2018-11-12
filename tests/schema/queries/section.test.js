@@ -5,8 +5,7 @@ describe("Section query", () => {
   const section = `
     query GetSection($id: ID!) {
       section(id: $id) {
-        id,
-        description
+        id
       }
     }
   `;

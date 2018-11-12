@@ -566,8 +566,7 @@ mutation UpdateAnswer($input: UpdateAnswerInput!) {
     guidance,
     qCode,
     label,
-    type,
-    mandatory
+    type
     ...on CompositeAnswer{
       childAnswers{
         id

@@ -11,8 +11,7 @@ describe("updateAnswer", () => {
         qCode,
         label,
         type
-        properties,
-        mandatory
+        properties
       }
     }
   `;
@@ -53,8 +52,7 @@ describe("updateAnswer", () => {
       guidance: "This is an update answer guidance",
       qCode: "123",
       label: "updated test answer",
-      type: "Date",
-      mandatory: true
+      type: "Date"
     };
 
     const result = await executeQuery(
